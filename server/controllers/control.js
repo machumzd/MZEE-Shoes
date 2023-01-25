@@ -89,8 +89,15 @@ exports.signUpCheck = async (req, res) => {
         res.render("user/signup", {
           message: "Mobile number already exists",
         });
-      } else if (
+      } else if(req.body.password!=req.body.cPassword){
+        res.render("user/signup", {
+          message: "Passwords are Diffrent",
+        });
+      }
+      
+      else if (
         req.body.password != "" &&
+        req.body.cPassword!=""&&
         req.body.email != "" &&
         req.body.mobile.length == 10 &&
         req.body.name != ""
@@ -140,7 +147,7 @@ exports.signIn = async (req, res) => {
 
       req.session.userData = user;
       req.session.user = true;
-      res.redirect("/user_home");
+      res.redirect("/user-home");
     }
   } catch (err) {
     req.session.user = false;
@@ -172,14 +179,14 @@ exports.userLoggedIn = (req, res, next) => {
   if (req.session.user) {
     next();
   } else {
-    res.redirect("/user_signin");
+    res.redirect("/user-login");
   }
 };
 exports.userLogout = (req, res) => {
   req.session.user = false;
   req.session.admin = false;
   req.session.destroy();
-  res.redirect("/user_home");
+  res.redirect("/user-home");
 };
 
 exports.mobileOtp = (req, res) => {
@@ -227,7 +234,7 @@ exports.verifyOtp = (req, res) => {
             if (userData) {
               req.session.userData = userData;
               req.session.user = true;
-              res.redirect("/user_home");
+              res.redirect("/user-home");
               resolve();
             } else {
               res.render("user/otpVerify", {
@@ -249,7 +256,7 @@ exports.verifyOtp = (req, res) => {
             if (result) {
               req.session.userData = result;
               req.session.user = true;
-              res.redirect("/user_home");
+              res.redirect("/user-home");
               resolve();
             } else {
               res.render("user/otpVerify", {
@@ -365,7 +372,7 @@ exports.adminLogin = (req, res) => {
       if (result) {
         req.session.admin = true;
         req.session.user = false;
-        res.redirect("/admin_panel/dashboard");
+        res.redirect("/admin-dashboard");
       } else if (
         !result &&
         signInData.email != "" &&
@@ -384,7 +391,7 @@ exports.adminLoggedIn = (req, res, next) => {
   if (req.session.admin) {
     next();
   } else {
-    res.redirect("/admin_login");
+    res.redirect("/admin-login");
   }
 };
 
@@ -451,7 +458,7 @@ exports.userUpdate = (req, res) => {
     .then(() => {
       let message = "User Updated successfully";
       req.session.adminMessage = message;
-      res.redirect("/admin_panel/user_management");
+      res.redirect("/admin-panel/user");
     })
     .catch((err) => {
       console.log(err.message);
@@ -463,7 +470,7 @@ exports.userDelete = (req, res) => {
   User.deleteOne({ _id: id }).then(() => {
     let message = "User Deleted Successfully";
     req.session.adminMessage = message;
-    res.redirect("/admin_panel/user_management");
+    res.redirect("/admin-panel/user");
   });
 };
 exports.userDashboard = (req, res) => {
@@ -473,7 +480,7 @@ exports.userBlock = (req, res) => {
   const id = req.query.id;
   User.findByIdAndUpdate({ _id: id }, { $set: { blockStatus: true } })
     .then(() => {
-      res.redirect("/admin_panel/user_management");
+      res.redirect("/admin-panel/user");
     })
     .catch((err) => {
       console.log(err.message);
@@ -484,7 +491,7 @@ exports.userUnBlock = (req, res) => {
   const id = req.query.id;
   User.findOneAndUpdate({ _id: id }, { $set: { blockStatus: false } })
     .then(() => {
-      res.redirect("/admin_panel/user_management");
+      res.redirect("/admin-panel/user");
     })
     .catch((err) => {
       console.log(err.message);
@@ -495,7 +502,7 @@ exports.adminLogout = (req, res) => {
   req.session.user = false;
   req.session.admin = false;
   req.session.destroy();
-  res.redirect("/admin_login");
+  res.redirect("/admin-login");
 };
 
 exports.adminCategory = (req, res) => {
@@ -515,7 +522,7 @@ exports.adminCategoryLoad = (req, res) => {
   categoryData
     .save()
     .then(() => {
-      res.redirect("/admin-panel/category-management");
+      res.redirect("/admin-category");
     })
     .catch((err) => {
       console.log(err.message);
@@ -525,7 +532,7 @@ exports.categoryDelete = (req, res) => {
   const id = req.query.id;
   Category.deleteOne({ _id: id })
     .then(() => {
-      res.redirect("/admin-panel/category-management");
+      res.redirect("/admin-category");
     })
     .catch((err) => {
       console.log(err.message);
@@ -536,7 +543,7 @@ exports.categoryEdit = (req, res) => {
   const id = req.query.id;
   Category.findOne({ _id: id }).then((result) => {
     req.session.editCategory = result.category;
-    res.redirect("/admin-panel/category-management");
+    res.redirect("/admin-category");
   });
 };
 
@@ -548,7 +555,7 @@ exports.categoryUpdate = (req, res) => {
   )
     .then(() => {
       req.session.editCategory = false;
-      res.redirect("/admin-panel/category-management");
+      res.redirect("/admin-category");
     })
     .catch((err) => {
       console.log(err);
@@ -609,7 +616,7 @@ exports.productUpload = (req, res) => {
     .then(() => {
       let message = "Product added successfully";
       req.session.productMessage = message;
-      res.redirect("/admin_panel/product_management");
+      res.redirect("/admin-product");
     })
     .catch((err) => {
       console.log(err.message);
@@ -655,7 +662,7 @@ exports.productUpdate = (req, res) => {
     .then(() => {
       let message = "Product Updated Successfully";
       req.session.productMessage = message;
-      res.redirect("/admin_panel/product_management");
+      res.redirect("/admin-product");
     })
     .catch((err) => {
       console.log(err.message);
@@ -667,7 +674,7 @@ exports.productDelete = (req, res) => {
     .then((product) => {
       let message = "product was soft deleted Successfully";
       req.session.productMessage = message;
-      res.redirect("/admin_panel/product_management");
+      res.redirect("/admin-product");
     })
     .catch((error) => {
       console.log(error.message);
@@ -689,7 +696,7 @@ exports.productSearch = (req, res) => {
       } else {
         let message = "product not found";
         req.session.productMessage = message;
-        res.redirect("/admin_panel/product_management");
+        res.redirect("/admin-product");
       }
     })
     .catch((err) => {

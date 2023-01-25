@@ -4,7 +4,7 @@
   <!-- header section strats -->
   <header class="header_section">
     <nav class="navbar navbar-expand-lg custom_nav-container ">
-      <a class="navbar-brand" href="/user_home">
+      <a class="navbar-brand" href="/user-home">
         <span>
           <img src="./images/logo.png" style="max-width:10rem">
         </span>
@@ -28,32 +28,33 @@
               <script src="../javascripts/validation.js"></script>
               <h5 class="text-success text-center">{{successmessage}}</h5>
 
-              <form onsubmit="loginValidate()" action="/user_signin" method="post">
+              <form onsubmit="loginValidate()" action="/user-login" method="post">
 
                 <!-- Email input -->
                 <div class="form-outline mb-4">
-                  <div class="error" id="lEmailErr"></div>
                   <input type="email" name="email" id="lEmail" class="form-control form-control-lg border-dark"
                     placeholder="Email address" />
+                     <div class="error" id="lEmailErr"></div>
                 </div>
 
                 <!-- Password input -->
                 <div class="form-outline mb-4">
-                  <div class="error" id="lPassErr"></div>
+                
                   <input type="password" id="lPassword" name="password" class="form-control form-control-lg border-dark"
                     placeholder="Password" />
+                      <div class="error" id="lPassErr"></div>
                 </div>
                 <h5 class="text-danger text-center">{{message}}</h5>
                 <div class="d-flex justify-content-around align-items-center mb-4">
-                  <h6>Forgot your password<a href="/mobile_otp"> click here</a></h6>
+                  <h6>Forgot your password<a href="/mobile-otp"> click here</a></h6>
                 </div>
 
 
                 <button type="submit" class="btn btn-success btn-lg btn-block w-100 border-dark">Login</button>
-                <a class="btn btn-danger btn-lg btn-block w-100 mt-2 border-dark" href="/mobile_otp" role="button">
+                <a class="btn btn-danger btn-lg btn-block w-100 mt-2 border-dark" href="/mobile-otp" role="button">
                   login with otp
                 </a>
-                <a class="btn btn-primary btn-lg btn-block w-100 mt-2 border-dark" href="/user_signup" role="button">
+                <a class="btn btn-primary btn-lg btn-block w-100 mt-2 border-dark" href="/user-signup" role="button">
                   sign-up
                 </a>
               </form>
