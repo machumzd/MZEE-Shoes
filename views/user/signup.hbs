@@ -1,0 +1,76 @@
+{{>head}}
+<div class="hero_area">
+  <!-- header section strats -->
+  <header class="header_section">
+    <nav class="navbar navbar-expand-lg custom_nav-container ">
+      <a class="navbar-brand" href="/user_home">
+        <span>
+          <img src="./images/logo.png" style="max-width:10rem">
+        </span>
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class=""></span>
+      </button>
+
+      <script src="../javascripts/validation.js"></script>
+
+      <section class="vh-100">
+        <div class="container py-5 h-100">
+          <div class="row d-flex align-items-center justify-content-center h-100">
+            <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+              <img src="./images/whitesneaker.png" class="img-fluid" style="width:auto;max-height:30rem;"
+                alt="Phone image">
+            </div>
+            <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+
+
+
+              <form onsubmit="signupValidate()" action="/user_signup" method="post">
+                <h1 class="pb-3 font-weight-bold">sign-up</h1>
+                <h5 class="text-danger text-center">{{message}}</h5>
+
+                <div class="form-outline mb-4">
+                  <div class="error" id="nameErr"></div>
+                  <input type="text" id="name" name="name" class="form-control form-control-lg border-dark"
+                    placeholder="Name" />
+                </div>
+
+
+                <!-- Mobile input -->
+                <div class="form-outline mb-4">
+                  <div class="error" id="mobileErr"></div>
+                  <input type="text" id="mobile" name="mobile" class="form-control form-control-lg border-dark"
+                    placeholder="Phone No" maxlength="10" />
+                </div>
+
+                <!-- Email input -->
+                <div class="form-outline mb-4">
+                  <div class="error" id="emailErr"></div>
+                  <input type="text" id="email" name="email" class="form-control form-control-lg border-dark"
+                    placeholder="Email address" />
+                </div>
+
+
+                <!-- Password input -->
+                <div class="form-outline mb-4">
+                  <div class="error" id="passErr"></div>
+                  <input type="password" id="password" name="password" class="form-control form-control-lg border-dark"
+                    placeholder="Password" />
+                </div>
+
+
+                <div class="d-flex justify-content-around align-items-center mb-3">
+                  <h6>Aldready Have an account<a href="/user_signin"> click here</a></h6>
+                </div>
+
+                <!-- Submit button -->
+                <button type="submit" class="btn btn-success btn-lg btn-block w-100 border-dark">Sign up</button>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+      {{>footer}}
+      {{>foot}}

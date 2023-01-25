@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Basic -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Site Metas -->
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
+    <title>
+        Mzee-login
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <!-- slider stylesheet -->
+    <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <style>
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="./javascripts/validation.js"></script>
+    <div class="container">
+        <section class="vh-100">
+
+            <div class="py-5 h-100">
+                <div class="text-center">
+                    <img src="./images/logo.png" class="img-fluid" style="width:auto;max-height:8rem">
+                </div>
+                <div class="row mx-auto justify-content-center p-2" style="border:2px solid black;border-radius:50px">
+                    <div class="col-md-6 col-lg-6 col-xl-6 pt-5">
+                        <form onSubmit="loginValidate()" action="/admin_login" method="post" class="border-dark">
+                            <h1 class="pb-3">Admin Login</h1>
+                            <!-- Email input -->
+                            <div class="form-outline mb-4">
+                                <div class="error" id="lEmailErr"></div>
+                                <input type="text" id="lEmail" name="email"
+                                    class="form-control form-control-lg border-dark" placeholder="Email address" />
+                            </div>
+
+                            <!-- Password input -->
+                            <div class="form-outline mb-4">
+                                <div class="error" id="lPassErr"></div>
+                                <input type="password" id="lPassword" name="password"
+                                    class="form-control form-control-lg border-dark" placeholder="Password" />
+                            </div>
+
+                            <!-- Submit button -->
+                            <button type="submit"
+                                class="btn btn-success btn-lg btn-block w-100 border-dark">Login</button>
+                            <h6 class="text-danger p-3 text-center pb-5">{{message}}</h6>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/../../public/javascripts/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/c9a477b534.js" crossorigin="anonymous"></script>
+</body>
+
+</html>

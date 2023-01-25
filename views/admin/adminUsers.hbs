@@ -1,0 +1,59 @@
+{{>adminNav}}
+
+<link rel="stylesheet" href="../../stylesheets/style.css">
+
+<div class="container  h-100">
+  <div class="row d-flex align-items-center justify-content-center h-100">
+    <div class="col-md-9 col-lg-8 col-xl-8 mt-5">
+
+
+
+      <form class=" d-flex flex-row justify-content-end mt-5" action="/admin_panel/user_management/search" method="post">
+        <input type="text" name="search" class="form-control w-25" placeholder="Search">
+        <input type="submit" class="btn ms-2 btn-dark" value="submit">
+      </form>
+
+      <h5 class="text-danger text-center ">{{adminMessage}}</h5>
+
+      <table class="table">
+        <h1 class="">Users</h1>
+        <thead>
+
+          <tr>
+
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each users}}
+          <tr>
+            <th scope="row">{{counter @index}}</th>
+            <td>{{name}}</td>
+            <td>{{email}}</td>
+            <td>{{mobile}}</td>
+            <td>
+              <a href="/admin_panel/user_management/edit?id={{_id}}" class="btn btn-primary">Edit</a>
+              <a onclick="return confirm('Are you sure you want to Delete {{name}}')"
+                href="/admin_panel/user_management/delete?id={{_id}}" class="btn btn-danger">Delete</a>
+
+              {{#if blockStatus}}
+              <a onclick="return confirm('Are you sure you want to Unblock {{name}}')"
+                href="/admin_panel/user_management/unblock?id={{_id}}" class="btn btn-success">unBlock</a>
+              {{else}}
+              <a onclick="return confirm('Are you sure you want to Block {{name}}')"
+                href="/admin_panel/user_management/block?id={{_id}}" class="btn btn-danger">Block</a>
+              {{/if}}
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{{>foot}}

@@ -1,0 +1,68 @@
+{{>adminNav}}
+<link rel="stylesheet" href="../../stylesheets/style.css">
+<section class="vh-100">
+
+  <div class="container  h-100">
+    <div class="row d-flex align-items-center justify-content-center h-100">
+      <div class="col-md-9 col-lg-7 col-xl-6">
+
+        <table class="table">
+          <h1 class="pb-3">Categories</h1>
+          <thead>
+
+            <tr>
+
+              <th scope="col-">SI no</th>
+              <th scope="col">category</th>
+              <th scope="col">Action</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            {{#each categories}}
+            <tr>
+              <th scope="row">{{counter @index}}</th>
+              <td>{{category}}</td>
+
+              <td>
+                <a href="/admin-panel/category-management/edit?id={{_id}}" class="btn btn-primary">Edit</a>
+                <a href="/admin-panel/category-management/delete?id={{_id}}" class="btn btn-danger">Delete</a>
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="col-md-6 col-lg-4 col-xl-4 offset-xl-1">
+        <h1 class="pb-3 font-weight-bold">Add category</h1>
+        {{#if editCategory}}
+        <form action="/admin-panel/category-management/update" method="post">
+          <div class="form-outline mb-4">
+            <input type="category" name="categoryUpdate" value={{editCategory}} id="categoryUpdate"
+              class="form-control form-control-lg border-dark" placeholder="Update Category" />
+          </div>
+
+          <h5 class="text-danger text-center">{{message}}</h5>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block w-100 border-dark">Update</button>
+
+
+          {{else}}
+          <form action="/admin-panel/category-management" method="post">
+            <div class="form-outline mb-4">
+              <input type="category" name="category" id="category" class="form-control form-control-lg border-dark"
+                placeholder="Add category" />
+            </div>
+
+            <h5 class="text-danger text-center">{{message}}</h5>
+
+            <button type="submit" class="btn btn-warning btn-lg btn-block w-100 border-dark">Add+</button>
+
+          </form>
+          {{/if}}
+      </div>
+    </div>
+  </div>
+</section>
+{{>foot}}

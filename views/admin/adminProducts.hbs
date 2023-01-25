@@ -1,0 +1,69 @@
+{{>head}}
+{{>adminNav}}
+
+<section class="vh-100">
+  <div class="container h-75">
+    <div class="row d-flex align-items-center justify-content-center h-100">
+
+     
+ <div class="col-md-3 col-lg-6 col-xl-12">
+
+     <h1 class="">Products</h1>
+         <h5 class="text-danger text-center ">{{adminMessage}}</h5>
+          <a href="/admin_panel/product_management/add" class="btn btn-primary mb-3">Add Product</a>
+        <form class=" d-flex flex-row justify-content-end mt-5" action="/admin_panel/product_management/search"
+          method="post">
+          <input type="text" name="productsearch" class="form-control w-25" placeholder="Search">
+          <input type="submit" class="btn ms-2 btn-dark" value="submit">
+        </form>
+
+    
+
+        <table class="table">
+         
+          <thead>
+
+            <tr>
+
+              <th scope="col">#</th>
+              <th scope="col">Product name</th>
+              <th scope="col">Price</th>
+              <th scope="col">Description</th>
+              <th scope="col">Stock</th>
+              <th scope="col">Category</th>
+              <th scope="col">img 1</th>
+              <th scope="col">img 2</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each products}}
+            <tr>
+              <th scope="row">{{counter @index}}</th>
+              <td>{{productName}}</td>
+              <td>{{price}}</td>
+              <td>{{description}}</td>
+               <td>{{stock}}</td>
+                <td>{{category}}</td>
+                 <td>{{img1}}</td>
+                  <td>{{img2}}</td>
+              <td>
+                <a href="/admin_panel/product_management/edit?id={{_id}}" class="btn btn-primary">Edit</a>
+                <a onclick="return confirm('Are you sure you want to Delete {{name}}')"
+                  href="/admin_panel/product_management/delete?id={{_id}}" class="btn btn-danger">Delete</a>
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{{>foot}}

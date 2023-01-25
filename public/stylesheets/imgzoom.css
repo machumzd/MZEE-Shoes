@@ -1,0 +1,42 @@
+
+/* zoom */
+.zoom-image-container {
+  
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+  }
+  
+  .zoom-image {
+    
+    position: relative;
+    
+  }
+  
+  .zoom-image img {
+    
+    cursor: zoom-in;
+    
+    
+    /* box-shadow: 0 18px 5px -15px rgba( 0, 0, 0, .5 ); */
+    
+  }
+  
+  .hover-image {
+    
+    position: fixed;
+    width:300px;
+    height: 300px;
+    
+    border-radius: 10%;
+    
+    transform: translate( -0%, -20% );
+    
+    pointer-events: none;
+    
+    box-shadow: 0 0 10px rgba( 0, 0, 0, .1 );
+    
+  }
+  

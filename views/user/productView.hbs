@@ -1,0 +1,141 @@
+{{>head}}
+
+{{#if userData}}
+{{>userNavLogged}}
+{{else}}
+{{>userNav}}
+{{/if}}
+
+
+
+<link rel="stylesheet" href="./stylesheets/imgzoom.css">
+<link rel="stylesheet" href="./stylesheets/style.css">
+
+
+<div class="container mt-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-12">
+            <div class="card border-0 product-view-card col-12">
+
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="images">
+
+                            <div class="text-center col-12 zoom-image" data-image="./image/{{product.img1}}">
+                                <img class="col-12" id="main-image" src="./images/{{product.img1}} " width="520" style="background-color:#FFB987;border-radius:30px;" />
+                            </div>
+
+                            <div class="thumbnail p-4">
+                                <img onclick="change_image(this)" src="./images/{{product.img1}}" width="100" style="background-color:#FFB987;border-radius:21px" >
+                                <img onclick="change_image(this)" src="./images/{{product.img2}}" width="100"style="background-color:#FFB987;border-radius:30px;" >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 ">
+                        <div class="product p-4" style="font-weight:800">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center"><a href="/user_home"
+                                        style="text-decoration: none; color: #6a6c6d;"><i
+                                            class="fa fa-long-arrow-left"></i> <span class="ml-1">Back</span></a></div>
+                                <a href="/cart"> <i class="fa fa-shopping-bag" aria-hidden="true"></i></a>
+                            </div>
+                            <div class="mt-4 mb-3"> <span class="text-uppercase text-muted brand">
+                                    {{product.category}}
+                                </span>
+                                <h5 class="text-uppercase mb-5" style="font-size: 35px; font-weight:">
+                                  {{product.productName}} 
+                                </h5>
+                                <div class="price d-flex flex-row align-items-center"> <span class="text-danger act-price"
+                                        style="margin-right: 10px">
+                                        ₹{{product.price}}/- per pair
+                                    </span>
+                                  40% off 
+                                </div>
+                            </div>
+                            <p class="about">
+                                {{product.description}}
+                            </p>
+                            <form action="/user_home/addtoCart" method="post">
+                                <button type="submit" class="btn btn-outline-dark bg-dark text-light w-50 mb-5 p-3"
+                                    style="width: 100%; margin-top: 10vw; border-radius:50px;">Add to cart</button>
+                                    
+                            </form>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function change_image(image) {
+        var container = document.getElementById("main-image");
+        container.src = image.src;
+    }
+
+    document.addEventListener("DOMContentLoaded", function (event) {
+
+    });
+    // <//script>
+
+    jQuery(document).ready(function ($) {
+
+        $('.zoom-image img').click(function (event) {
+            var ix = $(this).offset().left;
+            var iy = $(this).offset().top;
+            console.log(ix + '-' + iy);
+
+            var mx = event.pageX;
+            var my = event.pageY;
+            console.log(mx + '-' + my);
+        })
+
+        $('.zoom-image img').hover(function () {
+
+            var img = $(this).attr('src');
+
+            $(this).after("<div class='hover-image' style='background-image: url(" + img + "); background-size: 300px;'></div>");
+
+            $(this).mousemove(function (event) {
+
+                // Mouse Position
+                var mx = event.pageX;
+                var my = event.pageY;
+
+                // Image Position
+                var ix = $(this).offset().left;
+                var iy = $(this).offset().top;
+
+                // Mouse Position Relavtive to Image
+                var x = mx - (ix);
+                var y = my - (iy);
+
+                // Image Height and Width
+                var w = $(this).width();
+                var h = $(this).height();
+
+                // Mouse Position Relative to Image, in %
+                var xp = (-x / w) * -100;
+                var yp = (-y / h) * -100;
+
+                $(this).parent().find('.hover-image').attr('style',
+
+                    "background-image: url(" + img + "); background-size: 1000px; background-repeat: no-repeat; background-position: " + xp + "% " + yp + "%; top: " + y + "px; left: " + x + "px;");
+
+            });
+
+        }, function () {
+
+            $(this).parent().find('.hover-image').remove();
+
+        });
+
+    });
+
+</script>
+
+{{>foot}}

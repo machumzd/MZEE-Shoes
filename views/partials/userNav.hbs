@@ -1,0 +1,59 @@
+{{>head}}
+
+<div class="hero_area">
+  <!-- header section strats -->
+  <header class="header_section">
+    <nav class="navbar navbar-expand-lg custom_nav-container ">
+      <a class="navbar-brand" href="index.html">
+        <span>
+          <img src="./images/logo.png" style="max-width:8rem">
+        </span>
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class=""></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav  ">
+          <li class="nav-item">
+            <a class="nav-link" href="/user_home">Home
+            </a>
+          </li>
+          {{#each categories}}
+          <li class="nav-item">
+            <a class="nav-link" href="/displayCategory?id={{category}}">
+              {{category}}
+            </a>
+
+          </li>
+          {{/each}}
+
+          <li class="nav-item">
+            <a class="nav-link" href="/why">
+              Why Us
+            </a>
+          </li>
+          <div class="user_option">
+            <a href="/user_signin">
+              <i class="fa fa-user" aria-hidden="true"></i>
+              <span>
+                Login
+              </span>
+            </a>
+            <a href="">
+              <i class="fa fa-shopping-bag" aria-hidden="true"></i>
+            </a>
+            <a href="">
+              <i class="fa-solid fa-heart" area-hidden="true"></i>
+            </a>
+            <form class="form-inline mx-2" action="/search">
+              <input type="text" class="search_area"  name="search" placeholder="search">
+              <button class="btn nav_search-btn" type="submit">
+                <i class="fa fa-search" aria-hidden="true"></i>
+              </button>
+            </form>
+          </div>
+      </div>
+    </nav>
+  </header>
+  {{>foot}}

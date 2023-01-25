@@ -1,0 +1,49 @@
+{{>head}}
+
+<div class="hero_area">
+  <!-- header section strats -->
+  <header class="header_section">
+    <nav class="navbar navbar-expand-lg custom_nav-container ">
+      <a class="navbar-brand" href="/user_home">
+        <span>
+          <img src="./images/logo.png" style="max-width:10rem">
+        </span>
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class=""></span>
+      </button>
+
+
+      <section class="vh-100">
+        <div class="container py-5 h-75">
+          <div class="row d-flex align-items-center justify-content-center h-100">
+
+            <div class="col-md-12 col-lg-12 col-xl-12">
+
+              <form action="/verify_otp" method="/verify_otp">
+                <h1 class="pb-3 font-weight-bold">Enter your Otp</h1>
+
+                <!-- Mobile input -->
+                <div class="form-outline mb-4">
+
+                  <input type="otp" id="otp" name="otp" class="form-control form-control-lg border-dark"
+                    placeholder="please enter the Otp" maxlength="6" style="letter-spacing:0.5rem;" />
+                  <div class="error" id="otpErr"></div>
+                </div>
+
+
+                <h5 class="text-danger text-center">{{message}}</h5>
+                <div class="d-flex justify-content-around align-items-center mb-3">
+                  <h6>Edit your number?<a href="/mobile_otp"> Go back</a></h6>
+                </div>
+
+                <!-- Submit button -->
+                <button type="submit" class="btn btn-warning btn-lg btn-block w-100 border-dark">Verify Otp</button>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+      {{>foot}}
