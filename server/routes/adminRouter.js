@@ -31,6 +31,7 @@ router.post('/admin-product/edit',store.any(),controlls.productUpdate)
 router.get('/admin-product/delete',controlls.productDelete)
 router.post('/admin-product/search',controlls.adminLoggedIn,controlls.productSearch)
 
+
 router.get('/admin-dashboard',controlls.adminLoggedIn,controlls.userDashboard)
 
 

@@ -16,15 +16,18 @@ const hbs=require("hbs")
 const userRouter=require("./server/routes/userRouter")
 const adminRouter=require("./server/routes/adminRouter")
 
-app.use(session({
-    secret:"process.env.secret",
-    cookie:{maxAge:600000}
-  }));
+
 
 app.use(function(req, res, next) { 
   res.header('Cache-Control', 'no-cache, no-store');
    next();
  });
+
+
+app.use(session({
+    secret:"process.env.secret",
+    cookie:{maxAge:600000}
+  }));
 
 app.set('view engine','hbs')
 app.set('views',path.join(__dirname,'views'));

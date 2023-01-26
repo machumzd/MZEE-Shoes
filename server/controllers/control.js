@@ -7,7 +7,7 @@ const Category = require("../model/categoryModel");
 const Product = require("../model/productModel");
 const bcrypt = require("bcrypt");
 const client = new twilio(config.accountSID, config.authTocken);
-
+const Address = require("../model/addressModel");
 //otp purpose
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -62,12 +62,28 @@ const getCategory = function () {
 
 const getProducts = function () {
   return new Promise((res, rej) => {
-    Product.find({isDeleted:false})
+    Product.find({ isDeleted: false })
       .then((products) => {
         res(products);
       })
       .catch(() => {
         const error = new Error("could not find products");
+        rej(error);
+      });
+  });
+};
+
+const getAddress = function () {
+  return new Promise((res, rej) => {
+    console.log("this side have error");
+
+    console.log("its passed");
+    Address.find()
+      .then((address) => {
+        res(address);
+      })
+      .catch((err) => {
+        const error = new Error("could not get Address");
         rej(error);
       });
   });
@@ -89,15 +105,13 @@ exports.signUpCheck = async (req, res) => {
         res.render("user/signup", {
           message: "Mobile number already exists",
         });
-      } else if(req.body.password!=req.body.cPassword){
+      } else if (req.body.password != req.body.cPassword) {
         res.render("user/signup", {
           message: "Passwords are Diffrent",
         });
-      }
-      
-      else if (
+      } else if (
         req.body.password != "" &&
-        req.body.cPassword!=""&&
+        req.body.cPassword != "" &&
         req.body.email != "" &&
         req.body.mobile.length == 10 &&
         req.body.name != ""
@@ -276,10 +290,9 @@ exports.verifyOtp = (req, res) => {
 
 exports.displayCategory = (req, res) => {
   const category = req.query.id;
-  Product.find({ $and: [ { category: category }, { isDeleted: false } ] })
+  Product.find({ $and: [{ category: category }, { isDeleted: false }] })
 
     .then((products) => {
-      
       console.log("message from products" + products);
       getCategory()
         .then((categories) => {
@@ -303,62 +316,221 @@ exports.displayCategory = (req, res) => {
 exports.proSearch = (req, res) => {
   const search = req.query.search;
   Product.find({
-    $or: [
-      { productName: { $regex: search, $options: "i" } },
-      { price: { $regex: search, $options: "i" } },
-      { category: { $regex: search, $options: "i" } },
+    $and: [
+      {
+        $or: [
+          { productName: { $regex: search, $options: "i" } },
+          { price: { $regex: search, $options: "i" } },
+          { category: { $regex: search, $options: "i" } },
+        ],
+      },
+      { isDeleted: false },
     ],
-  }).then((products) => {
-    getCategory()
-      .then((categories) => {
-        if (req.session.user) {
-          res.render("user/index", {
-            userData: req.session.userData,
-            categories: categories,
-            products: products,
-          });
-        } else {
-          res.render("user/index", {
-            categories: categories,
-            products: products,
-          });
-        }
-      })
-      .catch((err) => {
-        console.log("categories not found"+err);
-      });
-  }).catch((err)=>{
-    console.log("product not found"+err)
-  });
+  })
+    .then((products) => {
+      getCategory()
+        .then((categories) => {
+          if (req.session.user) {
+            res.render("user/index", {
+              userData: req.session.userData,
+              categories: categories,
+              products: products,
+            });
+          } else {
+            res.render("user/index", {
+              categories: categories,
+              products: products,
+            });
+          }
+        })
+        .catch((err) => {
+          console.log("categories not found" + err);
+        });
+    })
+    .catch((err) => {
+      console.log("product not found" + err);
+    });
 };
 
 exports.productView = (req, res) => {
-const id=req.query.id
-console.log("this is id:"+req.query.id)
-Product.findOne({_id:id})
-.then((productDetails)=>{
-  getCategory().then((categories)=>{
-    res.render("user/productView",{
-      categories:categories,
-      userData:req.session.userData,
-      product:productDetails
+  const id = req.query.id;
+  console.log("this is id:" + req.query.id);
+  Product.findOne({ _id: id })
+    .then((productDetails) => {
+      getCategory()
+        .then((categories) => {
+          res.render("user/productView", {
+            categories: categories,
+            userData: req.session.userData,
+            product: productDetails,
+          });
+        })
+        .catch((err) => {
+          console.log("getCategory not found" + err);
+        });
     })
-  }).catch((err)=>{
-    console.log("getCategory not found"+err)
-  })
-}).catch((err)=>{
-  console.log("product details not found"+err)
-})
+    .catch((err) => {
+      console.log("product details not found" + err);
+    });
 };
 
+exports.userProfile = (req, res) => {
+  const userData = req.session.userData;
+  const errorMessage=req.session.errorMessage
+  const successMessage=req.session.successMessage
+  console.log("address id =" + userData._id);
+  getCategory().then((categories) => {
+    if (req.query.add) {
+      //add address n
+      console.log(req.query.add);
+      const addAddress = "for et edit address panel";
+      res.render("user/userProfile", { addAddress, userData, categories });
+    } else if (req.query.edit) {
+      const id = req.query.edit;
+      Address.findOne({ _id: id }).then((address) => {
+        const toEditAddress = "this for edit purpose it redirected to profile";
+        res.render("user/userProfile", {
+          toEditAddress,
+          editAddress: address,
+          userData,
+          categories,
+        });
+      });
+    } else if (req.query.passEdit) {
+      const toEditPassword = "this for password editing";
+      res.render("user/userProfile", { toEditPassword, userData,errorMessage,categories });
+    } else {
+      Address.find({ owner: userData._id }).then((address) => {
+        if (address) {
+          res.render("user/userProfile", { userData, address, categories,successMessage });
+        } else {
+          res.render("user/userProfile", { userData, categories });
+        }
+      });
+    }
+  });
+};
 
+exports.userAddress = (req, res) => {
+  const userData = req.session.userData;
+  const id = userData._id;
+  console.log("req body" + req.body.name);
+  const address = new Address({
+    owner: id,
+    name: req.body.name,
+    mobile: req.body.mobile,
+    address1: req.body.address1,
+    address2: req.body.address2,
+    city: req.body.city,
+    state: req.body.state,
+    zip: req.body.zip,
+  });
+  address
+    .save()
+    .then((address) => {
+      req.session.address = address;
+      let message="Address Added Successfully"
+      req.session.successMessage=message
+      req.query.add = false;
+      res.redirect("/user-profile");
+    })
+    .catch((err) => {
+      console.log(" new address error" + err);
+    });
+};
 
+exports.uploadAddress = (req, res) => {
+  const id = req.query.id;
+  Address.updateOne(
+    { _id: id },
+    {
+      $set: {
+        name: req.body.name,
+        mobile: req.body.mobile,
+        address1: req.body.address1,
+        address2: req.body.address2,
+        city: req.body.city,
+        state: req.body.state,
+        zip: req.body.zip,
+      },
+    }
+  )
+    .then(() => {
+      req.query.edit = false;
+      let message="Address Updated Successfully"
+      req.session.successMessage=message
+      res.redirect("/user-profile");
+    })
+    .catch((err) => {
+      console.log("error in address updation section" + err);
+    });
+};
 
+exports.changePassword = (req, res) => {
+  console.log("userData,,,,,"+req.query.id)
+  const id = req.query.id;
+  if (
+    req.body.currPass != "" &&
+    req.body.newPass != "" &&
+    req.body.repeatPass != ""
+  ) {
+    if (req.body.newPass == req.body.repeatPass) {
+      User.findOne({ _id: id })
+      .then((user) => {
+        const passwordMatch = bcrypt.compare(req.body.currPass, user.password);
+        if (passwordMatch) {
+          securePassword(req.body.newPass)
+            .then((passwordHash) => {
+              User.updateOne(
+                { _id: id },
+                {
+                  $set: {
+                    password: passwordHash,
+                  },
+                }
+              )
+                .then(() => {
+                  req.query.passEdit = false;
+                  let message = "Password changed Successfully";
+                  req.session.successMessage = message;
+                  res.redirect("/user-profile");
+                })
+                .catch((err) => {
+                  console.log("user couldn't update" + err);
+                });
+            })
+            .catch((err) => {
+              console.log("cant get password" + err);
+            });
+        } else {
+          req.query.passEdit=true;
+          let message = "Previous Password is Incorect";
+          req.session.errorMessage = message;
+          req.session.successMessage = "";
+          res.redirect("/user-profile")
+        }
+      }).catch((err) => {
+        console.log("Cant get user" + err);
+      });
+    } else {
+      req.query.passEdit=true;
+      let message = "Passwords are not match";
+      req.session.errorMessage = message;
+      req.session.successMessage = "";
+      res.redirect("/user-profile")
 
+    }
+  } else {
+    req.query.passEdit=true;
+    let message = "password and fields dont be blank";
+    req.session.errorMessage = message;
+    req.session.successMessage = "";
+    res.redirect("/user-profile")
 
+  }
+};
 
-
-///admin
+///admin-----------------------------------------------------------------------------------------------------
 exports.getAdminLogin = (req, res) => {
   res.render("admin/adminLogin");
 };

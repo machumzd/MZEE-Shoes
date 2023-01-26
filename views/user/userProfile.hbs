@@ -1,0 +1,236 @@
+{{>head}}
+
+{{#if userData}}
+{{>userNavLogged}}
+{{else}}
+{{>userNav}}
+{{/if}}
+
+
+<section class="h-100 h-custom" style="background-color: #fff;">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12">
+                <div class="card card-registration card-registration-2"
+                    style="border-radius: 15px; border: 1px solid black;">
+                    <div class="card-body p-0">
+                        <div class="row g-0">
+                            
+                            
+                            
+                            <div class="col-lg-4 bg-grey container">
+                                <div class="card mb-4" style="border: none;">
+                                    <div class="card-body mt-5 ms-2">
+                                      <div class="d-flex flex-row">
+                                        <h1 class="me-3">hei!! {{userData.name}}</h1>                                       
+                                        <a href="/myAccount?userEdit=true" style="color: black;font-size:2rem;"><i class="fa-solid fa-pen-to-square"></i></a>
+                                        </div>
+                                        <p class="text-muted mb-1">{{userData.email}}</p>
+                                        <p class="text-muted mb-1">{{userData.mobile}}</p>
+
+                                        <p class="mt-3"><a href="/user-profile?passEdit={{userData._id}}" style="text-decoration: none" class="text-success">Change Password</a></p>
+
+                                        <div class="mt-4">
+                                            <a href="/all-orders">
+                                                <button class="btn btn-danger">
+                                                    view All Orders
+                                                </button>
+                                            </a>
+                                        </div>
+
+                                        <div class="pt-5">
+                                            <h6 class="mb-0"><a href="/user-home" class="text-body">Back to home</a></h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            
+                            
+                            
+                            <div class="col-lg-8">
+                                <div class="p-5">
+                                    <div class="d-flex justify-content-between align-items-center mb-5">
+                                        <h1 class="fw-bold mb-0 text-black"><i
+                                                class="fa fa-cog fa-spin fa-1x fa-fw"></i>
+                                            My Account</h1>
+                                    </div>
+              <h5 class="text-success text-center">{{successMessage}}</h5>
+
+                                    <hr class="my-4">
+
+
+
+                                   
+                                        {{#if toEditAddress}}
+                                         <div class="">
+                                            <p class="card-text text-muted mt-4 mb-0  space">EDIT DELIVERY ADDRESS</p>
+                                          </div>
+                                          <div>
+                                            <form class="row g-3 mt-0" action="/user-profile/uploadAddress?id={{editAddress._id}}"  method="post">
+                                              <div class="col-md-6">
+                                                <label for="" class="form-label">Name</label>
+                                                <input type="text" value="{{editAddress.name}}" class="form-control" id="name" name="name" required>
+                                              </div>
+                                              <div class="col-md-6">
+                                                <label for="inputEmail4" class="form-label">Mobile number</label>
+                                                <input type="tel" value="{{editAddress.mobile}}" name="mobile" max="10" class="form-control" id="" required>
+                                              </div>
+                                              <div class="col-12">
+                                                <label for="inputAddress" class="form-label">Address</label>
+                                                <input type="text" value="{{editAddress.address1}}" class="form-control" name="address1" id="inputAddress"
+                                                  placeholder="1234 Main St" required>
+                                              </div>
+                                              <div class="col-12">
+                                                <label for="inputAddress2" class="form-label">Address 2</label>
+                                                <input type="text" value="{{editAddress.address2}}" class="form-control" name="address2" id="inputAddress2"
+                                                  placeholder="Apartment, studio, or floor" required>
+                                              </div>
+                                              <div class="col-md-6">
+                                                <label for="inputCity" class="form-label">City</label>
+                                                <input type="text" value="{{editAddress.city}}" class="form-control" name="city" id="inputCity" required>
+                                              </div>
+                                              <div class="col-md-4">
+                                                <label for="inputState" class="form-label">State</label>
+                                                <select id="inputState" value="{{editAddress.state}}" name="state" class="form-select" required>
+                                                  <option selected>Kerala</option>
+                                                  <option>Bengaluru</option>
+                                                </select>
+                                              </div>
+                                              <div class="col-md-2">
+                                                <label for="inputZip" class="form-label">Zip</label>
+                                                <input type="text" value="{{editAddress.zip}}" name="zip" class="form-control" id="inputZip" required>
+                                              </div>
+                                              
+                                              <div class="col-12 text-center">
+                                                <button type="submit" class="btn btn-lg btn-dark mb-2 mt-3"><i class="fa fa-refresh" aria-hidden="true"></i> Update</button>
+                                              </div>
+                                            </form>
+                                          </div> 
+                                 {{else if addAddress}}
+                                        <div class="">
+                                            <p class="card-text text-muted mt-4 mb-0  space">ADD DELIVERY ADDRESS</p>
+                                          </div>
+                                          <div>
+                                            <form class="row g-3 mt-0" action="/user-profile/addAddress?id={{_id}}"  method="post">
+                                              <div class="col-md-6">
+                                                <label for="" class="form-label">Name</label>
+                                                <input type="text" value="" class="form-control" id="name" name="name" required>
+                                              </div>
+                                              <div class="col-md-6">
+                                                <label for="inputEmail4" class="form-label">Mobile number</label>
+                                                <input type="tel" value="" name="mobile" max="10" class="form-control" id="" required>
+                                              </div>
+                                              <div class="col-12">
+                                                <label for="inputAddress" class="form-label">Address</label>
+                                                <input type="text" value="" class="form-control" name="address1" id="inputAddress"
+                                                  placeholder="1234 Main St" required>
+                                              </div>
+                                              <div class="col-12">
+                                                <label for="inputAddress2" class="form-label">Address 2</label>
+                                                <input type="text" value="" class="form-control" name="address2" id="inputAddress2"
+                                                  placeholder="Apartment, studio, or floor" required>
+                                              </div>
+                                              <div class="col-md-6">
+                                                <label for="inputCity" class="form-label">City</label>
+                                                <input type="text" value="" class="form-control" name="city" id="inputCity" required>
+                                              </div>
+                                              <div class="col-md-4">
+                                                <label for="inputState" class="form-label">State</label>
+                                                <select id="inputState" value="" name="state" class="form-select" required>
+                                                  <option selected>Kerala</option>
+                                                  <option>Kerala</option>
+                                                </select>
+                                              </div>
+                                              <div class="col-md-2">
+                                                <label for="inputZip" class="form-label">Zip</label>
+                                                <input type="text" value="" name="zip" class="form-control" id="inputZip" required>
+                                              </div>
+                                              
+                                              <div class="col-12 text-center">
+                                                <button type="submit" class="btn btn-lg btn-dark mb-2 mt-3">Save</button>
+                                              </div>
+                                            </form>
+                                          </div>
+                                   
+
+
+                                   {{else if toEditPassword}}
+                                      <h3 class="fw-bold mb-5 mt-2 pt-1 text-center">Change Password</h3>
+                                      <div class="container col-12 col-md-9">
+                                      
+                                        <form action="/user-profile/changePassword?id={{userData._id}}" method="post" >
+                                          <label class="form-label mt-0 mb-0" for="form3Examplea2">Enter Current Password</label>
+                                          <input name="currPass" style="border: 1px solid black" type="password" id="form3Examplea2" class="form-control form-control-lg mt-0"  />
+      
+                                          <label class="form-label mt-2 mb-0" for="form3Examplea2">Enter New Password</label>
+                                          <input name="newPass" style="border: 1px solid black" type="password" id="form3Examplea2" class="form-control form-control-lg mt-0" />
+      
+                                          <label class="form-label mt-2 mb-0" for="form3Examplea2">Repeat Password</label>
+                                          <input name="repeatPass" style="border: 1px solid black" type="password" id="form3Examplea2" class="form-control form-control-lg mt-0" />
+              <h5 class="text-danger text-center">{{errorMessage}}</h5>
+
+                                          <div class="form-outline " style="text-align: center">
+                                              <button style="right: 0%" type="submit" class=" mt-3 btn btn-dark btn-block btn-lg"
+                                              data-mdb-ripple-color="dark"><i class="fa fa-refresh" aria-hidden="true"></i> Update </button>
+                                          </div>
+                                        </form> 
+                                  </div>
+                                   {{!-- <% }else if(userEdit) { %> 
+                                      <form action="/myAccount/edit-user" method="post" enctype="multipart/form-data" >
+                                        <label class="form-label mt-0 mb-0" for="form3Examplea2">Enter Your Name</label>
+                                        <input name="name" value="<%= user.name %>" style="border: 1px solid black" type="text" id="form3Examplea2" class="form-control form-control-lg mt-0" required />
+    
+                                        <label class="form-label mt-2 mb-0" for="form3Examplea2">Enter Your Email</label>
+                                        <input name="email" value="<%= user.email %>" style="border: 1px solid black" type="email" id="form3Examplea2" class="form-control form-control-lg mt-0" required />
+    
+                                        <label class="form-label mt-2 mb-0" for="form3Examplea2">Enter Mobile</label>
+                                        <input name="mobile" value="<%= user.mobile %>" style="border: 1px solid black" type="tel" id="form3Examplea2" class="form-control form-control-lg mt-0" required />
+
+                                        <label class="form-label mt-2 mb-0" for="form3Examplea2">Upload Avatar</label>
+                                        <input name="profile" style="border: 1px solid black" type="file" id="form3Examplea2" class="form-control form-control-lg mt-0" accept="image/*" />
+    
+                                        <div class="form-outline " style="text-align: center">
+                                            <button style="right: 0%" type="submit" class=" mt-3 btn btn-dark btn-block btn-lg"
+                                            data-mdb-ripple-color="dark"><i class="fa fa-refresh" aria-hidden="true"></i> Update </button>
+                                        </div>
+                                      </form>
+                                    <% }else{ %>   --}}
+{{else}}
+                          {{#each address}}
+                                        <div class="form-check mt-3">
+                                            <ul>
+                                                <li>
+                                                    <p class="display-address">{{name}}<span class="mx-3"><a href="/user-profile?edit={{_id}}" style="text-decoration: none">Edit</a></span></p>
+                                                    <p class="display-address">{{address1}},{{address2}}</p>
+                                                    <p class="display-address">{{city}},{{state}}</p>
+                                                    <p class="display-address">{{mobile}}</p>
+                                                    <p class="display-address">{{zip}}</p>
+                                                </li>
+                                            </ul>
+                                            
+                                           
+                                            <label class="form-check-label" for="radio1"></label>
+
+                                        </div>
+ {{/each}}
+                                        <a href="/user-profile?add=true"
+                                            style="text-decoration: none; color: green;">
+                                            <p>Add a new address</p>
+                                        </a>
+
+                                   {{/if}}
+                                    
+                                </div>
+                            </div>
+
+
+
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+{{>foot}}
