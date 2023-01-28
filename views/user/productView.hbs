@@ -8,8 +8,8 @@
 
 
 
-<link rel="stylesheet" href="./stylesheets/imgzoom.css">
-<link rel="stylesheet" href="./stylesheets/style.css">
+<link rel="stylesheet" href="/stylesheets/imgzoom.css">
+<link rel="stylesheet" href="/stylesheets/style.css">
 
 
 <div class="container mt-5">
@@ -56,7 +56,7 @@
                             <p class="about">
                                 {{product.description}}
                             </p>
-                            <form action="/user-home/addtoCart" method="post">
+                            <form action="/user-home/addtoCart?id={{product._id}}" method="post">
                                 <button type="submit" class="btn btn-outline-dark bg-dark text-light w-50 mb-5 p-3"
                                     style="width: 100%; margin-top: 10vw; border-radius:50px;">Add to cart</button>
                                     
@@ -81,7 +81,6 @@
 
     });
     // <//script>
-
     jQuery(document).ready(function ($) {
 
         $('.zoom-image img').click(function (event) {
@@ -137,5 +136,7 @@
     });
 
 </script>
+
+
 
 {{>foot}}

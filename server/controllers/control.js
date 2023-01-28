@@ -8,6 +8,8 @@ const Product = require("../model/productModel");
 const bcrypt = require("bcrypt");
 const client = new twilio(config.accountSID, config.authTocken);
 const Address = require("../model/addressModel");
+const Cart = require("../model/cartModel");
+const { Error } = require("mongoose");
 //otp purpose
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -130,11 +132,13 @@ exports.signUpCheck = async (req, res) => {
 };
 
 //sign in
-
 exports.userSignin = (req, res) => {
-  res.render("user/login");
+  if (req.session.user) {
+    res.redirect("/user-home");
+  } else {
+    res.render("user/login");
+  }
 };
-
 exports.signIn = async (req, res) => {
   try {
     const password = req.body.password;
@@ -376,13 +380,12 @@ exports.productView = (req, res) => {
 
 exports.userProfile = (req, res) => {
   const userData = req.session.userData;
-  const errorMessage=req.session.errorMessage
-  const successMessage=req.session.successMessage
+  const errorMessage = req.session.errorMessage;
+  const successMessage = req.session.successMessage;
   console.log("address id =" + userData._id);
   getCategory().then((categories) => {
     if (req.query.add) {
       //add address n
-      console.log(req.query.add);
       const addAddress = "for et edit address panel";
       res.render("user/userProfile", { addAddress, userData, categories });
     } else if (req.query.edit) {
@@ -398,11 +401,29 @@ exports.userProfile = (req, res) => {
       });
     } else if (req.query.passEdit) {
       const toEditPassword = "this for password editing";
-      res.render("user/userProfile", { toEditPassword, userData,errorMessage,categories });
+      res.render("user/userProfile", {
+        toEditPassword,
+        userData,
+        errorMessage,
+        categories,
+      });
+    } else if (req.query.userEdit) {
+      const toEditUser = "this for Edit user Page";
+      res.render("user/userProfile", {
+        toEditUser,
+        userData,
+        categories,
+        successMessage,
+      });
     } else {
       Address.find({ owner: userData._id }).then((address) => {
         if (address) {
-          res.render("user/userProfile", { userData, address, categories,successMessage });
+          res.render("user/userProfile", {
+            userData,
+            address,
+            categories,
+            successMessage,
+          });
         } else {
           res.render("user/userProfile", { userData, categories });
         }
@@ -414,7 +435,6 @@ exports.userProfile = (req, res) => {
 exports.userAddress = (req, res) => {
   const userData = req.session.userData;
   const id = userData._id;
-  console.log("req body" + req.body.name);
   const address = new Address({
     owner: id,
     name: req.body.name,
@@ -429,8 +449,9 @@ exports.userAddress = (req, res) => {
     .save()
     .then((address) => {
       req.session.address = address;
-      let message="Address Added Successfully"
-      req.session.successMessage=message
+      let message = "Address Added Successfully";
+      req.session.successMessage = message;
+      req.session.errorMessage = "";
       req.query.add = false;
       res.redirect("/user-profile");
     })
@@ -457,8 +478,9 @@ exports.uploadAddress = (req, res) => {
   )
     .then(() => {
       req.query.edit = false;
-      let message="Address Updated Successfully"
-      req.session.successMessage=message
+      let message = "Address Updated Successfully";
+      req.session.successMessage = message;
+      req.session.errorMessage = "";
       res.redirect("/user-profile");
     })
     .catch((err) => {
@@ -467,7 +489,6 @@ exports.uploadAddress = (req, res) => {
 };
 
 exports.changePassword = (req, res) => {
-  console.log("userData,,,,,"+req.query.id)
   const id = req.query.id;
   if (
     req.body.currPass != "" &&
@@ -476,63 +497,216 @@ exports.changePassword = (req, res) => {
   ) {
     if (req.body.newPass == req.body.repeatPass) {
       User.findOne({ _id: id })
-      .then((user) => {
-        const passwordMatch = bcrypt.compare(req.body.currPass, user.password);
-        if (passwordMatch) {
-          securePassword(req.body.newPass)
-            .then((passwordHash) => {
-              User.updateOne(
-                { _id: id },
-                {
-                  $set: {
-                    password: passwordHash,
-                  },
-                }
-              )
-                .then(() => {
-                  req.query.passEdit = false;
-                  let message = "Password changed Successfully";
-                  req.session.successMessage = message;
-                  res.redirect("/user-profile");
-                })
-                .catch((err) => {
-                  console.log("user couldn't update" + err);
-                });
+        .then((user) => {
+          if (!user) {
+            let message = "Password is incorrect";
+            req.session.errorMessage = message;
+          }
+          return bcrypt
+            .compare(req.body.currPass, user.password)
+            .then((passwordMatch) => {
+              if (!passwordMatch) {
+                let message = "Previous Password is Incorrect";
+                req.session.errorMessage = message;
+                req.session.successMessage = "";
+                res.redirect("/user-profile?passEdit=true");
+              } else {
+                securePassword(req.body.newPass)
+                  .then((passwordHash) => {
+                    User.updateOne(
+                      { _id: id },
+                      {
+                        $set: {
+                          password: passwordHash,
+                        },
+                      }
+                    )
+                      .then(() => {
+                        req.query.passEdit = false;
+                        let message = "Password changed Successfully";
+                        req.session.user = true;
+                        req.session.successMessage = message;
+                        req.session.errorMessage = "";
+                        res.redirect("/user-profile");
+                      })
+                      .catch((err) => {
+                        console.log("user couldn't update" + err);
+                      });
+                  })
+                  .catch((err) => {
+                    console.log("cant get password" + err);
+                  });
+              }
             })
             .catch((err) => {
-              console.log("cant get password" + err);
+              console.log("password not match" + user);
             });
-        } else {
-          req.query.passEdit=true;
-          let message = "Previous Password is Incorect";
-          req.session.errorMessage = message;
-          req.session.successMessage = "";
-          res.redirect("/user-profile")
-        }
-      }).catch((err) => {
-        console.log("Cant get user" + err);
-      });
+        })
+        .catch((err) => {
+          console.log("cannot get user" + err);
+        });
     } else {
-      req.query.passEdit=true;
       let message = "Passwords are not match";
       req.session.errorMessage = message;
       req.session.successMessage = "";
-      res.redirect("/user-profile")
-
+      res.redirect("/user-profile?passEdit=true");
     }
   } else {
-    req.query.passEdit=true;
     let message = "password and fields dont be blank";
     req.session.errorMessage = message;
     req.session.successMessage = "";
-    res.redirect("/user-profile")
-
+    res.redirect("/user-profile?passEdit=true");
   }
+};
+
+exports.uploadUser = (req, res) => {
+  const id = req.query.id;
+  if (req.body.name != "" && req.body.email != "" && req.body.mobile != "") {
+    User.find({
+      $and: [
+        {
+          $or: [
+            {
+              email: req.body.email,
+            },
+            {
+              mobile: req.body.mobile,
+            },
+          ],
+        },
+        { _id: { $ne: id } },
+      ],
+    })
+      .then((result) => {
+        if (result.length === 0) {
+          User.findOneAndUpdate(
+            { _id: id },
+            {
+              $set: {
+                name: req.body.name,
+                mobile: req.body.mobile,
+                email: req.body.email,
+              },
+            }
+          )
+            .then((result) => {
+              let message =
+                "Profile edited Successfully,(reflects madeby after login)";
+              req.session.userData = result;
+              req.session.successMessage = message;
+              req.session.errorMessage = "";
+              res.redirect("/user-profile");
+            })
+            .catch((err) => {
+              console.log("profile can't updated" + err);
+            });
+        } else {
+          let message = "Credintial's will be aldready Taken";
+          req.session.errorMessage = message;
+          req.session.successMessage = "";
+          res.redirect("/user-profile?userEdit=true");
+        }
+      })
+      .catch((err) => {
+        console.log("user result not found" + err);
+      });
+  }
+};
+
+//cart
+
+//user-home/cart
+exports.cart = (req, res) => {
+  const userData = req.session.userData;
+  const cartBill=req.session.cartBill
+  const id = req.query.id;
+  const cartMessage = req.session.cartMessage;
+  getCategory().then((categories) => {
+
+    Cart.find({ owner: id }).then((cart) => {
+      res.render("user/cart", {
+        cart,
+        categories,
+        cartBill,
+        userData,
+        message: cartMessage,
+      });
+    });
+    
+  });
+};
+
+exports.addToCart = (req, res) => {
+  console.log("get cart ll keri");
+  const id = req.query.id;
+  const userData = req.session.userData;
+
+  if (userData) {
+    Product.findOne({
+      _id: id,
+    }).then((result) => {
+      const oldCartBill = req.session.newCartBill;
+      console.log("result price:----------" + result.price);
+      Cart.findOne({ productName: result.productName })
+      .then((cart) => {
+        if (!cart) {
+          const cartAdd = new Cart({
+            owner: userData._id,
+            productName: result.productName,
+            price: result.price,
+            category: result.category,
+            quantity: 1,
+            bill: result.price,
+            img1: result.img1,
+          });
+          cartAdd
+            .save()
+            .then((cartData) => {
+              const newCartBill = cartData.bill;
+              req.session.newCartBill = newCartBill;
+              res.redirect(`/productView?id=${result._id}`);
+            })
+            .catch((err) => {
+              console.log("cannot get cart" + err);
+            });
+        } else {
+          const oldCartBill = req.session.newCartBill;
+          Cart.updateOne(
+            { _id: cart._id },
+            { $inc: { quantity: 1, bill:result.price} }
+          ).then((updatedCart) => {
+            res.redirect(`/productView?id=${result._id}`);
+          });
+        }
+      });
+    });
+  } else {
+    res.redirect("/user-login");
+  }
+};
+
+exports.deleteCart = (req, res) => {
+  const userData = req.session.userData;
+  const id = req.query.id;
+  console.log("the id is " + req.query.id);
+  Cart.deleteOne({ _id: id })
+    .then((result) => {
+      let message = "cart deleted Successfully";
+      req.session.cartMessage = message;
+      res.redirect(`user-home/cart?id=${userData._id}`);
+    })
+    .catch((err) => {
+      console.log("cant delete" + err);
+    });
 };
 
 ///admin-----------------------------------------------------------------------------------------------------
 exports.getAdminLogin = (req, res) => {
-  res.render("admin/adminLogin");
+  if (req.session.admin) {
+    res.redirect("/admin-dashboard");
+  } else {
+    res.render("admin/adminLogin");
+  }
 };
 exports.adminLogin = (req, res) => {
   const signInData = req.body;
@@ -543,7 +717,6 @@ exports.adminLogin = (req, res) => {
     .then((result) => {
       if (result) {
         req.session.admin = true;
-        req.session.user = false;
         res.redirect("/admin-dashboard");
       } else if (
         !result &&
@@ -685,20 +858,33 @@ exports.adminCategory = (req, res) => {
         editCategory: req.session.editCategory,
       });
     } else {
-      res.render("admin/category", { categories: result });
+      res.render("admin/category", {
+        categories: result,
+        message: req.session.categoryMessage,
+      });
     }
   });
 };
 exports.adminCategoryLoad = (req, res) => {
-  const categoryData = new Category(req.body);
-  categoryData
-    .save()
-    .then(() => {
+  Category.find({
+    category: req.body.category,
+  }).then((result) => {
+    if (result.length === 0) {
+      const categoryData = new Category(req.body);
+      categoryData
+        .save()
+        .then(() => {
+          res.redirect("/admin-category");
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    } else {
+      let message = "the Category aldready exists.";
+      req.session.categoryMessage = message;
       res.redirect("/admin-category");
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
+    }
+  });
 };
 exports.categoryDelete = (req, res) => {
   const id = req.query.id;
@@ -854,7 +1040,6 @@ exports.productDelete = (req, res) => {
 };
 exports.productSearch = (req, res) => {
   const search = req.body.productsearch;
-  console.log("bodysearch ,,," + search);
   Product.find({
     $or: [
       { productName: { $regex: search, $options: "i" } },

@@ -38,19 +38,19 @@
           </thead>
           <tbody>
             {{#each products}}
-            <tr>
+            <tr style="line-height: 17px; text-overflow:ellipsis;">
               <th scope="row">{{counter @index}}</th>
               <td>{{productName}}</td>
               <td>{{price}}</td>
-              <td>{{description}}</td>
+              <td ">{{description}}</td>
                <td>{{stock}}</td>
                 <td>{{category}}</td>
-                 <td>{{img1}}</td>
-                  <td>{{img2}}</td>
+                 <td><img src="./images/{{img1}}" class="img-fluid" style="max-width:5rem;height:auto"></td>
+                  <td><img src="./images/{{img2}}" class="img-fluid" style="max-width:5rem;height:auto"></td>
               <td>
-                <a href="/admin-product/edit?id={{_id}}" class="btn btn-primary">Edit</a>
+                <a href="/admin-product/edit?id={{_id}}" class=" mt-1 btn btn-primary">Edit</a>
                 <a onclick="return confirm('Are you sure you want to Delete {{name}}')"
-                  href="/admin-product/delete?id={{_id}}" class="btn btn-danger">Delete</a>
+                  href="/admin-product/delete?id={{_id}}" class="mt-1 btn btn-danger">Delete</a>
               </td>
             </tr>
             {{/each}}
