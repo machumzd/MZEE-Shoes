@@ -9,7 +9,8 @@ module.exports={
     ServiceID : process.env.TWILIO_SERVICE_SID,
     accountSID : process.env.TWILIO_ACCOUNT_SID,
     authTocken : process.env.TWILIO_AUTH_TOCKEN,
-
+    email:process.env.EMAIL,
+    pass:process.env.PASSWORD,
      connectToDb: (cb) => {
         mongoose.connect(process.env.dataBase,{ useNewUrlParser: true })
             .then(() => {

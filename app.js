@@ -8,7 +8,6 @@ const multer=require("multer")
 const bcrypt=require("bcrypt")
 const cookieParser=require('cookie-parser');
 const db = require('./config/config')
-const twilio=require('twilio')
 const app=express();
 const hbs=require("hbs")
 

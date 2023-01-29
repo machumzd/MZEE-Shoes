@@ -23,21 +23,21 @@
 
             <div class="col-md-12 col-lg-12 col-xl-12">
 
-              <form onsubmit="loginValidate()" action="/mobile-otp" method="post">
-                <h1 class="pb-3 font-weight-bold">Login with Otp</h1>
+              <form onsubmit="loginValidate()" action="/forgot-password" method="post">
+                <h1 class="pb-3 font-weight-bold">verify with your mail</h1>
   <h5 class="text-danger text-center">{{message}}</h5>
                 <!-- Mobile input -->
                 <div class="form-outline mb-4">
 
-                  <input type="mobile" id="mobile" name="mobile" maxlength="10"
-                    class="form-control form-control-lg border-dark" value="{{mobile}}" placeholder="MObile Number"/>
-                  <div class="error" id="mobileErr"></div>
+                  <input type="text" id="lEmail" name="email"
+                    class="form-control form-control-lg border-dark" value="" placeholder="Enter your Email Address"/>
+                  <div class="error" id="emailErr"></div>
                 </div>
 
 
 
                 <div class="d-flex justify-content-around align-items-center mb-3">
-                  <h6>forget your Password<a href="/forgot-password"> click here</a></h6>
+                  <h6>login with phone<a href="/user-login"> click here</a></h6>
                 </div>
 
                 <!-- Submit button -->

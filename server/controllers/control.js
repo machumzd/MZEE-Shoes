@@ -10,6 +10,8 @@ const client = new twilio(config.accountSID, config.authTocken);
 const Address = require("../model/addressModel");
 const Cart = require("../model/cartModel");
 const { Error } = require("mongoose");
+const nodemailer = require("nodemailer");
+const { validateExpressRequest } = require("twilio/lib");
 //otp purpose
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -202,7 +204,6 @@ exports.userLoggedIn = (req, res, next) => {
 };
 exports.userLogout = (req, res) => {
   req.session.user = false;
-  req.session.admin = false;
   req.session.destroy();
   res.redirect("/user-home");
 };
@@ -272,10 +273,16 @@ exports.verifyOtp = (req, res) => {
         User.findOne({ token: otp })
           .then((result) => {
             if (result) {
-              req.session.userData = result;
-              req.session.user = true;
-              res.redirect("/user-home");
-              resolve();
+              console.log("user irikk");
+              if (req.session.changePassword) {
+                console.log("password match sir");
+                res.render("user/changePassword");
+              } else {
+                req.session.userData = result;
+                req.session.user = true;
+                res.redirect("/user-home");
+                resolve();
+              }
             } else {
               res.render("user/otpVerify", {
                 message: "the Otp is Incorrrect",
@@ -612,27 +619,37 @@ exports.uploadUser = (req, res) => {
       });
   }
 };
-
-//cart
-
-//user-home/cart
+//////////
 exports.cart = (req, res) => {
   const userData = req.session.userData;
-  const cartBill=req.session.cartBill
   const id = req.query.id;
   const cartMessage = req.session.cartMessage;
   getCategory().then((categories) => {
+    Cart.find({ owner: id })
+      .then((carts) => {
+        console.log(carts);
+        let cartQuantity = carts.map((cart) =>
+          Cart.findOne({ quantity: cart.quantity })
+        );
+        let productsPromise = carts.map((cart) =>
+          Product.findOne({ _id: cart.product })
+        );
+        console.log("ithannn ath" + productsPromise);
+        console.log("cart quantity" + cartQuantity);
+        return Promise.all(productsPromise);
+      })
 
-    Cart.find({ owner: id }).then((cart) => {
-      res.render("user/cart", {
-        cart,
-        categories,
-        cartBill,
-        userData,
-        message: cartMessage,
+      .then((products) => {
+        res.render("user/cart", {
+          products,
+          categories,
+          userData,
+          message: cartMessage,
+        });
+      })
+      .catch((err) => {
+        console.log("couldnt find cart" + err);
       });
-    });
-    
   });
 };
 
@@ -645,38 +662,27 @@ exports.addToCart = (req, res) => {
     Product.findOne({
       _id: id,
     }).then((result) => {
-      const oldCartBill = req.session.newCartBill;
-      console.log("result price:----------" + result.price);
-      Cart.findOne({ productName: result.productName })
-      .then((cart) => {
+      Cart.findOne({ product: result._id }).then((cart) => {
         if (!cart) {
           const cartAdd = new Cart({
             owner: userData._id,
-            productName: result.productName,
-            price: result.price,
-            category: result.category,
+            product: result._id,
             quantity: 1,
-            bill: result.price,
-            img1: result.img1,
           });
           cartAdd
             .save()
-            .then((cartData) => {
-              const newCartBill = cartData.bill;
-              req.session.newCartBill = newCartBill;
+            .then(() => {
               res.redirect(`/productView?id=${result._id}`);
             })
             .catch((err) => {
               console.log("cannot get cart" + err);
             });
         } else {
-          const oldCartBill = req.session.newCartBill;
-          Cart.updateOne(
-            { _id: cart._id },
-            { $inc: { quantity: 1, bill:result.price} }
-          ).then((updatedCart) => {
-            res.redirect(`/productView?id=${result._id}`);
-          });
+          Cart.updateOne({ _id: cart._id }, { $inc: { quantity: 1 } }).then(
+            () => {
+              res.redirect(`/productView?id=${result._id}`);
+            }
+          );
         }
       });
     });
@@ -689,7 +695,7 @@ exports.deleteCart = (req, res) => {
   const userData = req.session.userData;
   const id = req.query.id;
   console.log("the id is " + req.query.id);
-  Cart.deleteOne({ _id: id })
+  Cart.deleteOne({ product: id })
     .then((result) => {
       let message = "cart deleted Successfully";
       req.session.cartMessage = message;
@@ -698,6 +704,96 @@ exports.deleteCart = (req, res) => {
     .catch((err) => {
       console.log("cant delete" + err);
     });
+};
+
+exports.emailOtp = (req, res) => {
+  const enteredEmail = req.body.email;
+  if (enteredEmail != "") {
+    User.findOne({ email: enteredEmail })
+      .then((result) => {
+        if (result) {
+          req.session.userId=result._id
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: config.email,
+              pass: config.pass,
+            },
+          });
+          const options = {
+            from: "mzeeshoes.com",
+            to: enteredEmail,
+            subject: "Mzee-Shoes OTP VERIFICATION",
+            text: `DO NOT SHARE: Your Mzee OTP is ${result.token}.`,
+          };
+
+          transporter
+            .sendMail(options)
+            .then(() => {
+              console.log("otp sented");
+              req.session.verifypage = true;
+              req.session.changePassword = true;
+              res.render("user/otpVerify");
+            })
+            .catch((err) => {
+              console.log("couldnt send response" + err);
+            });
+        } else if (enteredEmail != "") {
+          res.render("user/emailOtp", { message: "incorrect credintials" });
+        }
+      })
+      .catch((err) => {
+        console.log("user not found" + err);
+      });
+  }else{
+    res.render("user/emailOtp", { message: "fields dont be blank" });
+   
+  }
+};
+
+exports.sendEmailOtp = (req, res) => {
+  res.render("user/emailOtp");
+};
+
+exports.verifyPassword = (req, res) => {
+  console.log("in verify pass");
+  const password = req.body.password;
+
+  const cPassword = req.body.cPassword;
+  console.log("in verify pass11"+password);
+  console.log("in verify pass22"+cPassword);
+  const id = req.session.userId;
+  console.log("this is "+id)
+  if (password != "" && cPassword != "") {
+    if (password == cPassword) {
+      securePassword(password)
+        .then((passwordHash) => {
+          User.updateOne(
+            { _id: id },
+            {
+              $set: {
+                password: passwordHash,
+              },
+            }
+          )
+            .then(() => {
+              console.log("to user login");
+              req.session.user=false  
+              res.redirect("/user-login");
+            })
+            .catch((err) => {
+              console.log("coudnt update the user" + err);
+            });
+        })
+        .catch((err) => {
+          console.log("password Hash not working" + err);
+        });
+    } else {
+      req.session.changePassword = true;
+      req.session.verifypage = true;
+      res.render("user/verifyOtp",{message:"the passwords are not match"});
+    }
+  }
 };
 
 ///admin-----------------------------------------------------------------------------------------------------

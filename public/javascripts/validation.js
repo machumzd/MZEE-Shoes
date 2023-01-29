@@ -71,7 +71,7 @@ function printError(elemId, hintMsg) {
         printError("lEmailErr", "");
       }
     }
-  
+
     if (password == "") {
       printError("lPassErr", "please enter your password");
     } else {

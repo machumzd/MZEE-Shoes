@@ -6,34 +6,17 @@ const cartSchema=new Schema({
         type: String,
         required: true
     },
-        productName: {
-            type: String
-        },
-        quantity: {
+    product:{
+        type:String,
+        required:true
+    },
+    
+    quantity: {
             type: Number,
             required: true,
             min: 1,
             default: 1
-        },
-        price: {
-            type: Number
-        },
-        category: {
-            type: String,
-            required: true
-        },
-        img1: {
-            type: String,
-            required: true
-        },
-    bill: {
-        type: Number,
-        default: 0
-    },
-    totalBill:{
-        type:String,
-        default:0
-    }
+        }
 
 })
 const Cart=mongoose.model('Cart',cartSchema)

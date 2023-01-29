@@ -19,6 +19,8 @@ router.get("/user-logout",controlls.userLogout)
 router.get("/why",controlls.why)
 router.get("/mobile-otp",controlls.mobileOtp)
 router.get("/verify-otp",controlls.verifyOtp)
+
+
 router.get("/displayCategory",controlls.displayCategory)
 router.get('/search',controlls.proSearch)
 router.get("/productView",controlls.productView)
@@ -26,6 +28,9 @@ router.post("/user-home/addtoCart",controlls.addToCart)//controlls.userLoggedIn
 router.get("/user-home/cart",controlls.cart)
 router.post("/delete-from-cart",controlls.deleteCart)
 
+router.get("/forgot-password",controlls.sendEmailOtp)
+router.post("/forgot-password",controlls.emailOtp)
+router.post("/verify-password",controlls.verifyPassword)
 router.post("/user-profile/addAddress",controlls.userAddress)
 router.post("/user-profile/uploadAddress",controlls.uploadAddress)
 router.post("/user-profile/changePassword",controlls.changePassword)
@@ -36,7 +41,7 @@ router.post("/user-profile/userEdit",controlls.uploadUser)
 router.get("/user-profile",controlls.userProfile)
 router.post("/user-signup",controlls.signUpCheck)
 router.post("/user-login",controlls.signIn)
-router.post("/sent_otp",controlls.sendOtp)
+router.post("/mobile-otp",controlls.sendOtp)
 
 
 module.exports=router;

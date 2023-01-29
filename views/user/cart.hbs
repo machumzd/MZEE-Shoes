@@ -18,7 +18,7 @@
                   <div class="d-flex justify-content-between align-items-center mb-5">
                     <h1 class="fw-bold mb-0 text-black">Shopping Cart</h1>
 
-                    <h6 class="mb-0 text-muted">{{cart.length}} items</h6>
+                    <h6 class="mb-0 text-muted">{{products.length}} items</h6>
                   </div>
                   <hr class="my-4">
 {{!-- {{#if cart.length===0}}
@@ -28,7 +28,7 @@
                    --}}
                  
                 
-{{#each cart}}
+{{#each products}}
 
                   <div class="row mb-4 d-flex justify-content-between align-items-center">
                     <div class="col-md-2 col-lg-2 col-xl-2">
@@ -81,7 +81,7 @@
                   <h3 class="fw-bold mb-5 mt-2 pt-1">Summary</h3>
                   <hr class="my-4">
                   <div class="d-flex justify-content-between mb-4">
-                    <h5 class="text-uppercase">items {{cart.length}} </h5>
+                    <h5 class="text-uppercase">items {{products.length}} </h5>
                     <h5>₹ {{cartBill}} </h5>
                   </div>
                   <h5 class="text-uppercase mb-3">Shipping</h5>
