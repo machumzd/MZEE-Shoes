@@ -1,0 +1,46 @@
+
+{{>adminNav}}
+
+<div class="container mt-5 table-responsive">
+    <table
+      id="myTable"
+      class="table table-striped"
+    >
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Order ID</th>
+          <th>Mobile</th>
+          <th>Zip</th>
+          <th>Total Bill</th>
+          <th>Pay method</th>
+          <th>Order Date</th>
+          <th>Edit Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each orders}}
+            <tr>
+            <td>{{address.name}} </td>
+            <td>{{_id}}</td>
+            <td>{{address.mobile}} </td>
+            <td>{{address.zip}} </td>
+            <td style="font-weight: 700;">₹ {{orderBill}} </td>
+            <td>{{paymentMode}} </td>
+            <td style="max-width: 200px">{{formatDate orderDate}} </td>
+            <td><a href="/admin/orders/status?id={{_id}}"><button type="submit" class="btn btn-success">View Products</button></a></td>
+            </tr>
+     {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  
+  <script>
+    $(document).ready( function () {
+    $('#myTable').DataTable();
+} );
+  </script>
+
+{{>footer}}
+{{>foot}}

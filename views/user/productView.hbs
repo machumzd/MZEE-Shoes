@@ -23,19 +23,19 @@
                         <div class="images">
 
                             <div class="text-center col-12 zoom-image" data-image="./image/{{product.img1}}">
-                                <img class="col-12" id="main-image" src="./images/{{product.img1}} " width="520" style="background-color:#FFB987;border-radius:30px;" />
+                                <img class="col-12" id="main-image" src="/images/{{product.img1}} " width="520" style="background-color:{{product.bgColor}};border-radius:30px;" />
                             </div>
 
                             <div class="thumbnail p-4">
-                                <img onclick="change_image(this)" src="./images/{{product.img1}}" width="100" style="background-color:#FFB987;border-radius:21px" >
-                                <img onclick="change_image(this)" src="./images/{{product.img2}}" width="100"style="background-color:#FFB987;border-radius:30px;" >
+                                <img onclick="change_image(this)" src="/images/{{product.img1}}" width="100" style="background-color:{{product.bgColor}};border-radius:21px;" >
+                                <img onclick="change_image(this)" src="/images/{{product.img2}}" width="100"style="background-color:{{product.bgColor}};border-radius:30px;" >
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 ">
                         <div class="product p-4" style="font-weight:800">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center"><a href="/user-home"
+                                <div class="d-flex align-items-center"><a href="/user"
                                         style="text-decoration: none; color: #6a6c6d;"><i
                                             class="fa fa-long-arrow-left"></i> <span class="ml-1">Back</span></a></div>
                                 <a href="/cart"> <i class="fa fa-shopping-bag" aria-hidden="true"></i></a>
@@ -56,7 +56,7 @@
                             <p class="about">
                                 {{product.description}}
                             </p>
-                            <form action="/user-home/addtoCart?id={{product._id}}" method="post">
+                            <form action="/user/addtoCart?id={{product._id}}" method="post">
                                 <button type="submit" class="btn btn-outline-dark bg-dark text-light w-50 mb-5 p-3"
                                     style="width: 100%; margin-top: 10vw; border-radius:50px;">Add to cart</button>
                                     

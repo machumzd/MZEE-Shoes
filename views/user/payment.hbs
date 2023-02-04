@@ -1,0 +1,234 @@
+{{>head}}
+
+{{#if userData}}
+{{>userNavLogged}}
+{{else}}
+{{>userNav}}
+{{/if}}
+<script>
+  window.onload = function() {
+    var msg = document.getElementById("validation");
+    if (msg.innerHTML !== "") {
+      setTimeout(function() {
+        msg.style.display = "none";
+      }, 1000); // 3000 milliseconds = 3 seconds
+    }
+  };
+</script>
+
+<div class=" container-fluid my-5 ">
+    <div class="row justify-content-center ">
+        <div class="col-xl-10">
+            <div class="card shadow-lg ">
+                <div class="row p-2 mt-3 justify-content-between mx-sm-2">
+                </div>
+
+
+
+                <div class="row justify-content-around">
+                    <div class="col-md-5">
+                        <div class="card border-0">
+                            <div class="card-header pb-0">
+                                <h2 class="card-title space">Payment Option</h2>
+                                <hr class="my-0 mt-4">
+
+                                <div class="">
+                                    <p class="card-text text-muted mt-5 mb-2  space">HAVE A COUPON CODE?</p>
+                                </div>
+                                <h5 class="text-uppercase mb-2  mt-4">Give code</h5>
+
+
+                                <div class="mb-5">
+                                    <div class="form-outline">
+                                        <form id="applyCoupon" action="/applyCoupon?id={{cart._id}}" method="post">
+                                            <div style="display : flex; gap: 2px;">
+                                                <input style="border: 1px solid black;width:20rem;" name="coupon" placeholder="enter your code" type="text"
+                                                    id="form3Examplea2" class="form-control form-control-lg" />
+                                                <button type="submit" class="btn btn-warning ms-2 border-dark">Apply</button>
+                                      
+
+                                            </div>
+                                            {{#if couponSMsg}}
+                                            <span style="color: green;" class="ps-3"><b>{{couponSMsg}}</b></span>
+                                             {{/if}}
+                                           <span style="color: red;" class="ps-3"><b id="validation">{{couponMsg}}</b></span>
+                                          
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="">
+                                    <p class="card-text text-muted mt-4 mb-2  space">SELECT PAYMENT OPTION</p>
+                                </div>
+
+                                <form id="checkout-form">
+                                     <div class="form-check">
+                                        <input class="form-check-input mt-5 mx-3 js-radioInput" type="radio"
+                                            name="radio" value="razorpay" id="flexRadioDefault1">
+                                        <label class="form-check-label" for="flexRadioDefault1">
+                                            <img class=""
+                                                src="https://upload.wikimedia.org/wikipedia/en/8/89/Razorpay_logo.svg"
+                                                alt="" height="100" width="200">
+                                        </label>
+                                    </div>
+                                    {{!-- <div class="form-check">
+                                        <input class="form-check-input mt-4 mx-3 js-radioInput" type="radio"
+                                            name="radio" value="paypal" id="flexRadioDefault2">
+                                        <label class="form-check-label" for="flexRadioDefault2">
+                                            <img src="https://pngimg.com/uploads/paypal/paypal_PNG15.png" alt=""
+                                                height="60" width="200">
+                                        </label>
+                                    </div>  --}}
+                                    <div class="form-check">
+                                        <input class="form-check-input mt-5 mx-3 js-radioInput" type="radio"
+                                            name="radio" value="COD" id="flexRadioDefault2">
+                                        <label class="form-check-label" for="flexRadioDefault2">
+                                            <img src="http://cdn.onlinewebfonts.com/svg/img_462168.png" alt=""
+                                                height="70" width="180">
+                                        </label>
+                                    </div>
+
+
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 mt-4">
+                        <div class="card border-0 ">
+                            <div class="card-header card-2">
+                                <p class="card-text text-muted mt-md-4 space">ORDER SUMMARY </p>
+                                <hr class="my-2">
+                            </div>
+
+
+                            <div class="card-body pt-0">
+
+                                {{#each cart}}
+                                <div class="row  justify-content-between">
+                                    <div class="col-auto col-md-7">
+                                        <div class="media flex-column flex-sm-row">
+                                            <img class=" img-fluid mb-2" src="/images/{{img1}}" width="62" height="62">
+                                            <div class="media-body  my-auto">
+                                                <div class="row ">
+                                                    <div class="col-auto">
+                                                        <h6 class="mb-0"><b>{{productName}}</b></h6>
+                                                        <small class="text-muted">{{category}}</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class=" pl-0 flex-sm-col col-auto  my-auto">
+                                        <h6 class="">{{quantity}} </h6>
+                                    </div>
+                                    <div class=" pl-0 flex-sm-col col-auto  my-auto ">
+                                        <h6><b>₹ {{bill}}</b></h6>
+                                    </div>
+                                </div>
+                                <hr class="my-2">
+                                {{/each}}
+
+
+
+
+
+                                <div class="row mt-5">
+                                    <div class="col">
+                                        <div class="row justify-content-between">
+                                            <div class="col-4">
+                                                <h6 class="mb-3"><b>Subtotal</b></h6>
+                                            </div>
+                                            <div class="flex-sm-col col-auto">
+                                                <h6 class="mb-3"><b>₹ {{totalBill}}</b></h6>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-between">
+                                            <div class="col-4">
+                                                <h6 class="mb-3"><b id="couponDiscount"></b></h6>
+                                            </div>
+                                            <div class="col-6">
+                                                <h6 class="mb-3" id="couponCode" style="color : green"></h6>
+                                            </div>
+                                            <div class="flex-sm-col col-auto">
+                                                <h6 style=" color : red" class="mb-3"><b id="couponValue"></b></h6>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-between">
+                                            <div class="col">
+                                                <h6 class="mb-3"><b>Shipping</b></h6>
+                                            </div>
+                                            <div class="flex-sm-col col-auto">
+                                                <h6 class="mb-3" style="color: green"><b>Free</b></h6>
+                                            </div>
+                                        </div>
+                                        <hr class="my-0">
+                                        <div class="row justify-content-between">
+                                            <div class="col-3">
+                                                <h6 class="mb-3"></h6>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-between">
+                                            <div class="col-4">
+                                                <h6><b>Total</b></h6>
+                                            </div>
+                                            <div class="flex-sm-col col-auto">
+                                                <h6 class="mb-3"><b id="totalBill">₹ {{totalBill}} </b></h6>
+                                            </div>
+                                            <input type="hidden" name="orderBill" id="totalBillInput" value="{{totalBill}}">
+                                        </div>
+                                        <hr class="my-0">
+                                    </div>
+                                </div>
+
+
+                                <div class="row mb-5 mt-4 ">
+                                    <div class="col-md-7 col-lg-6 p-2"><button id="my_button" type="submit"
+                                            disabled="disabled" class="btn btn-block btn-success btn-lg border-dark"   style="width: 100%;  border-radius:30px;">Confirm
+                                            Order</button></div>
+                                </div>
+                                </form>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{{>foot}}
+
+
+<script>
+
+    var inputElems = document.getElementsByClassName("js-radioInput");
+    for (var i = inputElems.length - 1; i >= 0; --i) {
+        var elem = inputElems[i];
+        elem.onchange = function () {
+            document.getElementById("my_button").removeAttribute("disabled");
+        };
+    }
+
+    $("#checkout-form").submit((e) => {
+        console.log("ajax working")
+        e.preventDefault()
+        $.ajax({
+            url: '/cart/checkout/paymentMode',
+            method: 'post',
+            data: $('#checkout-form').serialize(),
+            success: (response) => {
+                console.log("The response")
+
+                if (response.codSuccess) {
+                    console.log("COD working")
+                    location.replace('/orderRedirect')
+              } 
+            }
+        })
+    })
+    </script>

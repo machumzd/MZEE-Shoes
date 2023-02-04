@@ -4,9 +4,9 @@
   <!-- header section strats -->
   <header class="header_section">
     <nav class="navbar navbar-expand-lg custom_nav-container ">
-      <a class="navbar-brand" href="/user-home">
+      <a class="navbar-brand" href="/user">
         <span>
-          <img src="./images/logo.png" style="max-width:10rem">
+          <img src="/images/logo.png" style="max-width:10rem">
         </span>
       </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -21,7 +21,7 @@
 
             <div class="col-md-12 col-lg-12 col-xl-12">
 
-              <form action="/verify-otp" method="/verify-otp">
+              <form action="/otpVerify" method="/otpVerify">
                 <h1 class="pb-3 font-weight-bold">Enter your Otp</h1>
 
                 <!-- Mobile input -->
@@ -35,7 +35,9 @@
 
                 <h5 class="text-danger text-center">{{message}}</h5>
                 <div class="d-flex justify-content-around align-items-center mb-3">
-                  <h6>Edit your number?<a href="/mobile-otp"> Go back</a></h6>
+                  <h6>Edit your number?<a href="/otp"> Go back</a></h6><br>
+                  <h6>Edit your Email?<a href="/forgotPassword"> Go back</a></h6>
+
                 </div>
 
                 <!-- Submit button -->

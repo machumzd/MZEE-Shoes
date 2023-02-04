@@ -1,0 +1,163 @@
+<section class="h-100 gradient-custom">
+    <div class="container py-5">
+        <div class="row d-flex justify-content-center my-4">
+
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header py-3">
+                        <h5 class="mb-0">Shopping Cart</h5>
+                    </div>
+                    <div class="card-body">
+                        {{#if CartExist}}
+                        <!-- Single item -->
+
+                        {{#each product}}
+                        <div class="row">
+                            <div class="col-lg-3 col-md-12 mb-4 mb-lg-0">
+                                <!-- Image -->
+                                <div class="bg-image hover-overlay hover-zoom ripple rounded"
+                                    data-mdb-ripple-color="light">
+                                    <img src="/productImages/{{this.image}}" alt="Product">
+                                </div>
+                                <!-- Image -->
+                            </div>
+
+                            <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
+                                <!-- Data -->
+                                <p><strong>{{this.name}}<br>{{this.price}}</strong></p>
+
+
+                                <button class="btn  btn-sm mb-2  " onclick="removeCartItem('{{_id}}')" <i
+                                    class="ci-close-circle me-2"></i><span class="fs-sm">Remove</span> </button>
+
+                                <!-- Data -->
+                            </div>
+                            <form action="/proceed-checkout" method="post">
+                                <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                                    <!-- Quantity -->
+                                    <div class="d-flex mb-4" style="max-width: 300px">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="quantity">Quantity</label>
+                                            <input class="form-control" type="number" id="{{this._id}}" min="1"
+                                                name="quantity" pattern="{{this._id}}" max="{{this.stock}}" value="1"
+                                                onchange="validateData('{{_id}}')" />
+                                            <span id="price_text_{{this._id}}">{{this.price}} </span>
+
+                                        </div>
+                                        <div class="form-outline">
+                                            <!-- Price -->
+
+                                            <div class="fs-lg text-accent pt-2 price">
+                                                <div id="get">
+                                                    <p id="actual_price_{{this._id}}" hidden="">{{this.price}}</p>
+
+                                                </div>
+                                            </div>
+                                            <!-- Price -->
+                                        </div>
+                                    </div>
+                                    <!-- Quantity -->
+
+
+                                </div>
+
+                        </div>
+                        <br>
+                        {{/each}}
+                        <!-- Single item -->
+                        {{else}}
+                        <div class="row">
+                            <h5 class="mb-0">Cart Empty</h5>
+                            <h2>Cart Empty</h2>
+                        </div>
+                        {{/if}}
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header py-3">
+                        <h5 class="mb-0">Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li
+                                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                                Subtotal
+                                <h3 id="total" class="fw-normal">{{subtotal}}</h3>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                Tax
+                                <h3 id="tax" class="fw-normal">{{tax}}</h3>
+                            </li>
+                            <li
+                                class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                <div>
+                                    <strong>Total amount</strong>
+                                    <strong>
+                                        <p class="mb-0">(including VAT)</p>
+                                    </strong>
+                                </div>
+                                <h3 id="final" class="fw-normal">{{final}}</h3>
+
+                            </li>
+                        </ul>
+                        {{#unless final}}
+                        <button type="button" class="btn btn-primary btn-lg btn-block  disabled">
+                            Go to checkout
+                        </button>
+                        {{else}}
+                        {{!-- <button type="submit" class="btn btn-dark btn-shadow d-block w-100 mt-4">Proceed to
+                            Checkout</button> --}}
+                        <button type="submit" class="btn btn-dark btn-lg btn-block ">
+                            Go to checkout
+                        </button>
+                        </form>
+                        {{/unless}}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<script>
+
+
+    function validateData(id) {
+        const element = document.getElementById(id)
+        const priceText = document.getElementById('price_text_' + id)
+        const price = document.getElementById('actual_price_' + id)
+        const total = document.getElementById('total')
+        const tax = document.getElementById('tax')
+        const final = document.getElementById("final")
+        if (Number(element.value) > Number(element.max))
+            element.value = element.max
+
+        const rate = priceText.innerHTML
+        priceText.innerHTML = Number(price.innerHTML) * Number(element.value)
+        const diff = Number(priceText.innerHTML) - Number(rate)
+        total.innerHTML = Number(diff) + Number(total.innerHTML)
+        tax.innerHTML = (Number(diff) + Number(total.innerHTML)) * 0.1
+        final.innerHTML = Number(total.innerHTML) + Number(tax.innerHTML)
+    }
+
+    async function proceedTocheckout() {
+        const quantity = Object.values(document.getElementsByName("quantity")).map((item) => (
+            {
+                productid: item.id,
+                quantity: item.value
+            }
+        ))
+
+        let response = await fetch('/proceed-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', },
+            body: JSON.stringify(quantity)
+        });
+        let result = await response.json()
+
+    }
+</script>

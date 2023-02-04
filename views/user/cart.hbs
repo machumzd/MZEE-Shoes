@@ -18,17 +18,15 @@
                   <div class="d-flex justify-content-between align-items-center mb-5">
                     <h1 class="fw-bold mb-0 text-black">Shopping Cart</h1>
 
-                    <h6 class="mb-0 text-muted">{{products.length}} items</h6>
+                    <h6 class="mb-0 text-muted">{{cart.length}} items</h6>
                   </div>
                   <hr class="my-4">
-{{!-- {{#if cart.length===0}}
- <p>No items found </p>
-                  <hr class="my-4">
-                  {{else}} 
-                   --}}
-                 
-                
-{{#each products}}
+                  {{#if cart}}
+
+
+
+
+                  {{#each cart}}
 
                   <div class="row mb-4 d-flex justify-content-between align-items-center">
                     <div class="col-md-2 col-lg-2 col-xl-2">
@@ -36,42 +34,106 @@
                     </div>
                     <div class="col-md-3 col-lg-3 col-xl-3">
                       <h6 class="text-muted">{{category}}</h6>
-                      <a href="/user-home/product?id=<%= cart.items[i].itemId %> " style="text-decoration: none">
+                      <a href="/productView?name={{productName}} " style="text-decoration: none">
                         <h6 class="text-black mb-0">{{productName}}</h6>
                       </a>
                     </div>
+
                     <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                      <form action="/addToCart/cart-operation?id=<%= cart.items[i].itemId %>&sub=true" method="post">
-                        <button class="btn btn-link px-2" type="submit" onclick="">
-                          <i class="fas fa-minus"></i>
-                        </button>
-                      </form>
-                      <input id="form1" min="1" max="5" name="quantity" value="{{quantity}}"
-                        type="text" class="form-control form-control-sm" />
-                      <form action="/addToCart/cart-operation?id=<%= cart.items[i].itemId %>&add=true" method="post">
-                        <button class="btn btn-link px-2" type="submit" onclick="">
-                          <i class="fas fa-plus"></i>
-                        </button>
-                      </form>
+                      <button class="btn btn-link px-2" onclick="stepondown(this, '{{_id}}', '{{price}}')">
+                        <i class="fas fa-minus"></i>
+                      </button>
+                      <input id="form{{_id}}" min="1" max="{{stock}}" name="quantity" value="{{quantity}}" onchange="validateData('{{_id}}')" type="text"
+                        class="form-control form-control-sm" />
+                      <button class="btn btn-link px-2" onclick="steponup(this, '{{_id}}', '{{price}}')">
+                        <i class="fas fa-plus"></i>
+                      </button>
                     </div>
+
+<script>
+
+  function steponup(element, data, price) {
+    const x = element.previousElementSibling.value;
+    if (x < 8) {
+      document.getElementById("form" + data).setAttribute("value", parseInt(x) + 1);
+      document.getElementById("bill"+data).innerHTML = "₹ " + ((parseInt(x) + 1) * price);
+      
+      const id = data;
+      console.log("im in steponup")
+      fetch("/addToCart/operation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          add: "add",
+          price: price,
+          id: id
+        })
+      })
+        .then(response => {
+          console.log("success")
+        })
+    } else {
+      document.getElementById("limitMessage").innerHTML = "You can't add more than 8 items"
+    }
+  }
+
+  function stepondown(element, data, price) {
+    const x = element.nextElementSibling.value;
+    if (x > 0) {
+      element.nextElementSibling.value = parseInt(x) - 1;
+      document.getElementById("bill"+data).innerHTML = "₹ " + ((parseInt(x) - 1) * price);
+      const id = data;
+      console.log("im in steponup")
+      fetch("/addToCart/operation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          sub: "sub",
+          price: price,
+          id: id
+        })
+      })
+        .then(response => {
+          console.log("success")
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    } else {
+      document.getElementById("limitMessage").innerHTML = "You can't add less than 0 items"
+    }
+  }
+
+</script>
+
                     <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                      <h6 class="mb-0 itemPrice" id="price" value="">₹ {{price}}</h6>
+                      <h6 class="mb-0 itemPrice" id="bill{{_id}}" value="">₹ {{bill}}</h6>
                     </div>
                     <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                      <form action="/delete-from-cart?id={{_id}}" method="post">
+                      <form action="/deleteFromCart?id={{_id}}" method="post">
                         <button type="submit" class="text-muted"
                           style="cursor: pointer; background: none;color: inherit;border: none;padding: 0;font: inherit;cursor: pointer;outline: inherit;"><i
                             class="fas fa-times"></i></button>
+
                       </form>
                     </div>
+                    <h8 id="limitMessage" class="ps-5 text-center text-danger"></h8>
                   </div>
                   <hr class="my-4">
-    
-             {{/each}}
-{{!-- {{/if}} --}}
-<h5 class="text-danger text-center">{{message}}</h5>
+
+                  {{/each}}
+                  {{else}}
+                  <p>No items found </p>
+                  <hr class="my-4">
+
+                  {{/if}}
+                  <h5 class="text-danger text-center" id="serverMessage">{{message}}</h5>
                   <div class="pt-5">
-                    <h6 class="mb-0"><a href="/user-home" class="text-body"><i
+                    <h6 class="mb-0"><a href="/user" class="text-body"><i
                           class="fas fa-long-arrow-alt-left me-2"></i>Back to shop</a></h6>
                   </div>
                 </div>
@@ -81,8 +143,8 @@
                   <h3 class="fw-bold mb-5 mt-2 pt-1">Summary</h3>
                   <hr class="my-4">
                   <div class="d-flex justify-content-between mb-4">
-                    <h5 class="text-uppercase">items {{products.length}} </h5>
-                    <h5>₹ {{cartBill}} </h5>
+                    <h5 class="text-uppercase">items {{cart.length}}</h5>
+                    <h5 id="totalBill">₹ {{cartBill}} </h5>
                   </div>
                   <h5 class="text-uppercase mb-3">Shipping</h5>
                   <div class="mb-4 pb-2">
@@ -93,16 +155,16 @@
                   <hr class="my-4">
                   <div class="d-flex justify-content-between mb-5">
                     <h5 class="text-uppercase">Total price</h5>
-                    <h5>₹ <%= cart.bill %> </h5>
+                    <h5>₹ {{cartBill}} </h5>
+                    <input type="hidden" id="totalPrice">
                   </div>
 
-                  {{!-- {{#if (cart.length < 1)}}
-                  <button type="button" disabled class="btn btn-secondary btn-block btn-lg"
-                    data-mdb-ripple-color="dark">Proceed to Checkout</button>
-                  {{else}} --}}
-                  <a href="/cart/checkout"><button type="button" class="btn btn-dark btn-block btn-lg"
-                      data-mdb-ripple-color="dark">Proceed to Checkout</button></a>
-                  
+                  {{!-- {{#if (cart.length < 1)}} <button type="button" disabled
+                    class="btn btn-secondary btn-block btn-lg" data-mdb-ripple-color="dark">Proceed to Checkout</button>
+                    {{else}} --}}
+                    <a href="/cart/checkout"><button type="button" class="btn btn-dark btn-block btn-lg"
+                        data-mdb-ripple-color="dark">Proceed to Checkout</button></a>
+
 
                 </div>
               </div>
@@ -117,3 +179,31 @@
 
 
 {{>foot}}
+
+
+{{!--
+<script>
+  function stepondown() {
+    var x = document.getElementById("form1").value;
+    if (x > 1) {
+      document.getElementById("form1").value = x - 1;
+    }
+  }
+
+  function steponup() {
+    var x = document.getElementById("form1").value;
+    if (x < 5) {
+      document.getElementById("form1").value = parseInt(x) + 1;
+    }
+  }
+</script> --}}
+<script>
+window.onload = function() {
+    var msg = document.getElementById("serverMessage");
+    if (msg.innerHTML !== "") {
+      setTimeout(function() {
+        msg.style.display = "none";
+      }, 2000); // 3000 milliseconds = 3 seconds
+    }
+  };
+</script>

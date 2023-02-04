@@ -8,7 +8,7 @@
 
 
 
-      <form class=" d-flex flex-row justify-content-end mt-5" action="/admin-panel/user/search" method="post">
+      <form class=" d-flex flex-row justify-content-end mt-5" action="/admin/users/search" method="post">
         <input type="text" name="search" class="form-control w-25" placeholder="Search">
         <input type="submit" class="btn ms-2 btn-dark" value="submit">
       </form>
@@ -36,16 +36,14 @@
             <td>{{email}}</td>
             <td>{{mobile}}</td>
             <td>
-              <a href="/admin-panel/user/edit?id={{_id}}" class="btn btn-primary">Edit</a>
-              <a onclick="return confirm('Are you sure you want to Delete {{name}}')"
-                href="/admin-panel/user/delete?id={{_id}}" class="btn btn-danger">Delete</a>
+              <a href="/admin/users/edit?id={{_id}}" class="btn btn-primary">Edit</a>
+              {{!-- <a onclick="Deleteuser('{{_id}}')" data-bs-toggle="modal" data-bs-target="#deleteuserBut" class="btn btn-danger">Delete</a> --}}
 
               {{#if blockStatus}}
-              <a onclick="return confirm('Are you sure you want to Unblock {{name}}')"
-                href="/admin-panel/user/unblock?id={{_id}}" class="btn btn-success">unBlock</a>
+              <a onclick="unBlock('{{_id}}')" data-bs-toggle="modal" data-bs-target="#unblockBut" class="btn btn-success">unBlock</a>
               {{else}}
-              <a onclick="return confirm('Are you sure you want to Block {{name}}')"
-                href="/admin-panel/user/block?id={{_id}}" class="btn btn-danger">Block</a>
+              <a onclick="Block('{{_id}}')" data-bs-toggle="modal" data-bs-target="#blockBut"
+                class="btn btn-danger">Block</a>
               {{/if}}
             </td>
           </tr>
@@ -57,3 +55,182 @@
 </div>
 
 {{>foot}}
+
+
+<div class="modal fade" id="blockBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Block</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to Block this user?
+        <input type="hidden" id="blockID">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+        <button class="btn btn-danger mt-1 mb-1" onclick='return confirmBlock()' id="block-Button">Block</button>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  function Block(data) {
+    document.getElementById('blockID').value = data
+  }
+  function confirmBlock() {
+    const id = document.getElementById("blockID").value
+    console.log(id)
+    fetch("/admin/users/block", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    })
+      .then(response => {
+        $('#blockBut').modal('hide')
+        console.log(response)
+      })
+
+      .then(data => {
+        location.reload()
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+</script>
+
+
+{{!-- //unBlock --}}
+
+
+
+
+<div class="modal fade" id="unblockBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">UnBlock</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to UnBlock this user?
+        <input type="hidden" id="unblockID">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+        <button class="btn btn-success mt-1 mb-1" onclick='return confirmunBlock()' id="unblock-Button">UnBlock</button>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  function unBlock(data) {
+    document.getElementById('unblockID').value = data
+  }
+  function confirmunBlock() {
+    const id = document.getElementById("unblockID").value
+    console.log(id)
+    fetch("/admin/users/unblock", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    })
+      .then(response => {
+        $('#unblockBut').modal('hide')
+        console.log(response)
+      })
+
+      .then(data => {
+        location.reload()
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+</script>
+
+
+{{!-- 
+delete --}}
+
+
+
+{{!-- 
+<div class="modal fade" id="deleteuserBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to Delete this user?
+        <input type="hidden" id="deleteuserID">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+        <button class="btn btn-danger mt-1 mb-1" onclick='return confirmDeleteuser()' id="deleteuser-Button">Delete</button>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  function Deleteuser(data) {
+    document.getElementById('deleteuserID').value = data
+  }
+  function confirmDeleteuser() {
+    const id = document.getElementById("deleteuserID").value
+    console.log(id)
+    fetch("/admin/users/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    })
+      .then(response => {
+        $('#deleteuserBut').modal('hide')
+        console.log(response)
+      })
+
+      .then(data => {
+        location.reload()
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+</script> --}}

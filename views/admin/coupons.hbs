@@ -1,0 +1,151 @@
+{{>adminNav}}
+
+<section class="h-100 h-custom" style="background-color: #ffff;">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 border-0 mt-5">
+                <div class="card card-registration card-registration-2 border-0">
+                    <div class="card-body p-0">
+                        <div class="row g-0">
+                            <div class="col-lg-8">
+                                <div class="p-5">
+                                    <div class="d-flex justify-content-between align-items-center mb-5">
+                                        <h1 class="mb-0 text-black">Coupons</h1>
+                                        <h5 class="text-danger text-center ">{{message}}</h5>
+                                        <h6 class="mb-0 text-muted">{{coupon.length}} Coupons </h6>
+                                    </div>
+
+                                    <div
+                                        class="row mb-4 d-flex justify-content-between align-items-center table-responsive">
+                                        <table id="myTable" class="table table-striped" style="width:100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>Sl No</th>
+                                                    <th>Coupon Code</th>
+                                                    <th>Coupon Value</th>
+                                                    <th>Min bill</th>
+                                                    <th>Coupon Expiry</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+
+                                                {{#each coupon}}
+                                                <tr>
+                                                    <td>{{counter @index}}</td>
+                                                    <td>{{code}}</td>
+                                                    <td>{{value}}</td>
+                                                    <td>{{minBill}}</td>
+                                             <td>{{formatDate expiryDate}}</td>
+                                                        {{#ifeq status "Active"}}
+                                                    <td class="text-success">{{status}}</td>
+                                                    {{else}}
+                                                    <td class="text-danger">{{status}}</td>
+                                                    {{/ifeq}}
+                                                    <td>
+                                                        <a href="/admin/coupon/edit?id={{_id}}"
+                                                            class="btn btn-success">Edit</a>
+                                                        <a href="/admin/coupon/delete?id={{_id}}"
+                                                            class="btn btn-danger">Delete</a>
+                                                    </td>
+                                                </tr>
+                                                {{/each}}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <hr class="my-4">
+
+
+                                    <!-- <div class="pt-5">
+                      <h6 class="mb-0"><a href="/user_home" class="text-body"><i
+                            class="fas fa-long-arrow-alt-left me-2"></i>Back to shop</a></h6>
+                    </div> -->
+                                </div>
+                            </div>
+                            <div class="col-lg-4 bg-grey">
+                                <div class="p-5">
+                                    <h1 class="mb-5 mt-2 pt-1">Add Coupon</h1>
+
+
+                                    <div class="mb-3">
+                                        <div class="form-outline">
+                                            {{#if couponEdit}}
+
+                                            <form action="/admin/coupon/update?id={{couponEdit._id}}" method="post">
+                                                <input name="couponCode" value="{{couponEdit.code}}"
+                                                    style="border: 1px solid black" type="text" id="form3Examplea2"
+                                                    class="form-control form-control-lg mt-0" required />
+
+                                                <input name="couponValue" value="{{couponEdit.value}}"
+                                                    style="border: 1px solid black" type="number" min="1" max="100" id="form3Examplea2"
+                                                    class="form-control form-control-lg mt-3" required />
+
+                                                <input name="minBill" value="{{couponEdit.minBill}}"
+                                                    style="border: 1px solid black" type="text" id="form3Examplea2"
+                                                    class="form-control form-control-lg mt-3" required />
+
+
+                                                <label class="mt-3">{{formatDate couponEdit.expiryDate}}</label> 
+                                                <input name="couponExpiry"  style="border: 1px
+                                                solid black" type="date" id="form3Examplea2" class="form-control
+                                                form-control-lg  mb-3" required/>
+
+                                                <div class="form-outline " style="text-align: center">
+
+                                                    <button type="submit"
+                                                        class="btn btn-warning btn-lg btn-block w-100 border-dark">Update</button>
+                                                </div>
+                                            </form>
+                                            {{else}}
+                                            <form action="/admin/coupons/add" method="post">
+                                                <input name="couponCode" style="border: 1px solid black"
+                                                    placeholder="coupon code" type="text" id="form3Examplea2"
+                                                    class="form-control form-control-lg " required />
+
+                                                <input name="couponValue" style="border: 1px solid black"
+                                                    placeholder="coupon value" type="text" id="form3Examplea2"
+                                                    class="form-control form-control-lg mt-3" required />
+
+                                                <input name="minBill" style="border: 1px solid black" type="text"
+                                                    placeholder="min Bill" id="form3Examplea2"
+                                                    class="form-control form-control-lg mt-3" required />
+
+                                                <input name="couponExpiry" style="border: 1px solid black" type="date"
+                                                    placeholder="expiry date" id="form3Examplea2"
+                                                    class="form-control form-control-lg mt-3 mb-3" required />
+
+
+                                                <div class="form-outline " style="text-align: center">
+
+                                                    <button type="submit"
+                                                        class="btn btn-primary btn-lg btn-block w-100 border-dark">Add+</button>
+                                                </div>
+                                            </form>
+                                            {{/if}}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</section>
+
+
+<script>
+    $(document).ready(function () {
+        $('#myTable').DataTable({
+            "pageLength": 5
+        });
+    });
+</script>
+
+{{>foot}}

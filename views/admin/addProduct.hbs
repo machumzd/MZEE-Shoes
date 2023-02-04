@@ -7,7 +7,7 @@
 
             <div class="col-md-6 col-lg-6 col-xl-6 offset-xl-1">
 
-                <form action="/admin-product/add" method="post" enctype="multipart/form-data">
+                <form action="/admin/products/add" method="post" enctype="multipart/form-data">
                     <h1 class="pb-3 font-weight-bold">Add Product</h1>
 
                     <div class="form-outline mb-4">
@@ -31,6 +31,7 @@
                             placeholder="stock" />
 
                     </div>
+
                     <div class="form-outline mb-4">
                         <select name="category" class="form-control form-control-lg border-dark" id="cars">
                             <option>choose the category</option>
@@ -38,6 +39,12 @@
                             <option value={{category}}>{{category}}</option>
                             {{/each}}
                         </select>
+                    </div>
+                
+                 <div class="form-outline mb-4">
+                        <input type="text" id="bgColor" name="bgcolor" class="form-control form-control-lg border-dark"
+                            placeholder="background color" />
+
                     </div>
 
                     <div class="form-outline mb-4">
@@ -52,7 +59,7 @@
                     </div>
 
                     <div class="d-flex justify-content-around align-items-center mb-3">
-                        <h6>Want to go back<a href="/admin-product"> click here</a></h6>
+                        <h6>Want to go back<a href="/admin/products"> click here</a></h6>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-lg btn-block w-100 border-dark">Add

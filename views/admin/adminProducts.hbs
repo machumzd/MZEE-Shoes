@@ -5,22 +5,21 @@
   <div class="container h-75">
     <div class="row d-flex align-items-center justify-content-center h-100">
 
-     
- <div class="col-md-3 col-lg-6 col-xl-12">
 
-     <h1 class="">Products</h1>
-         <h5 class="text-danger text-center ">{{adminMessage}}</h5>
-          <a href="/admin-product/add" class="btn btn-primary mb-3">Add Product</a>
-        <form class=" d-flex flex-row justify-content-end mt-5" action="/admin-product/search"
-          method="post">
+      <div class="col-md-3 col-lg-6 col-xl-12">
+
+        <h1 class="">Products</h1>
+        <h5 class="text-danger text-center ">{{adminMessage}}</h5>
+        <a href="/admin/products/add" class="btn btn-primary mb-3">Add Product</a>
+        <form class=" d-flex flex-row justify-content-end mt-5" action="/admin/products/search" method="post">
           <input type="text" name="productsearch" class="form-control w-25" placeholder="Search">
           <input type="submit" class="btn ms-2 btn-dark" value="submit">
         </form>
 
-    
+
 
         <table class="table">
-         
+
           <thead>
 
             <tr>
@@ -45,25 +44,81 @@
               <td ">{{description}}</td>
                <td>{{stock}}</td>
                 <td>{{category}}</td>
-                 <td><img src="./images/{{img1}}" class="img-fluid" style="max-width:5rem;height:auto"></td>
-                  <td><img src="./images/{{img2}}" class="img-fluid" style="max-width:5rem;height:auto"></td>
+
+                 <td><img src=" /images/{{img1}}" class="img-fluid" style="max-width:5rem;height:auto"></td>
+              <td><img src="/images/{{img2}}" class="img-fluid" style="max-width:5rem;height:auto"></td>
               <td>
-                <a href="/admin-product/edit?id={{_id}}" class=" mt-1 btn btn-primary">Edit</a>
-                <a onclick="return confirm('Are you sure you want to Delete {{name}}')"
-                  href="/admin-product/delete?id={{_id}}" class="mt-1 btn btn-danger">Delete</a>
+
+                <a href="/admin/products/edit?id={{_id}}" class=" mt-1 btn btn-primary">Edit</a>
+               
+               
+                <a onclick="Delete('{{_id}}')" data-bs-toggle="modal" data-bs-target="#deleteBut"
+                  class="mt-1 btn btn-danger">Delete</a>
+
+                  
               </td>
             </tr>
             {{/each}}
           </tbody>
         </table>
-
-
-
-
-
       </div>
     </div>
   </div>
 </section>
 
 {{>foot}}
+
+<div class="modal fade" id="deleteBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to Delete this order?
+        <input type="hidden" id="deleteID">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+        <button class="btn btn-danger mt-1 mb-1" onclick='return confirmDelete()' id="delete-Button">Delete</button>
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  function Delete(data) {
+    document.getElementById('deleteID').value = data
+  }
+  function confirmDelete() {
+    const id = document.getElementById("deleteID").value
+    console.log(id)
+    fetch("/admin/products/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    })
+      .then(response => {
+        $('#deleteBut').modal('hide')
+        console.log(response)
+      })
+
+      .then(data => {
+        location.reload()
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+</script>

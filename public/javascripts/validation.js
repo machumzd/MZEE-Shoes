@@ -6,7 +6,7 @@ function printError(elemId, hintMsg) {
   //signup 
 
   function signupValidate() {
-    console.log("validation started")
+    console.log("validation 4started")
     var name = document.getElementById("name").value;
     var password = document.getElementById("password").value;
     var email = document.getElementById("email").value;
@@ -54,9 +54,10 @@ function printError(elemId, hintMsg) {
 
 
 
-///login
+//login
 
   function loginValidate() {
+    console.log("login validate")
     let email = document.getElementById("lEmail").value;
     let password = document.getElementById("lPassword").value;
   

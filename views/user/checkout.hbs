@@ -1,0 +1,138 @@
+{{>head}}
+
+{{#if userData}}
+{{>userNavLogged}}
+{{else}}
+{{>userNav}}
+{{/if}}
+
+<div class=" container-fluid my-5 ">
+    <div class="row justify-content-center ">
+        <div class="col-xl-10">
+            <div class="card shadow-lg ">
+                <div class="row p-2 mt-3 justify-content-between mx-sm-2">
+                </div>
+                <div class="row justify-content-around">
+                    <div class="col-md-5">
+                        <div class="card border-0">
+                            <div class="card-header pb-0">
+                                <h2 class="card-title space ">Checkout</h2>
+                                <p class="card-text text-muted mt-4  space">SHIPPING DETAILS</p>
+                                <hr class="my-0">
+                                <div class="">
+                                    <p class="card-text text-muted mt-4 mb-2  space">SELECT DELIVERY ADDRESS</p>
+                                </div>
+                                <form action="/cart/checkout/payment" method="post" class="">
+
+                                    {{#each address}}
+                                    <div class="form-check mt-3">
+                                        <input type="radio" class="form-check-input js-radioInput" id="radio1"
+                                            name="selectedAddressIndex" onclick="" value="{{_id}}">
+                                        <p class="display-address">{{name}}</p>
+                                        <p class="display-address">{{address1}},{{address2}}</p>
+                                        <p class="display-address">{{city}},{{state}}</p>
+                                        <p class="display-address">{{mobile}}</p>
+                                        <p class="display-address">{{zip}}</p>
+                                        <label class="form-check-label" for="radio1"></label>
+                                    </div>
+                                    {{/each}}
+
+                                    <a href="/profile?add=true" style="text-decoration: none; color: green;">
+                                        <p>Add a new address</p>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 mt-4">
+                        <div class="card border-0 ">
+                            <div class="card-header card-2">
+                                <p class="card-text text-muted mt-md-4 space">ORDER SUMMARY </p>
+                                <hr class="my-2">
+                            </div>
+                            <div class="card-body pt-0">
+
+                                {{#each cart}}
+                                <div class="row  justify-content-between">
+                                    <div class="col-auto col-md-7">
+                                        <div class="media flex-column flex-sm-row">
+                                            <img class=" img-fluid mb-2" src="/images/{{img1}} " width="62" height="62">
+                                            <div class="media-body  my-auto">
+                                                <div class="row ">
+                                                    <div class="col-auto">
+                                                        <h6 class="mb-0"><b>
+                                                                {{productName}}
+                                                            </b></h6>
+                                                        <small class="text-muted">
+                                                            {{category}}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class=" pl-0 flex-sm-col col-auto  my-auto">
+                                        <h6 class="">
+                                            {{quantity}}
+                                        </h6>
+                                    </div>
+                                    <div class=" pl-0 flex-sm-col col-auto  my-auto ">
+                                        <h6><b>₹ {{bill}} </b></h6>
+                                    </div>
+                                </div>
+                                <hr class="my-2">
+                                {{/each}}
+
+                                <div class="row mt-5">
+                                    <div class="col">
+                                        <div class="row justify-content-between">
+                                            <div class="col-4">
+                                                <h6 class="mb-3"><b>Subtotal</b></h6>
+                                            </div>
+                                            <div class="flex-sm-col col-auto">
+                                                <h6 class="mb-3"><b>₹ {{totalBill}} </b></h6>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-between">
+                                            <div class="col">
+                                                <h6 class="mb-3"><b>Shipping</b></h6>
+                                            </div>
+                                            <div class="flex-sm-col col-auto">
+                                                <h6 class="mb-3" style="color: green"><b>Free</b></h6>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-between">
+                                            <div class="col-4">
+                                                <h6><b>Total</b></h6>
+                                            </div>
+                                            <div class="flex-sm-col col-auto">
+                                                <h6 class="mb-3"><b>₹ {{totalBill}}</b></h6>
+                                            </div>
+                                        </div>
+                                        <hr class="my-0">
+                                    </div>
+                                </div>
+                                <div class="row mb-5 mt-4 ">
+                                    <div class="col-md-7 col-lg-6"><button id="my_button" type="submit"
+                                            disabled="disabled" value="submit" name="submit"
+                                            class="btn btn-primary btn-block btn-lg border-dark" style="width: 100%;  border-radius:30px;">Proceed to Payment</button>
+                                    </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{>foot}}
+<script>
+    var inputElems = document.getElementsByClassName("js-radioInput");
+    for (var i = inputElems.length - 1; i >= 0; --i) {
+        var elem = inputElems[i];
+        elem.onchange = function () {
+            document.getElementById("my_button").removeAttribute("disabled");
+        };
+    }
+</script>

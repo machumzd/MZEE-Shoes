@@ -1,6 +1,5 @@
-const { nextTick } = require("process");
 const twilio = require("twilio");
-const config = require("../../config/config");
+const config = require("../config/config");
 const Admin = require("../model/adminModel");
 const User = require("../model/userModel");
 const Category = require("../model/categoryModel");
@@ -11,7 +10,11 @@ const Address = require("../model/addressModel");
 const Cart = require("../model/cartModel");
 const { Error } = require("mongoose");
 const nodemailer = require("nodemailer");
-const { validateExpressRequest } = require("twilio/lib");
+const Order = require("../model/orderModel");
+const Coupon = require("../model/couponModel");
+const { log } = require("console");
+const { response } = require("express");
+
 //otp purpose
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -28,7 +31,16 @@ const securePassword = async (password) => {
 };
 
 exports.why = (req, res) => {
-  res.render("user/why");
+  const userData = req.session.userData;
+  getCategory().then((categories) => {
+    if (userData) {
+      getCarts(userData._id).then((carts) => {
+        res.render("user/why", { categories, userData, cart: carts });
+      });
+    } else {
+      res.render("user/why", { categories, userData });
+    }
+  });
 };
 
 //for signup extra otp
@@ -77,12 +89,22 @@ const getProducts = function () {
   });
 };
 
-const getAddress = function () {
+const getCarts = function (id) {
   return new Promise((res, rej) => {
-    console.log("this side have error");
+    Cart.find({ owner: id })
+      .then((carts) => {
+        res(carts);
+      })
+      .catch(() => {
+        const error = new Error("could not find Cart");
+        rej(error);
+      });
+  });
+};
 
-    console.log("its passed");
-    Address.find()
+const getAddress = function (id) {
+  return new Promise((res, rej) => {
+    Address.find({ owner: id })
       .then((address) => {
         res(address);
       })
@@ -136,7 +158,7 @@ exports.signUpCheck = async (req, res) => {
 //sign in
 exports.userSignin = (req, res) => {
   if (req.session.user) {
-    res.redirect("/user-home");
+    res.redirect("/user");
   } else {
     res.render("user/login");
   }
@@ -167,11 +189,11 @@ exports.signIn = async (req, res) => {
 
       req.session.userData = user;
       req.session.user = true;
-      res.redirect("/user-home");
+      res.redirect("/user");
     }
   } catch (err) {
     req.session.user = false;
-    res.render("user/login", { message: err.message });
+    res.render("/login", { message: err.message });
   }
 };
 
@@ -179,10 +201,14 @@ exports.userHome = (req, res) => {
   getCategory().then((categories) => {
     getProducts().then((products) => {
       if (req.session.user) {
-        res.render("user/index", {
-          userData: req.session.userData,
-          categories: categories,
-          products: products,
+        userData = req.session.userData;
+        getCarts(userData._id).then((carts) => {
+          res.render("user/index", {
+            userData: userData,
+            cart: carts,
+            categories: categories,
+            products: products,
+          });
         });
         console.log("login success");
       } else {
@@ -199,13 +225,13 @@ exports.userLoggedIn = (req, res, next) => {
   if (req.session.user) {
     next();
   } else {
-    res.redirect("/user-login");
+    res.redirect("/login");
   }
 };
 exports.userLogout = (req, res) => {
   req.session.user = false;
   req.session.destroy();
-  res.redirect("/user-home");
+  res.redirect("/user");
 };
 
 exports.mobileOtp = (req, res) => {
@@ -215,16 +241,17 @@ exports.mobileOtp = (req, res) => {
 exports.sendOtp = (req, res) => {
   mobile = req.body.mobile;
   if (mobile.length == 10 && mobile != "") {
-    User.findOne({ mobile: mobile }).then((result) => {
-      sendOTP(mobile, result.token)
-        .then(() => {
-          req.session.verifypage = true;
-          res.render("user/otpVerify");
-        })
-        .catch((error) => console.log(error));
-    });
+    const OTP = generateOTP();
+    sendOTP(mobile, OTP);
+    User.updateOne({ mobile: mobile }, { $set: { token: OTP } })
+
+      .then(() => {
+        req.session.verifypage = true;
+        res.render("user/otpVerify");
+      })
+      .catch((error) => console.log(error));
   } else {
-    let message = "fields cannot empty";
+    const message = "fields cannot empty";
     res.render("user/mobileOtp", { message: message });
   }
 };
@@ -253,7 +280,7 @@ exports.verifyOtp = (req, res) => {
             if (userData) {
               req.session.userData = userData;
               req.session.user = true;
-              res.redirect("/user-home");
+              res.redirect("/user");
               resolve();
             } else {
               res.render("user/otpVerify", {
@@ -269,18 +296,18 @@ exports.verifyOtp = (req, res) => {
       }
     } else {
       if (req.session.verifypage) {
+        console.log("in verify page");
         const otp = req.query.otp;
         User.findOne({ token: otp })
           .then((result) => {
             if (result) {
-              console.log("user irikk");
               if (req.session.changePassword) {
-                console.log("password match sir");
+                console.log("in change password");
                 res.render("user/changePassword");
               } else {
                 req.session.userData = result;
                 req.session.user = true;
-                res.redirect("/user-home");
+                res.redirect("/user");
                 resolve();
               }
             } else {
@@ -307,14 +334,18 @@ exports.displayCategory = (req, res) => {
       console.log("message from products" + products);
       getCategory()
         .then((categories) => {
-          console.log("message after get category" + products);
-          res.render("user/shop.hbs", {
-            products,
-            categoryName: category,
-            userData: req.session.userData,
-            categories: categories,
+          const userData = req.session.userData;
+          getCarts(userData._id).then((carts) => {
+            res.render("user/shop.hbs", {
+              products,
+              cart: carts,
+              categoryName: category,
+              userData: userData,
+              categories: categories,
+            });
           });
         })
+
         .catch((err) => {
           console.log("error from products" + err);
         });
@@ -365,24 +396,30 @@ exports.proSearch = (req, res) => {
 
 exports.productView = (req, res) => {
   const id = req.query.id;
+  const name = req.query.name;
   console.log("this is id:" + req.query.id);
-  Product.findOne({ _id: id })
-    .then((productDetails) => {
-      getCategory()
-        .then((categories) => {
+  Product.findOne({ $or: [{ _id: id }, { productName: name }] }).then(
+    (productDetails) => {
+      getCategory().then((categories) => {
+        if (req.session.userData) {
+          getCarts(req.session.userData._id).then((carts) => {
+            res.render("user/productView", {
+              categories: categories,
+              cart: carts,
+              userData: req.session.userData,
+              product: productDetails,
+            });
+          });
+        } else {
           res.render("user/productView", {
             categories: categories,
             userData: req.session.userData,
             product: productDetails,
           });
-        })
-        .catch((err) => {
-          console.log("getCategory not found" + err);
-        });
-    })
-    .catch((err) => {
-      console.log("product details not found" + err);
-    });
+        }
+      });
+    }
+  );
 };
 
 exports.userProfile = (req, res) => {
@@ -456,11 +493,11 @@ exports.userAddress = (req, res) => {
     .save()
     .then((address) => {
       req.session.address = address;
-      let message = "Address Added Successfully";
+      const message = "Address Added Successfully";
       req.session.successMessage = message;
       req.session.errorMessage = "";
       req.query.add = false;
-      res.redirect("/user-profile");
+      res.redirect("/profile");
     })
     .catch((err) => {
       console.log(" new address error" + err);
@@ -485,10 +522,10 @@ exports.uploadAddress = (req, res) => {
   )
     .then(() => {
       req.query.edit = false;
-      let message = "Address Updated Successfully";
+      const message = "Address Updated Successfully";
       req.session.successMessage = message;
       req.session.errorMessage = "";
-      res.redirect("/user-profile");
+      res.redirect("/profile");
     })
     .catch((err) => {
       console.log("error in address updation section" + err);
@@ -506,17 +543,17 @@ exports.changePassword = (req, res) => {
       User.findOne({ _id: id })
         .then((user) => {
           if (!user) {
-            let message = "Password is incorrect";
+            const message = "Password is incorrect";
             req.session.errorMessage = message;
           }
           return bcrypt
             .compare(req.body.currPass, user.password)
             .then((passwordMatch) => {
               if (!passwordMatch) {
-                let message = "Previous Password is Incorrect";
+                const message = "Previous Password is Incorrect";
                 req.session.errorMessage = message;
                 req.session.successMessage = "";
-                res.redirect("/user-profile?passEdit=true");
+                res.redirect("/profile?passEdit=true");
               } else {
                 securePassword(req.body.newPass)
                   .then((passwordHash) => {
@@ -530,11 +567,11 @@ exports.changePassword = (req, res) => {
                     )
                       .then(() => {
                         req.query.passEdit = false;
-                        let message = "Password changed Successfully";
+                        const message = "Password changed Successfully";
                         req.session.user = true;
                         req.session.successMessage = message;
                         req.session.errorMessage = "";
-                        res.redirect("/user-profile");
+                        res.redirect("/profile");
                       })
                       .catch((err) => {
                         console.log("user couldn't update" + err);
@@ -553,16 +590,16 @@ exports.changePassword = (req, res) => {
           console.log("cannot get user" + err);
         });
     } else {
-      let message = "Passwords are not match";
+      const message = "Passwords are not match";
       req.session.errorMessage = message;
       req.session.successMessage = "";
-      res.redirect("/user-profile?passEdit=true");
+      res.redirect("/profile?passEdit=true");
     }
   } else {
-    let message = "password and fields dont be blank";
+    const message = "password and fields dont be blank";
     req.session.errorMessage = message;
     req.session.successMessage = "";
-    res.redirect("/user-profile?passEdit=true");
+    res.redirect("/profile?passEdit=true");
   }
 };
 
@@ -597,21 +634,21 @@ exports.uploadUser = (req, res) => {
             }
           )
             .then((result) => {
-              let message =
+              const message =
                 "Profile edited Successfully,(reflects madeby after login)";
               req.session.userData = result;
               req.session.successMessage = message;
               req.session.errorMessage = "";
-              res.redirect("/user-profile");
+              res.redirect("/profile");
             })
             .catch((err) => {
               console.log("profile can't updated" + err);
             });
         } else {
-          let message = "Credintial's will be aldready Taken";
+          const message = "Credintial's will be aldready Taken";
           req.session.errorMessage = message;
           req.session.successMessage = "";
-          res.redirect("/user-profile?userEdit=true");
+          res.redirect("/profile?userEdit=true");
         }
       })
       .catch((err) => {
@@ -619,37 +656,35 @@ exports.uploadUser = (req, res) => {
       });
   }
 };
-//////////
+
+//cart
 exports.cart = (req, res) => {
   const userData = req.session.userData;
   const id = req.query.id;
   const cartMessage = req.session.cartMessage;
   getCategory().then((categories) => {
-    Cart.find({ owner: id })
-      .then((carts) => {
-        console.log(carts);
-        let cartQuantity = carts.map((cart) =>
-          Cart.findOne({ quantity: cart.quantity })
-        );
-        let productsPromise = carts.map((cart) =>
-          Product.findOne({ _id: cart.product })
-        );
-        console.log("ithannn ath" + productsPromise);
-        console.log("cart quantity" + cartQuantity);
-        return Promise.all(productsPromise);
-      })
-
-      .then((products) => {
+    Cart.find({ owner: id }).then((cart) => {
+      if (cart.length == 0 || !cart) {
         res.render("user/cart", {
-          products,
+          cart,
           categories,
+          cartBill: 0,
           userData,
           message: cartMessage,
         });
-      })
-      .catch((err) => {
-        console.log("couldnt find cart" + err);
-      });
+      } else {
+        getTotalSum(id).then((result) => {
+          req.session.cartBill = result;
+          res.render("user/cart", {
+            cart,
+            categories,
+            cartBill: result,
+            userData,
+            message: cartMessage,
+          });
+        });
+      }
+    });
   });
 };
 
@@ -662,32 +697,39 @@ exports.addToCart = (req, res) => {
     Product.findOne({
       _id: id,
     }).then((result) => {
-      Cart.findOne({ product: result._id }).then((cart) => {
+      Cart.findOne({ productName: result.productName }).then((cart) => {
         if (!cart) {
           const cartAdd = new Cart({
             owner: userData._id,
-            product: result._id,
+            productId: result._id,
+            productName: result.productName,
+            price: result.price,
+            category: result.category,
             quantity: 1,
+            bill: result.price,
+            img1: result.img1,
+            orderStatus: "pending",
           });
           cartAdd
             .save()
-            .then(() => {
+            .then((cartData) => {
               res.redirect(`/productView?id=${result._id}`);
             })
             .catch((err) => {
               console.log("cannot get cart" + err);
             });
         } else {
-          Cart.updateOne({ _id: cart._id }, { $inc: { quantity: 1 } }).then(
-            () => {
-              res.redirect(`/productView?id=${result._id}`);
-            }
-          );
+          Cart.updateOne(
+            { _id: cart._id },
+            { $inc: { quantity: 1, bill: result.price } }
+          ).then((updatedCart) => {
+            res.redirect(`/productView?id=${result._id}`);
+          });
         }
       });
     });
   } else {
-    res.redirect("/user-login");
+    res.redirect("/login");
   }
 };
 
@@ -695,11 +737,11 @@ exports.deleteCart = (req, res) => {
   const userData = req.session.userData;
   const id = req.query.id;
   console.log("the id is " + req.query.id);
-  Cart.deleteOne({ product: id })
+  Cart.deleteOne({ _id: id })
     .then((result) => {
-      let message = "cart deleted Successfully";
+      const message = "cart deleted Successfully";
       req.session.cartMessage = message;
-      res.redirect(`user-home/cart?id=${userData._id}`);
+      res.redirect(`cart?id=${userData._id}`);
     })
     .catch((err) => {
       console.log("cant delete" + err);
@@ -708,11 +750,12 @@ exports.deleteCart = (req, res) => {
 
 exports.emailOtp = (req, res) => {
   const enteredEmail = req.body.email;
+  const OTP = generateOTP();
   if (enteredEmail != "") {
-    User.findOne({ email: enteredEmail })
+    User.findOneAndUpdate({ email: enteredEmail }, { $set: { token: OTP } })
       .then((result) => {
         if (result) {
-          req.session.userId=result._id
+          req.session.userId = result._id;
           const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -724,7 +767,7 @@ exports.emailOtp = (req, res) => {
             from: "mzeeshoes.com",
             to: enteredEmail,
             subject: "Mzee-Shoes OTP VERIFICATION",
-            text: `DO NOT SHARE: Your Mzee OTP is ${result.token}.`,
+            text: `DO NOT SHARE: Your Mzee OTP is ${OTP}.`,
           };
 
           transporter
@@ -745,9 +788,10 @@ exports.emailOtp = (req, res) => {
       .catch((err) => {
         console.log("user not found" + err);
       });
-  }else{
-    res.render("user/emailOtp", { message: "fields dont be blank" });
-   
+  } else if (enteredEmail == "") {
+    res.render("user/emailOtp", { message: "fields are not be null" });
+  } else {
+    res.render("user/emailOtp", { message: "incorrect credintials" });
   }
 };
 
@@ -758,12 +802,8 @@ exports.sendEmailOtp = (req, res) => {
 exports.verifyPassword = (req, res) => {
   console.log("in verify pass");
   const password = req.body.password;
-
   const cPassword = req.body.cPassword;
-  console.log("in verify pass11"+password);
-  console.log("in verify pass22"+cPassword);
   const id = req.session.userId;
-  console.log("this is "+id)
   if (password != "" && cPassword != "") {
     if (password == cPassword) {
       securePassword(password)
@@ -778,8 +818,8 @@ exports.verifyPassword = (req, res) => {
           )
             .then(() => {
               console.log("to user login");
-              req.session.user=false  
-              res.redirect("/user-login");
+              req.session.user = false;
+              res.redirect("/login");
             })
             .catch((err) => {
               console.log("coudnt update the user" + err);
@@ -791,15 +831,287 @@ exports.verifyPassword = (req, res) => {
     } else {
       req.session.changePassword = true;
       req.session.verifypage = true;
-      res.render("user/verifyOtp",{message:"the passwords are not match"});
+      res.render("user/verifyOtp", { message: "the passwords are not match" });
     }
+  }
+};
+
+exports.cartOperation = (req, res) => {
+  console.log("----------------------im in operation");
+  const userData = req.session.userData;
+  req.session.cartMessage = "";
+
+  Cart.findOne({ owner: userData._id })
+    .then((cart) => {
+      if (!cart) {
+        return res.redirect(`/cart?id=${userData._id}`);
+      } else {
+        if (req.body.add) {
+          console.log("req body=-------" + req.body.id);
+          const id = req.body.id;
+          const price = parseInt(req.body.price);
+          Cart.findOneAndUpdate(
+            {
+              _id: id,
+            },
+            {
+              $inc: {
+                quantity: 1,
+                bill: price,
+              },
+            },
+            { new: true }
+          ).then((response) => {
+            res.json(response);
+            // return res.redirect(`/cart?id=${userData._id}`);
+          });
+        }
+
+        if (req.body.sub) {
+          const id = req.body.id;
+          const price = req.body.price;
+          Cart.findOneAndUpdate(
+            { _id: id },
+            {
+              $inc: { quantity: -1, bill: -price },
+            }
+          ).then(() => {
+            res.json(response);
+          });
+        }
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      return res.status(500).send("Internal server error");
+    });
+};
+
+const getTotalSum = function (id) {
+  return new Promise((res, rej) => {
+    Cart.find({ owner: id }).then((result) => {
+      if (result == null) {
+        constsum = 0;
+        res(sum);
+      } else {
+        Cart.aggregate([
+          {
+            $match: {
+              owner: id,
+            },
+          },
+          {
+            $group: {
+              _id: "$owner",
+              total: {
+                $sum: "$bill",
+              },
+            },
+          },
+        ])
+          .exec()
+          .then((sum) => {
+            res(sum[0].total);
+          });
+      }
+    });
+  });
+};
+exports.checkout = (req, res) => {
+  const userData = req.session.userData;
+  getCategory().then((categories) => {
+    Cart.find({ owner: userData._id }).then((cart) => {
+      if (cart.length == 0) {
+        res.redirect("/cart");
+      } else {
+        getAddress(userData._id).then((address) => {
+          if (req.session.user) {
+            const totalBill = req.session.cartBill;
+            res.render("user/checkout", {
+              userData,
+              address,
+              categories,
+              totalBill,
+              cart,
+            });
+          } else {
+            res.redirect("/login");
+          }
+        });
+      }
+    });
+  });
+};
+
+exports.paymentLoad = (req, res) => {
+  req.session.selectedAddressIndex = req.body.selectedAddressIndex;
+  res.redirect(`/cart/checkout/payment?index=${req.body.selectedAddressIndex}`);
+};
+
+exports.payment = (req, res) => {
+  const selectedAddress = req.query.index;
+  const userData = req.session.userData;
+  req.session.selectedAddress = selectedAddress;
+  getCategory().then((categories) => {
+    Cart.find({ owner: userData._id }).then((cart) => {
+      if (cart.length == 0) {
+        res.redirect("/cart");
+      } else {
+        const couponMsg = req.session.applyCouponMsg;
+        const couponSMsg = req.session.applyCouponSMsg;
+        getTotalSum(userData._id).then((totalBill) => {
+          res.render("user/payment", {
+            categories,
+            couponMsg,
+            couponSMsg,
+            selectedAddress,
+            cart,
+            userData,
+            totalBill,
+          });
+        });
+      }
+    });
+  });
+};
+
+exports.paymentMode = (req, res) => {
+  console.log("in function");
+  const userData = req.session.userData;
+  function createOrders(cart, paymentMode, address, orderBill) {
+    const newOrder = {
+      owner: cart[0].owner,
+      address: address,
+      items: cart,
+      paymentMode: paymentMode,
+      orderBill: orderBill,
+      orderDate: Date(),
+    };
+    req.session.order = newOrder;
+  }
+  Cart.find({ owner: userData._id }).then((cart) => {
+    const address = req.session.selectedAddress;
+    const paymentMode = req.body.radio;
+    const orderBill = req.session.cartBill;
+    Address.findOne({ _id: address }).then((address) => {
+      if (paymentMode == "COD") {
+        console.log("in function going section");
+        createOrders(cart, paymentMode, address, orderBill);
+        res.json({ codSuccess: true });
+      }
+    });
+  });
+};
+
+exports.orderSuccessRedirect = (req, res) => {
+  const order = req.session.order;
+  order.items.forEach((item) => {
+    item.orderStatus = "processed";
+  });
+  const newOrder = new Order(order);
+  newOrder
+    .save()
+    .then(() => {
+      console.log(newOrder.owner);
+      Cart.deleteMany({ owner: newOrder.owner }).then(() => {
+        res.redirect("/orderSuccess");
+        console.log("success guys");
+      });
+    })
+    .catch((err) => {
+      console.log("cant render order success" + err);
+    });
+};
+
+exports.orderSuccess = (req, res) => {
+  res.render("user/orderSuccess");
+};
+
+exports.orders = async (req, res) => {
+  const userData = req.session.userData;
+
+  getCategory().then(async (categories) => {
+    const data = await Order.find({ owner: req.session.userData._id }).lean();
+
+    res.render("user/orders", { data, userData, categories });
+  });
+};
+
+exports.cancelOrder = (req, res) => {
+  const userData = req.session.userData;
+  const id = req.body.id;
+  console.log("userId:-" + userData._id);
+  console.log("req.id " + id);
+  Order.findOneAndUpdate(
+    {
+      owner: userData._id,
+      "items._id": id,
+    },
+    { $set: { "items.$.orderStatus": "Cancelled" } }
+  ).then((result) => {
+    Product.findOneAndUpdate(
+      { _id: result.items[0].productId },
+      { $inc: { stock: result.items[0].quantity } }
+    ).then((response) => {
+      res.json(response);
+    });
+  });
+};
+
+exports.returnOrder = (req, res) => {
+  const userData = req.session.userData;
+  const id = req.query.id;
+  Order.findOneAndUpdate(
+    {
+      owner: userData._id,
+      "items._id": id,
+    },
+    { $set: { "items.$.orderStatus": "Return initiated" } }
+  ).then((result) => {
+    Product.findOneAndUpdate(
+      { _id: result.items[0].productId },
+      { $inc: { stock: result.items[0].quantity } }
+    ).then(() => {
+      res.redirect("/orders?user=true");
+    });
+  });
+};
+
+exports.applyCoupon = (req, res) => {
+  const id = req.query.id;
+  const code = req.body.coupon;
+  const currDate = new Date();
+  if (code != "") {
+    Coupon.findOne({ code: code }).then((coupon) => {
+      if (coupon) {
+        if (coupon.status == "Active") {
+          req.session.applyCouponMsg = "";
+          req.session.applyCouponSMsg = `${coupon.code}-coupon Added Successfully`;
+          res.redirect(
+            `/cart/checkout/payment?index=${req.session.selectedAddressIndex}`
+          );
+        }
+      } else {
+        req.session.applyCouponSMsg = "";
+        req.session.applyCouponMsg = "check your Coupon!!";
+        res.redirect(
+          `/cart/checkout/payment?index=${req.session.selectedAddressIndex}`
+        );
+      }
+    });
+  } else {
+    req.session.applyCouponSMsg = "";
+    req.session.applyCouponMsg = "coupon field don't be null!!";
+    res.redirect(
+      `/cart/checkout/payment?index=${req.session.selectedAddressIndex}`
+    );
   }
 };
 
 ///admin-----------------------------------------------------------------------------------------------------
 exports.getAdminLogin = (req, res) => {
   if (req.session.admin) {
-    res.redirect("/admin-dashboard");
+    res.redirect("/admin/dashboard");
   } else {
     res.render("admin/adminLogin");
   }
@@ -813,7 +1125,7 @@ exports.adminLogin = (req, res) => {
     .then((result) => {
       if (result) {
         req.session.admin = true;
-        res.redirect("/admin-dashboard");
+        res.redirect("/admin/dashboard");
       } else if (
         !result &&
         signInData.email != "" &&
@@ -832,7 +1144,7 @@ exports.adminLoggedIn = (req, res, next) => {
   if (req.session.admin) {
     next();
   } else {
-    res.redirect("/admin-login");
+    res.redirect("/admin");
   }
 };
 
@@ -863,7 +1175,7 @@ exports.userSearch = (req, res) => {
       if (result) {
         res.render("admin/adminUsers", { users: result });
       } else {
-        let message = "User not found";
+        const message = "User not found";
         req.session.adminMessage = message;
         res.redirect("admin/adminUsers");
       }
@@ -875,6 +1187,7 @@ exports.userSearch = (req, res) => {
 
 exports.userEdit = (req, res) => {
   const id = req.query.id;
+  req.session.adminMessage = "";
   req.session.userId = id;
   User.findOne({ _id: id })
     .then((result) => {
@@ -886,6 +1199,7 @@ exports.userEdit = (req, res) => {
 };
 
 exports.userUpdate = (req, res) => {
+  req.session.adminMessage = "";
   User.updateOne(
     { _id: req.session.userId },
     {
@@ -897,31 +1211,37 @@ exports.userUpdate = (req, res) => {
     }
   )
     .then(() => {
-      let message = "User Updated successfully";
+      const message = "User Updated successfully";
       req.session.adminMessage = message;
-      res.redirect("/admin-panel/user");
+      res.redirect("/admin/users");
     })
     .catch((err) => {
       console.log(err.message);
     });
 };
 
-exports.userDelete = (req, res) => {
-  const id = req.query.id;
-  User.deleteOne({ _id: id }).then(() => {
-    let message = "User Deleted Successfully";
-    req.session.adminMessage = message;
-    res.redirect("/admin-panel/user");
-  });
-};
+// exports.userDelete = (req, res) => {
+//   const id = req.body.id;
+//   req.session.adminMessage = "";
+//   User.deleteOne({ _id: id }).then((response) => {
+//     const message = "User Deleted Successfully";
+//     req.session.adminMessage = message;
+//     res.json(response)
+//     res.redirect("/admin/users");
+//   });
+// };
 exports.userDashboard = (req, res) => {
   res.render("admin/adminDashboard");
 };
 exports.userBlock = (req, res) => {
-  const id = req.query.id;
+  const id = req.body.id;
+  req.session.adminMessage = "";
   User.findByIdAndUpdate({ _id: id }, { $set: { blockStatus: true } })
-    .then(() => {
-      res.redirect("/admin-panel/user");
+    .then((response) => {
+      const message = "User Blocked Successfully";
+      req.session.adminMessage = message;
+      res.json(response);
+      res.redirect("/admin/users");
     })
     .catch((err) => {
       console.log(err.message);
@@ -929,10 +1249,14 @@ exports.userBlock = (req, res) => {
 };
 
 exports.userUnBlock = (req, res) => {
-  const id = req.query.id;
+  const id = req.body.id;
+  req.session.adminMessage = "";
   User.findOneAndUpdate({ _id: id }, { $set: { blockStatus: false } })
-    .then(() => {
-      res.redirect("/admin-panel/user");
+    .then((response) => {
+      const message = "User unBlocked Successfully";
+      req.session.adminMessage = message;
+      res.json(response);
+      res.redirect("/admin/users");
     })
     .catch((err) => {
       console.log(err.message);
@@ -943,7 +1267,7 @@ exports.adminLogout = (req, res) => {
   req.session.user = false;
   req.session.admin = false;
   req.session.destroy();
-  res.redirect("/admin-login");
+  res.redirect("/admin");
 };
 
 exports.adminCategory = (req, res) => {
@@ -962,31 +1286,38 @@ exports.adminCategory = (req, res) => {
   });
 };
 exports.adminCategoryLoad = (req, res) => {
-  Category.find({
-    category: req.body.category,
-  }).then((result) => {
-    if (result.length === 0) {
-      const categoryData = new Category(req.body);
-      categoryData
-        .save()
-        .then(() => {
-          res.redirect("/admin-category");
-        })
-        .catch((err) => {
-          console.log(err.message);
-        });
-    } else {
-      let message = "the Category aldready exists.";
-      req.session.categoryMessage = message;
-      res.redirect("/admin-category");
-    }
-  });
+  if (req.body.category != "") {
+    Category.find({
+      category: req.body.category,
+    }).then((result) => {
+      if (result.length === 0) {
+        req.session.categoryMessage = "";
+        const categoryData = new Category(req.body);
+        categoryData
+          .save()
+          .then(() => {
+            res.redirect("/admin/category");
+          })
+          .catch((err) => {
+            console.log(err.message);
+          });
+      } else {
+        const message = "The Category aldready exists.";
+        req.session.categoryMessage = message;
+        res.redirect("/admin/category");
+      }
+    });
+  } else {
+    const message = "The Category field don't be null";
+    req.session.categoryMessage = message;
+    res.redirect("/admin/category");
+  }
 };
 exports.categoryDelete = (req, res) => {
   const id = req.query.id;
   Category.deleteOne({ _id: id })
     .then(() => {
-      res.redirect("/admin-category");
+      res.redirect("/admin/category");
     })
     .catch((err) => {
       console.log(err.message);
@@ -997,7 +1328,7 @@ exports.categoryEdit = (req, res) => {
   const id = req.query.id;
   Category.findOne({ _id: id }).then((result) => {
     req.session.editCategory = result.category;
-    res.redirect("/admin-category");
+    res.redirect("/admin/category");
   });
 };
 
@@ -1009,7 +1340,7 @@ exports.categoryUpdate = (req, res) => {
   )
     .then(() => {
       req.session.editCategory = false;
-      res.redirect("/admin-category");
+      res.redirect("/admin/category");
     })
     .catch((err) => {
       console.log(err);
@@ -1061,6 +1392,7 @@ exports.productUpload = (req, res) => {
     description: req.body.description,
     stock: req.body.stock,
     category: req.body.category,
+    bgColor: req.body.bgcolor,
     img1: req.files[0] && req.files[0].filename ? req.files[0].filename : "",
     img2: req.files[1] && req.files[1].filename ? req.files[1].filename : "",
     isDeleted: false,
@@ -1068,9 +1400,9 @@ exports.productUpload = (req, res) => {
   productData
     .save()
     .then(() => {
-      let message = "Product added successfully";
+      const message = "Product added successfully";
       req.session.productMessage = message;
-      res.redirect("/admin-product");
+      res.redirect("/admin/products");
     })
     .catch((err) => {
       console.log(err.message);
@@ -1096,13 +1428,14 @@ exports.productEdit = (req, res) => {
 
 exports.productUpdate = (req, res) => {
   const id = req.session.productQuery;
-  let updateObj = {
+  const updateObj = {
     $set: {
       productName: req.body.name,
       price: req.body.price,
       description: req.body.description,
       stock: req.body.stock,
       category: req.body.category,
+      bgColor: req.body.bgcolor,
       isDeleted: false,
     },
   };
@@ -1114,21 +1447,22 @@ exports.productUpdate = (req, res) => {
   }
   Product.updateOne({ _id: id }, updateObj)
     .then(() => {
-      let message = "Product Updated Successfully";
+      const message = "Product Updated Successfully";
       req.session.productMessage = message;
-      res.redirect("/admin-product");
+      res.redirect("/admin/products");
     })
     .catch((err) => {
       console.log(err.message);
     });
 };
 exports.productDelete = (req, res) => {
-  const id = req.query.id;
+  const id = req.body.id;
   Product.findByIdAndUpdate(id, { $set: { isDeleted: true } })
-    .then((product) => {
-      let message = "product was soft deleted Successfully";
+    .then((response) => {
+      console.log(response);
+      const message = "product was soft deleted Successfully";
       req.session.productMessage = message;
-      res.redirect("/admin-product");
+      res.json(response);
     })
     .catch((error) => {
       console.log(error.message);
@@ -1147,12 +1481,189 @@ exports.productSearch = (req, res) => {
       if (result) {
         res.render("admin/adminProducts", { products: result });
       } else {
-        let message = "product not found";
+        const message = "product not found";
         req.session.productMessage = message;
-        res.redirect("/admin-product");
+        res.redirect("/admin/products");
       }
     })
     .catch((err) => {
       console.log(err.message);
+    });
+};
+
+exports.ordersLoad = (req, res) => {
+  Order.find({}).then((orders) => {
+    res.render("admin/adminOrders", { orders });
+  });
+};
+
+exports.editStatusLoad = (req, res) => {
+  const id = req.query.id;
+  req.session.order2Id = id;
+  Order.find({ _id: id }).then((orders) => {
+    res.render("admin/editOrderStatus", { orders });
+  });
+};
+
+exports.editStatus = (req, res) => {
+  console.log("order id========" + req.session.order2Id);
+  console.log("approve id===========" + req.query.orderId);
+  const order2Id = req.session.order2Id;
+  if (req.query.approve) {
+    const id = req.query.orderId;
+    Order.findOneAndUpdate(
+      {
+        _id: order2Id,
+        "items._id": id,
+      },
+      { $set: { "items.$.orderStatus": "Approved" } }
+    )
+      .then(() => {
+        console.log("product succesfuly changed");
+        res.redirect(`/admin/orders/status?id=${order2Id}`);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } else if (req.query.deny) {
+    const id = req.query.ordeId;
+    Order.findOneAndUpdate(
+      {
+        _id: order2Id,
+        "items._id": id,
+      },
+      { $set: { "items.$.orderStatus": "Cancelled" } }
+    )
+      .then(() => {
+        res.redirect(`/admin/orders/status?id=${order2Id}`);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } else if (req.query.shipped) {
+    const id = req.query.orderId;
+    Order.findOneAndUpdate(
+      {
+        _id: order2Id,
+        "items._id": id,
+      },
+      { $set: { "items.$.orderStatus": "Shipped" } }
+    )
+      .then(() => {
+        res.redirect(`/admin/orders/status?id=${order2Id}`);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } else if (req.query.delivered) {
+    const id = req.query.orderId;
+    const itemId = req.query.itemId;
+    console.log("item id....." + itemId);
+    Order.findOneAndUpdate(
+      {
+        _id: order2Id,
+        "items._id": id,
+      },
+      { $set: { "items.$.orderStatus": "Delivered" } }
+    )
+      .then((result) => {
+        console.log("result--------" + result.items[0].quantity);
+        Product.updateOne(
+          { _id: itemId },
+          {
+            $inc: { stock: -result.items[0].quantity },
+          }
+        ).then(() => {
+          res.redirect(`/admin/orders/status?id=${order2Id}`);
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } else {
+    res.redirect(`/admin/orders/status?id=${order2Id}`);
+  }
+};
+
+exports.couponLoad = (req, res) => {
+  Coupon.find({}).then((coupon) => {
+    if (coupon) {
+      if (req.query.edit) {
+        Coupon.findOne({ _id: req.query.edit }).then((edit) => {
+          res.render("admin/coupons", { couponEdit: edit, coupon });
+        });
+      } else {
+        req.query.edit = false;
+        const message = req.session.couponMessage;
+        res.render("admin/coupons", { coupon, message });
+      }
+    } else {
+      res.render("admin/coupons");
+    }
+  });
+};
+
+exports.couponAdd = (req, res) => {
+  req.session.couponMessage = "";
+  const code = req.body.couponCode;
+  const value = req.body.couponValue;
+  const expiry = req.body.couponExpiry;
+  const bill = req.body.minBill;
+  const couponData = new Coupon({
+    code: code,
+    value: value,
+    minBill: bill,
+    expiryDate: Date(),
+    status: "Active",
+  });
+
+  couponData.save().then((coupon) => {
+    const message = "new Coupon Added Successfully";
+    req.session.couponMessage = message;
+    res.redirect("/admin/coupons");
+  });
+};
+
+exports.couponDelete = (req, res) => {
+  const id = req.query.id;
+  Coupon.deleteOne({ _id: id }).then(() => {
+    const message = "coupon Deleted Successfully";
+    req.session.couponMessage = message;
+    res.redirect("/admin/coupons");
+  });
+};
+
+exports.couponEdit = (req, res) => {
+  const id = req.query.id;
+  res.redirect(`/admin/coupons?edit=${id}`);
+};
+exports.couponUpdate = (req, res) => {
+  const id = req.query.id;
+  const code = req.body.couponCode;
+  const value = req.body.couponValue;
+  const expiry = new Date(req.body.couponExpiry);
+  const bill = req.body.minBill;
+  const currDate = new Date();
+
+  const status = currDate.getTime() < expiry.getTime() ? "Active" : "Expired";
+
+  Coupon.findOneAndUpdate(
+    { _id: id },
+    {
+      $set: {
+        code: code,
+        value: value,
+        expiryDate: expiry,
+        minBill: bill,
+        status: status,
+      },
+    }
+  )
+    .then(() => {
+      res.redirect("/admin/coupons");
+    })
+    .catch((error) => {
+      console.error(error);
+      res.send("An error occurred while updating the coupon.");
     });
 };

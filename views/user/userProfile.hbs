@@ -22,17 +22,17 @@
                   <div class="card-body mt-5 ms-2">
                     <div class="d-flex flex-row">
                       <h1 class="me-3">hei!! {{userData.name}}</h1>
-                      <a href="/user-profile?userEdit={{userData._id}}" style="color: black;font-size:2rem;"><i
+                      <a href="/profile?userEdit={{userData._id}}" style="color: black;font-size:2rem;"><i
                           class="fa-solid fa-pen-to-square"></i></a>
                     </div>
                     <p class="text-muted mb-1">{{userData.email}}</p>
                     <p class="text-muted mb-1">{{userData.mobile}}</p>
 
-                    <p class="mt-3"><a href="/user-profile?passEdit={{userData._id}}" style="text-decoration: none"
+                    <p class="mt-3"><a href="/profile?passEdit={{userData._id}}" style="text-decoration: none"
                         class="text-success">Change Password</a></p>
 
                     <div class="mt-4">
-                      <a href="/all-orders">
+                      <a href="/orders?user=true">
                         <button class="btn btn-danger">
                           view All Orders
                         </button>
@@ -40,8 +40,12 @@
                     </div>
 
                     <div class="pt-5">
-                      <h6 class="mb-0"><a href="/user-home" class="text-body">Back to home</a></h6>
+                      <h6 class="mb-0"><a href="/user" class="text-body">Back to home</a></h6>
                     </div>
+  <div class="pt-5">
+                      <h6 class="mb-0"><a href="/cart/checkout" class="text-body">Back to Checkout</a></h6>
+                    </div>
+                    
                   </div>
                 </div>
               </div>
@@ -67,7 +71,7 @@
                     <p class="card-text text-muted mt-4 mb-0  space">EDIT DELIVERY ADDRESS</p>
                   </div>
                   <div>
-                    <form class="row g-3 mt-0" action="/user-profile/uploadAddress?id={{editAddress._id}}"
+                    <form class="row g-3 mt-0" action="/profile/uploadAddress?id={{editAddress._id}}"
                       method="post">
                       <div class="col-md-6">
                         <label for="" class="form-label">Name</label>
@@ -118,7 +122,7 @@
                     <p class="card-text text-muted mt-4 mb-0  space">ADD DELIVERY ADDRESS</p>
                   </div>
                   <div>
-                    <form class="row g-3 mt-0" action="/user-profile/addAddress?id={{_id}}" method="post">
+                    <form class="row g-3 mt-0" action="/profile/addAddress?id={{_id}}" method="post">
                       <div class="col-md-6">
                         <label for="" class="form-label">Name</label>
                         <input type="text" value="" class="form-control" id="name" name="name" required>
@@ -165,7 +169,7 @@
                   <h3 class="fw-bold mb-5 mt-2 pt-1 text-center">Change Password</h3>
                   <div class="container col-12 col-md-9">
 
-                    <form action="/user-profile/changePassword?id={{userData._id}}" method="post">
+                    <form action="/profile/changePassword?id={{userData._id}}" method="post">
                       <label class="form-label mt-0 mb-0" for="form3Examplea2">Enter Current Password</label>
                       <input name="currPass" style="border: 1px solid black" type="password" id="form3Examplea2"
                         class="form-control form-control-lg mt-0" />
@@ -179,7 +183,7 @@
                       <input name="repeatPass" style="border: 1px solid black" type="password" id="form3Examplea2"
                         class="form-control form-control-lg mt-0" />
                            <div class="d-flex justify-content-around align-items-center mb-4">
-                  <h6>Forgot your password<a href="/forgot-password"> click here</a></h6>
+                  <h6>Forgot your password<a href="/forgotPassword"> click here</a></h6>
                 </div>
                       <h5 class="text-danger text-center">{{errorMessage}}</h5>
 
@@ -190,7 +194,7 @@
                     </form>
                   </div>
                   {{else if toEditUser}}
-                  <form action="/user-profile/userEdit?id={{userData._id}}" method="post">
+                  <form action="/profile/userEdit?id={{userData._id}}" method="post">
                     <label class="form-label mt-0 mb-0" for="form3Examplea2">Enter Your Name</label>
                     <input name="name" value="{{userData.name}}" style="border: 1px solid black" type="text"
                       id="form3Examplea2" class="form-control form-control-lg mt-0" required />
@@ -215,7 +219,7 @@
                   <div class="form-check mt-3">
                     <ul>
                       <li>
-                        <p class="display-address">{{name}}<span class="mx-3"><a href="/user-profile?edit={{_id}}"
+                        <p class="display-address">{{name}}<span class="mx-3"><a href="/profile?edit={{_id}}"
                               style="text-decoration: none">Edit</a></span></p>
                         <p class="display-address">{{address1}},{{address2}}</p>
                         <p class="display-address">{{city}},{{state}}</p>
@@ -229,7 +233,7 @@
 
                   </div>
                   {{/each}}
-                  <a href="/user-profile?add=true" style="text-decoration: none; color: green;">
+                  <a href="/profile?add=true" style="text-decoration: none; color: green;">
                     <p>Add a new address</p>
                   </a>
 

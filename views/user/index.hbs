@@ -7,6 +7,7 @@
 {{/if}}
 <!-- end header section -->
 <!-- slider section -->
+
 <section class="slider_section">
   <div class="slider_container">
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
@@ -37,7 +38,7 @@
               </div>
               <div class="col-md-5 ">
                 <div class="img-box p-5 overflow-hidden">
-                  <img src="./images/shoe1.png" class="img-fluid object-fit-none" alt="">
+                  <img src="/images/shoe1.png" class="img-fluid object-fit-none" alt="">
                 </div>
               </div>
             </div>
@@ -68,7 +69,7 @@
               </div>
               <div class="col-md-5 ">
                 <div class="img-box overflow-hidden ">
-                  <img src="./images/shoe3.png" class=" object-fit-none img-fluid" alt="">
+                  <img src="/images/shoe3.png" class=" object-fit-none img-fluid" alt="">
                 </div>
               </div>
             </div>
@@ -84,7 +85,7 @@
           <i class="fa fa-arrow-left" aria-hidden="true"></i>
           <span class="sr-only">Previous</span>
         </a>
-        <img src="./images/line.png" alt="">
+        <img src="/images/line.png" alt="">
         <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
           <span class="sr-only">Next</span>
@@ -109,10 +110,10 @@
       {{#each products}}
       <div class="col-sm-6 col-md-4 col-lg-3">
 
-        <div class="box" style="background-color:#7AE597">
+        <div class="box" style="background-color:{{bgColor}}!important">
           <a href="/productView?id={{_id}}">
             <div class="img-box">
-              <img src="./images/{{img1}}" alt="">
+              <img src="/images/{{img1}}" alt="">
             </div>
 
             <div class="new">
@@ -145,7 +146,7 @@
         <div class="box">
           <a href="">
             <div class="img-box">
-              <img src="./images/shoe4.png" alt="">
+              <img src="/images/shoe4.png" alt="">
             </div>
 
             <div class="new">
@@ -206,7 +207,7 @@
         </div>
 
         <div class="img-box p-1">
-          <img src="./images/shoe3.png" class="pt-2 ps-3 img-fluid" alt="">
+          <img src="/images/shoe3.png" class="pt-2 ps-3 img-fluid" alt="">
         </div>
 
 
@@ -229,7 +230,7 @@
         </div>
 
         <div class="img-box p-1">
-          <img src="./images/shoe1.png" class="pt-2 ps-3 img-fluid" alt="">
+          <img src="/images/shoe1.png" class="pt-2 ps-3 img-fluid" alt="">
         </div>
 
 
@@ -257,10 +258,10 @@
       {{#each products}}
       <div class="col-sm-6 col-md-4 col-lg-3">
 
-        <div class="box" style="background-color:#4799F9">
+        <div class="box" style="background-color:{{bgColor}}">
           <a href="/productView?id={{_id}}">
             <div class="img-box">
-              <img src="./images/{{img1}}" alt="">
+              <img src="/images/{{img1}}" alt="">
             </div>
 
             <div class="new">
@@ -528,7 +529,7 @@
         <div class="col-md-5">
           <div class="img_container">
             <div class="img-box">
-              <img src="./images/gifts.png" alt="">
+              <img src="/images/gifts.png" alt="">
             </div>
           </div>
         </div>
@@ -545,7 +546,7 @@
 
             </p>
             <div class="btn-box">
-              <a href="/user-home" class="btn1">
+              <a href="/user" class="btn1">
                 Buy Now
               </a>
               <a href="/why" class="btn2">

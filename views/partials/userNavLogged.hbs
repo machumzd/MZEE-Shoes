@@ -2,9 +2,9 @@
   <!-- header section strats -->
   <header class="header_section">
     <nav class="navbar navbar-expand-lg custom_nav-container ">
-      <a class="navbar-brand" href="/user-home">
+      <a class="navbar-brand" href="/user">
         <span>
-          <img src="/images/logo.png" style="max-width:8rem">
+          <img src="/images/logo.png" style="max-width:9rem">
         </span>
       </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -14,8 +14,8 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav  ">
           <li class="nav-item">
-            <a class="nav-link" href="/user-home">Home
-            
+            <a class="nav-link" href="/user">Home
+
             </a>
           </li>
           {{#each categories}}
@@ -30,15 +30,25 @@
             </a>
           </li>
           <div class="user_option">
-            <a href="/user-profile" style="background-color:black;color:white;padding:5px 20px 5px 20px;border-radius:14px;">
+            <a href="/profile"
+              style="background-color:black;color:white;padding:5px 20px 5px 20px;border-radius:14px;">
               <i class="fa fa-user" aria-hidden="true"></i>
               <span>
                 {{userData.name}}
               </span>
             </a>
-            <a href="/user-home/cart?id={{userData._id}}">
+            {{#if cart}}
+            <a class="nav-icon-link my-auto position-relative" href="/cart?id={{userData._id}}"> <i
+                class="fa fa-shopping-bag" aria-hidden="true"></i><span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{cart.length}}
+              </span></a>
+            </a>
+            {{else}}
+
+            <a href="/cart?id={{userData._id}}">
               <i class="fa fa-shopping-bag" aria-hidden="true"></i>
             </a>
+            {{/if}}
             <a href="">
               <i class="fa-solid fa-heart" area-hidden="true"></i>
             </a>
@@ -48,7 +58,7 @@
                 <i class="fa fa-search" aria-hidden="true"></i>
               </button>
             </form>
-            <a href="/user-logout" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+            <a href="/logout" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
               <i class="fa-solid fa-right-from-bracket"></i>
             </a>
 
@@ -65,7 +75,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <a href="/user-logout"><button type="button" class="btn btn-danger">Logout</button></a>
+                    <a href="/logout"><button type="button" class="btn btn-danger">Logout</button></a>
                   </div>
                 </div>
               </div>
