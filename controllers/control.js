@@ -89,6 +89,18 @@ const getProducts = function () {
   });
 };
 
+const getCoupons = function () {
+  return new Promise((res, rej) => {
+    Coupon.find({})
+      .then((coupons) => {
+        res(coupons);
+      })
+      .catch(() => {
+        const error = new Error("could not find coupons");
+        rej(error);
+      });
+  });
+};
 const getCarts = function (id) {
   return new Promise((res, rej) => {
     Cart.find({ owner: id })
@@ -689,7 +701,6 @@ exports.cart = (req, res) => {
 };
 
 exports.addToCart = (req, res) => {
-  console.log("get cart ll keri");
   const id = req.query.id;
   const userData = req.session.userData;
 
@@ -863,6 +874,7 @@ exports.cartOperation = (req, res) => {
             { new: true }
           ).then((response) => {
             res.json(response);
+
             // return res.redirect(`/cart?id=${userData._id}`);
           });
         }
@@ -926,13 +938,14 @@ exports.checkout = (req, res) => {
       } else {
         getAddress(userData._id).then((address) => {
           if (req.session.user) {
-            const totalBill = req.session.cartBill;
-            res.render("user/checkout", {
-              userData,
-              address,
-              categories,
-              totalBill,
-              cart,
+            getTotalSum(userData._id).then((totalBill) => {
+              res.render("user/checkout", {
+                userData,
+                address,
+                categories,
+                totalBill,
+                cart,
+              });
             });
           } else {
             res.redirect("/login");
@@ -957,13 +970,12 @@ exports.payment = (req, res) => {
       if (cart.length == 0) {
         res.redirect("/cart");
       } else {
-        const couponMsg = req.session.applyCouponMsg;
-        const couponSMsg = req.session.applyCouponSMsg;
         getTotalSum(userData._id).then((totalBill) => {
+          console.log("this is frorm ------payment" + req.session.couponCode);
+
           res.render("user/payment", {
             categories,
-            couponMsg,
-            couponSMsg,
+            coupon: req.session.couponCode,
             selectedAddress,
             cart,
             userData,
@@ -978,6 +990,7 @@ exports.payment = (req, res) => {
 exports.paymentMode = (req, res) => {
   console.log("in function");
   const userData = req.session.userData;
+
   function createOrders(cart, paymentMode, address, orderBill) {
     const newOrder = {
       owner: cart[0].owner,
@@ -989,6 +1002,7 @@ exports.paymentMode = (req, res) => {
     };
     req.session.order = newOrder;
   }
+
   Cart.find({ owner: userData._id }).then((cart) => {
     const address = req.session.selectedAddress;
     const paymentMode = req.body.radio;
@@ -1012,10 +1026,29 @@ exports.orderSuccessRedirect = (req, res) => {
   newOrder
     .save()
     .then(() => {
-      console.log(newOrder.owner);
       Cart.deleteMany({ owner: newOrder.owner }).then(() => {
-        res.redirect("/orderSuccess");
-        console.log("success guys");
+        if (req.session.applyedCoupon) {
+          const applyedCoupon = req.session.applyedCoupon;
+          console.log("--------------------coupon applied-------");
+          Coupon.findOneAndUpdate(
+            { _id: applyedCoupon._id },
+            { $set: { status: "Applied" } }
+          ).then((coupon) => {
+            const final =
+              newOrder.orderBill - (newOrder.orderBill * coupon.value) / 100;
+            console.log("-------------------------final-----------" + final);
+            Order.updateOne(
+              { _id: newOrder._id },
+              { $set: { orderBill: final } }
+            ).then(() => {
+              res.redirect("/orderSuccess");
+              console.log("success guys");
+            });
+          });
+        } else {
+          res.redirect("/orderSuccess");
+          console.log("success guys");
+        }
       });
     })
     .catch((err) => {
@@ -1040,8 +1073,6 @@ exports.orders = async (req, res) => {
 exports.cancelOrder = (req, res) => {
   const userData = req.session.userData;
   const id = req.body.id;
-  console.log("userId:-" + userData._id);
-  console.log("req.id " + id);
   Order.findOneAndUpdate(
     {
       owner: userData._id,
@@ -1078,34 +1109,35 @@ exports.returnOrder = (req, res) => {
 };
 
 exports.applyCoupon = (req, res) => {
-  const id = req.query.id;
   const code = req.body.coupon;
-  const currDate = new Date();
-  if (code != "") {
-    Coupon.findOne({ code: code }).then((coupon) => {
-      if (coupon) {
-        if (coupon.status == "Active") {
-          req.session.applyCouponMsg = "";
-          req.session.applyCouponSMsg = `${coupon.code}-coupon Added Successfully`;
-          res.redirect(
-            `/cart/checkout/payment?index=${req.session.selectedAddressIndex}`
-          );
-        }
-      } else {
-        req.session.applyCouponSMsg = "";
-        req.session.applyCouponMsg = "check your Coupon!!";
-        res.redirect(
-          `/cart/checkout/payment?index=${req.session.selectedAddressIndex}`
-        );
-      }
-    });
-  } else {
-    req.session.applyCouponSMsg = "";
-    req.session.applyCouponMsg = "coupon field don't be null!!";
-    res.redirect(
-      `/cart/checkout/payment?index=${req.session.selectedAddressIndex}`
-    );
-  }
+  const bill = req.body.bill;
+
+  Coupon.findOne({ code: code }).then((coupon1) => {
+    if (coupon1) {
+      const coupDate = new Date(coupon1.expiryDate);
+      const currDate = new Date();
+      const status = currDate.getTime() > coupDate.getTime() ? "Expired" : "Active";
+      
+      console.log("-------------------insidee of coupo1--------");
+      Coupon.findOneAndUpdate(
+        { code: code },
+        { $set: { status: status } }
+      ).then((coupon3) => {
+        console.log("---------------------inside of coupon3---"+coupon3.code)
+        Coupon.findOne({ code: code }) //extra validation
+          .then((Vcoupon) => {
+            console.log("-----------------------inside of vcoupon----------"+bill,Vcoupon.minBill)
+
+            if (Vcoupon.minBill < bill) {
+              req.session.applyedCoupon = Vcoupon;
+            }
+            res.json(coupon1);
+          });
+      });
+    } else {
+      res.json(307);
+    }
+  });
 };
 
 ///admin-----------------------------------------------------------------------------------------------------
@@ -1595,7 +1627,8 @@ exports.couponLoad = (req, res) => {
       } else {
         req.query.edit = false;
         const message = req.session.couponMessage;
-        res.render("admin/coupons", { coupon, message });
+        const errorMessage = req.session.couponErrMessage;
+        res.render("admin/coupons", { coupon, message, errorMessage });
       }
     } else {
       res.render("admin/coupons");
@@ -1609,24 +1642,38 @@ exports.couponAdd = (req, res) => {
   const value = req.body.couponValue;
   const expiry = req.body.couponExpiry;
   const bill = req.body.minBill;
-  const couponData = new Coupon({
-    code: code,
-    value: value,
-    minBill: bill,
-    expiryDate: Date(),
-    status: "Active",
-  });
+  if (code != "" && value != "" && expiry != "" && bill != "") {
+    if (value > 0 && value <= 100) {
+      const couponData = new Coupon({
+        code: code,
+        value: value,
+        minBill: bill,
+        expiryDate: Date(),
+        status: "Active",
+      });
 
-  couponData.save().then((coupon) => {
-    const message = "new Coupon Added Successfully";
-    req.session.couponMessage = message;
+      couponData.save().then((coupon) => {
+        req.session.couponErrMessage = "";
+        const message = "new Coupon Added Successfully";
+        req.session.couponErrMessage = message;
+        res.redirect("/admin/coupons");
+      });
+    } else {
+      req.session.couponMessage = "";
+      req.session.couponErrMessage = "coupon Value(0-100 only)";
+      res.redirect("/admin/coupons");
+    }
+  } else {
+    req.session.couponMessage = "";
+    req.session.couponErrMessage = "fields dont be null";
     res.redirect("/admin/coupons");
-  });
+  }
 };
 
 exports.couponDelete = (req, res) => {
   const id = req.query.id;
   Coupon.deleteOne({ _id: id }).then(() => {
+    req.session.couponErrMessage = "";
     const message = "coupon Deleted Successfully";
     req.session.couponMessage = message;
     res.redirect("/admin/coupons");

@@ -40,77 +40,134 @@
                     </div>
 
                     <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                      <button class="btn btn-link px-2" onclick="stepondown(this, '{{_id}}', '{{price}}')">
+                      <input type="hidden" id="priceText{{_id}}" value="{{price}}">
+                      <button class="btn btn-link px-2"
+                        onclick="stepondown(this, '{{_id}}', '{{price}}','{{cartBill}}')">
                         <i class="fas fa-minus"></i>
                       </button>
-                      <input id="form{{_id}}" min="1" max="{{stock}}" name="quantity" value="{{quantity}}" onchange="validateData('{{_id}}')" type="text"
+                      <input id="form{{_id}}" min="1" max="8" name="quantity" value="{{quantity}}" type="text"
                         class="form-control form-control-sm" />
-                      <button class="btn btn-link px-2" onclick="steponup(this, '{{_id}}', '{{price}}')">
+                      <button class="btn btn-link px-2" onclick="steponup(this, '{{_id}}', '{{price}}','{{cartBill}}')">
                         <i class="fas fa-plus"></i>
                       </button>
                     </div>
 
-<script>
+                    <input type="hidden" id="4plus{{_id}}" value="" />
+                    <input type="hidden" id="4minus{{_id}}" value="" />
 
-  function steponup(element, data, price) {
-    const x = element.previousElementSibling.value;
-    if (x < 8) {
-      document.getElementById("form" + data).setAttribute("value", parseInt(x) + 1);
-      document.getElementById("bill"+data).innerHTML = "₹ " + ((parseInt(x) + 1) * price);
-      
-      const id = data;
-      console.log("im in steponup")
-      fetch("/addToCart/operation", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          add: "add",
-          price: price,
-          id: id
-        })
-      })
-        .then(response => {
-          console.log("success")
-        })
-    } else {
-      document.getElementById("limitMessage").innerHTML = "You can't add more than 8 items"
-    }
-  }
+                    <script>
 
-  function stepondown(element, data, price) {
-    const x = element.nextElementSibling.value;
-    if (x > 0) {
-      element.nextElementSibling.value = parseInt(x) - 1;
-      document.getElementById("bill"+data).innerHTML = "₹ " + ((parseInt(x) - 1) * price);
-      const id = data;
-      console.log("im in steponup")
-      fetch("/addToCart/operation", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          sub: "sub",
-          price: price,
-          id: id
-        })
-      })
-        .then(response => {
-          console.log("success")
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    } else {
-      document.getElementById("limitMessage").innerHTML = "You can't add less than 0 items"
-    }
-  }
+                      function steponup(element, data, price, cartBill) {
+                        document.getElementById("limitMessage" + data).innerHTML = ""
+                        const x = element.previousElementSibling.value;
+                        if (x < 8) {
+                          document.getElementById("form" + data).setAttribute("value", parseInt(x) + 1);
+                          document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) + 1) * price);
+                          //document.getElementById("4plus"+data).value=bill
+                           document.getElementById("totalBill").innerHTML= "₹ " + ((parseInt(x) + 1) * price);
+                          document.getElementById("totalBills").innerHTML= "₹ " + ((parseInt(x) + 1) * price);
+                          const id = data;
+                          console.log("im in steponup")
+                          fetch("/addToCart/operation", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                              add: "add",
+                              price: price,
+                              id: id
+                            })
+                          })
+                            .then(response => {
+                              return response.json();
+                            })
+                            .then(data => {
+                              console.log("this add data"+data)
+                            })
+                            .catch(error => {
+                              console.log(error);
+                            });
+                        } else {
+                          document.getElementById("limitMessage" + data).innerHTML = "You can't add more than 8 items"
+                        }
+                      }
 
-</script>
+                      function stepondown(element, data, price, cartBill) {
+                        document.getElementById("limitMessage" + data).innerHTML = ""
+                        const x = element.nextElementSibling.value;
+                        if (x > 0) {
+                          element.nextElementSibling.value = parseInt(x) - 1;
+                          const bill = document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) - 1) * price);
+                          //document.getElementById("4minus"+data).value=bill
+                           document.getElementById("totalBill").innerHTML= "₹ " + ((parseInt(x) - 1) * price);
+                          document.getElementById("totalBills").innerHTML= "₹ " + ((parseInt(x) - 1) * price); 
+
+
+                          const id = data;
+                          console.log("im in stepondqown")
+                          fetch("/addToCart/operation", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                              sub: "sub",
+                              price: price,
+                              id: id
+                            })
+                          })
+                            .then(response => {
+                              return response.json();
+                            })
+                            .then(data => {
+                              console.log("the data is" + data)
+
+                            })
+                            .catch(error => {
+                              console.log(error);
+                            });
+                        } else {
+                          document.getElementById("limitMessage" + data).innerHTML = "You can't add less than 0 items"
+                        }
+                      }
+
+
+
+
+
+
+                      /*
+                       function validateData(id) {
+                              const element = document.getElementById(id)
+                              const priceText = document.getElementById('priceText' + id)     //price of single item
+                              const price = document.getElementById('bill' + id)     //bill of single item
+                              const total = document.getElementById('final')   //total price
+                              const final = document.getElementById("totalBill")  //final price
+                      
+                              console.log("element.value"+element.value)
+                              console.log("priceText.innerHTML"+priceText)
+                              console.log("price.value"+price.value)
+                              console.log("total.innerHTML"+total.innerHTML)
+                              console.log("final.innerHTML"+final.innerHTML)
+                      
+                      
+                              const rate = priceText.innerHTML
+                              priceText.innerHTML = Number(price.innerHTML) * Number(element.value)
+                              const diff = Number(priceText.innerHTML) - Number(rate)
+                      
+                              total.innerHTML = Number(diff) + Number(total.innerHTML)
+                              final.innerHTML = Number(total.innerHTML)
+                          }
+                      
+                      */
+
+
+
+                    </script>
 
                     <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+                      <h3 id="final" class="fw-normal"></h3>
                       <h6 class="mb-0 itemPrice" id="bill{{_id}}" value="">₹ {{bill}}</h6>
                     </div>
                     <div class="col-md-1 col-lg-1 col-xl-1 text-end">
@@ -121,7 +178,7 @@
 
                       </form>
                     </div>
-                    <h8 id="limitMessage" class="ps-5 text-center text-danger"></h8>
+                    <h8 id="limitMessage{{_id}}" class="ps-5 text-center text-danger"></h8>
                   </div>
                   <hr class="my-4">
 
@@ -144,7 +201,7 @@
                   <hr class="my-4">
                   <div class="d-flex justify-content-between mb-4">
                     <h5 class="text-uppercase">items {{cart.length}}</h5>
-                    <h5 id="totalBill">₹ {{cartBill}} </h5>
+                    <h5 id="totalBill" value="">₹ {{cartBill}}</h5>
                   </div>
                   <h5 class="text-uppercase mb-3">Shipping</h5>
                   <div class="mb-4 pb-2">
@@ -155,7 +212,7 @@
                   <hr class="my-4">
                   <div class="d-flex justify-content-between mb-5">
                     <h5 class="text-uppercase">Total price</h5>
-                    <h5>₹ {{cartBill}} </h5>
+                    <h5 id="totalBills" value="">₹ {{cartBill}} </h5>
                     <input type="hidden" id="totalPrice">
                   </div>
 
@@ -198,10 +255,11 @@
   }
 </script> --}}
 <script>
-window.onload = function() {
+  window.onload = function () {
     var msg = document.getElementById("serverMessage");
+    var limitMessage = document.getElementById("limitMessage")
     if (msg.innerHTML !== "") {
-      setTimeout(function() {
+      setTimeout(function () {
         msg.style.display = "none";
       }, 2000); // 3000 milliseconds = 3 seconds
     }

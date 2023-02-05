@@ -11,7 +11,8 @@
                                 <div class="p-5">
                                     <div class="d-flex justify-content-between align-items-center mb-5">
                                         <h1 class="mb-0 text-black">Coupons</h1>
-                                        <h5 class="text-danger text-center ">{{message}}</h5>
+                                        <h5 class="text-success text-center ">{{message}}</h5>
+
                                         <h6 class="mb-0 text-muted">{{coupon.length}} Coupons </h6>
                                     </div>
 
@@ -37,8 +38,8 @@
                                                     <td>{{code}}</td>
                                                     <td>{{value}}</td>
                                                     <td>{{minBill}}</td>
-                                             <td>{{formatDate expiryDate}}</td>
-                                                        {{#ifeq status "Active"}}
+                                                    <td>{{formatDate expiryDate}}</td>
+                                                    {{#ifeq status "Active"}}
                                                     <td class="text-success">{{status}}</td>
                                                     {{else}}
                                                     <td class="text-danger">{{status}}</td>
@@ -79,18 +80,19 @@
                                                     class="form-control form-control-lg mt-0" required />
 
                                                 <input name="couponValue" value="{{couponEdit.value}}"
-                                                    style="border: 1px solid black" type="number" min="1" max="100" id="form3Examplea2"
-                                                    class="form-control form-control-lg mt-3" required />
+                                                    style="border: 1px solid black" type="number" min="1" max="100"
+                                                    id="form3Examplea2" class="form-control form-control-lg mt-3"
+                                                    required />
 
                                                 <input name="minBill" value="{{couponEdit.minBill}}"
                                                     style="border: 1px solid black" type="text" id="form3Examplea2"
                                                     class="form-control form-control-lg mt-3" required />
 
 
-                                                <label class="mt-3">{{formatDate couponEdit.expiryDate}}</label> 
-                                                <input name="couponExpiry"  style="border: 1px
+                                                <label class="mt-3">{{formatDate couponEdit.expiryDate}}</label>
+                                                <input name="couponExpiry" style="border: 1px
                                                 solid black" type="date" id="form3Examplea2" class="form-control
-                                                form-control-lg  mb-3" required/>
+                                                form-control-lg  mb-3" required />
 
                                                 <div class="form-outline " style="text-align: center">
 
@@ -102,23 +104,23 @@
                                             <form action="/admin/coupons/add" method="post">
                                                 <input name="couponCode" style="border: 1px solid black"
                                                     placeholder="coupon code" type="text" id="form3Examplea2"
-                                                    class="form-control form-control-lg " required />
+                                                    class="form-control form-control-lg " />
 
                                                 <input name="couponValue" style="border: 1px solid black"
-                                                    placeholder="coupon value" type="text" id="form3Examplea2"
-                                                    class="form-control form-control-lg mt-3" required />
+                                                    placeholder="coupon value(%)" type="number" id="form3Examplea2"
+                                                    class="form-control form-control-lg mt-3" />
 
                                                 <input name="minBill" style="border: 1px solid black" type="text"
                                                     placeholder="min Bill" id="form3Examplea2"
-                                                    class="form-control form-control-lg mt-3" required />
+                                                    class="form-control form-control-lg mt-3" min="1" max="100" />
 
                                                 <input name="couponExpiry" style="border: 1px solid black" type="date"
                                                     placeholder="expiry date" id="form3Examplea2"
-                                                    class="form-control form-control-lg mt-3 mb-3" required />
+                                                    class="form-control form-control-lg mt-3 mb-3" />
 
 
                                                 <div class="form-outline " style="text-align: center">
-
+                                                    <h5 class="text-danger text-center ">{{errorMessage}}</h5>
                                                     <button type="submit"
                                                         class="btn btn-primary btn-lg btn-block w-100 border-dark">Add+</button>
                                                 </div>

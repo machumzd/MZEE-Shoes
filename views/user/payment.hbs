@@ -5,16 +5,7 @@
 {{else}}
 {{>userNav}}
 {{/if}}
-<script>
-  window.onload = function() {
-    var msg = document.getElementById("validation");
-    if (msg.innerHTML !== "") {
-      setTimeout(function() {
-        msg.style.display = "none";
-      }, 1000); // 3000 milliseconds = 3 seconds
-    }
-  };
-</script>
+
 
 <div class=" container-fluid my-5 ">
     <div class="row justify-content-center ">
@@ -40,20 +31,23 @@
 
                                 <div class="mb-5">
                                     <div class="form-outline">
-                                        <form id="applyCoupon" action="/applyCoupon?id={{cart._id}}" method="post">
-                                            <div style="display : flex; gap: 2px;">
-                                                <input style="border: 1px solid black;width:20rem;" name="coupon" placeholder="enter your code" type="text"
-                                                    id="form3Examplea2" class="form-control form-control-lg" />
-                                                <button type="submit" class="btn btn-warning ms-2 border-dark">Apply</button>
-                                      
+                                        <div style="display : flex; gap: 2px;">
+                                            <input style="border: 1px solid black;width:20rem;" name="coupon"
+                                                placeholder="enter your code" type="text" id="form3Examplea2"
+                                                class="form-control form-control-lg" />
+                                            <button type="submit" class="btn btn-warning ms-2 border-dark"
+                                                onclick="couponApply('{{cart._id}}','{{coupon.value}}','{{totalBill}}')">Apply</button>
 
-                                            </div>
-                                            {{#if couponSMsg}}
-                                            <span style="color: green;" class="ps-3"><b>{{couponSMsg}}</b></span>
-                                             {{/if}}
-                                           <span style="color: red;" class="ps-3"><b id="validation">{{couponMsg}}</b></span>
-                                          
-                                        </form>
+
+                                        </div>
+
+                                        <span style="color: green;" id="validation2"
+                                            class="ps-3"><b>{{couponSMsg}}</b></span>
+
+                                        <span style="color: red;" class="ps-3"><b
+                                                id="validation">{{couponMsg}}</b></span>
+
+
                                     </div>
                                 </div>
 
@@ -62,7 +56,7 @@
                                 </div>
 
                                 <form id="checkout-form">
-                                     <div class="form-check">
+                                    <div class="form-check">
                                         <input class="form-check-input mt-5 mx-3 js-radioInput" type="radio"
                                             name="radio" value="razorpay" id="flexRadioDefault1">
                                         <label class="form-check-label" for="flexRadioDefault1">
@@ -78,7 +72,7 @@
                                             <img src="https://pngimg.com/uploads/paypal/paypal_PNG15.png" alt=""
                                                 height="60" width="200">
                                         </label>
-                                    </div>  --}}
+                                    </div> --}}
                                     <div class="form-check">
                                         <input class="form-check-input mt-5 mx-3 js-radioInput" type="radio"
                                             name="radio" value="COD" id="flexRadioDefault2">
@@ -174,9 +168,10 @@
                                                 <h6><b>Total</b></h6>
                                             </div>
                                             <div class="flex-sm-col col-auto">
-                                                <h6 class="mb-3"><b id="totalBill">₹ {{totalBill}} </b></h6>
+                                                <h6 class="mb-3"><b id="totalBill2">₹ {{totalBill}} </b></h6>
                                             </div>
-                                            <input type="hidden" name="orderBill" id="totalBillInput" value="{{totalBill}}">
+                                            <input type="hidden" name="orderBill" id="totalBillInput"
+                                                value="koo{{totalBill}}">
                                         </div>
                                         <hr class="my-0">
                                     </div>
@@ -185,7 +180,8 @@
 
                                 <div class="row mb-5 mt-4 ">
                                     <div class="col-md-7 col-lg-6 p-2"><button id="my_button" type="submit"
-                                            disabled="disabled" class="btn btn-block btn-success btn-lg border-dark"   style="width: 100%;  border-radius:30px;">Confirm
+                                            disabled="disabled" class="btn btn-block btn-success btn-lg border-dark"
+                                            style="width: 100%;  border-radius:30px;">Confirm
                                             Order</button></div>
                                 </div>
                                 </form>
@@ -227,8 +223,94 @@
                 if (response.codSuccess) {
                     console.log("COD working")
                     location.replace('/orderRedirect')
-              } 
+                }
             }
         })
     })
-    </script>
+</script>
+
+
+<script>
+
+    function couponApply(id, value, bill) {
+        var coupon = document.getElementById("form3Examplea2").value;
+        console.log(value)
+        console.log(bill)
+        console.log(coupon);
+
+        if (coupon == "") {
+            document.getElementById("validation2").innerHTML = ""
+            document.getElementById("validation").innerHTML = "Please enter a coupon code";
+        } else {
+            fetch("/applyCoupon", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    coupon: coupon,
+                    bill:bill,
+                    id: id
+                })
+            })
+
+                .then(respo => {
+                    return respo.json();
+                })
+                .then(response => {
+                    if (response.code == coupon.toUpperCase()) {
+                        if (response.status == "Active") {
+                            if (response.minBill > bill) {
+                                document.getElementById("validation2").innerHTML = "";
+                                document.getElementById("validation").innerHTML = "Minimum Bill Required is ₹ " + response.minBill;
+                                document.getElementById("couponCode").innerHTML = "";
+                                document.getElementById("couponDiscount").innerHTML = "";
+                                document.getElementById("couponValue").innerHTML = "";
+                                document.getElementById("totalBill2").innerHTML = "₹ " + bill;
+                            } else {
+                                document.getElementById("validation").innerHTML = "";
+                                document.getElementById("couponCode").innerHTML = coupon;
+                                document.getElementById("couponDiscount").innerHTML = "Coupon Discount";
+                                document.getElementById("couponValue").innerHTML = response.value + "%";
+                                document.getElementById("totalBill2").innerHTML = "₹ " + (bill - (bill * response.value / 100));
+                                document.getElementById("validation2").innerHTML = coupon + "-Coupon Added Successfully";
+                            }
+                        } else {
+                            document.getElementById("validation2").innerHTML = "";
+                            document.getElementById("validation").innerHTML = "Coupon Expired";
+                            document.getElementById("couponCode").innerHTML = "";
+                            document.getElementById("couponDiscount").innerHTML = "";
+                            document.getElementById("couponValue").innerHTML = "";
+                            document.getElementById("totalBill2").innerHTML = "₹ " + bill;
+
+                        }
+                    } else {
+                        document.getElementById("validation2").innerHTML = "";
+                        document.getElementById("validation").innerHTML = "Coupon not found,try again";
+                        document.getElementById("couponCode").innerHTML = "";
+                        document.getElementById("couponDiscount").innerHTML = "";
+                        document.getElementById("couponValue").innerHTML = "";
+                        document.getElementById("totalBill2").innerHTML = "₹ " + bill;
+
+
+
+                    }
+
+                })
+
+                .catch(error => {
+                    console.log(error);
+                });
+        }
+
+    }
+
+  window.onload = function () {
+    var msg = document.getElementById("validation");
+    if (msg.innerHTML !== "") {
+      setTimeout(function () {
+        msg.style.display = "none";
+      }, 2000); // 3000 milliseconds = 3 seconds
+    }
+  };
+</script>
