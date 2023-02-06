@@ -14,7 +14,8 @@ const Order = require("../model/orderModel");
 const Coupon = require("../model/couponModel");
 const { log } = require("console");
 const { response } = require("express");
-
+const excelJs=require("exceljs")
+const Razorpay = require('razorpay');
 //otp purpose
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -233,18 +234,7 @@ exports.userHome = (req, res) => {
   });
 };
 
-exports.userLoggedIn = (req, res, next) => {
-  if (req.session.user) {
-    next();
-  } else {
-    res.redirect("/login");
-  }
-};
-exports.userLogout = (req, res) => {
-  req.session.user = false;
-  req.session.destroy();
-  res.redirect("/user");
-};
+
 
 exports.mobileOtp = (req, res) => {
   res.render("user/mobileOtp");
@@ -1012,6 +1002,10 @@ exports.paymentMode = (req, res) => {
         console.log("in function going section");
         createOrders(cart, paymentMode, address, orderBill);
         res.json({ codSuccess: true });
+      }else{
+        console.log("im in razorpay");
+        createOrders(cart,paymentMode,address,orderBill);
+        res.redirect("/razorpay")
       }
     });
   });
@@ -1020,7 +1014,7 @@ exports.paymentMode = (req, res) => {
 exports.orderSuccessRedirect = (req, res) => {
   const order = req.session.order;
   order.items.forEach((item) => {
-    item.orderStatus = "processed";
+    item.orderStatus = "Processed";
   });
   const newOrder = new Order(order);
   newOrder
@@ -1040,9 +1034,11 @@ exports.orderSuccessRedirect = (req, res) => {
             Order.updateOne(
               { _id: newOrder._id },
               { $set: { orderBill: final } }
+             
             ).then(() => {
               res.redirect("/orderSuccess");
               console.log("success guys");
+              
             });
           });
         } else {
@@ -1064,7 +1060,7 @@ exports.orders = async (req, res) => {
   const userData = req.session.userData;
 
   getCategory().then(async (categories) => {
-    const data = await Order.find({ owner: req.session.userData._id }).lean();
+    const data = await Order.find({ owner: req.session.userData._id }).sort({orderDate:-1}).lean();
 
     res.render("user/orders", { data, userData, categories });
   });
@@ -1111,13 +1107,12 @@ exports.returnOrder = (req, res) => {
 exports.applyCoupon = (req, res) => {
   const code = req.body.coupon;
   const bill = req.body.bill;
-
+  req.session.orderBill=bill
   Coupon.findOne({ code: code }).then((coupon1) => {
     if (coupon1) {
       const coupDate = new Date(coupon1.expiryDate);
       const currDate = new Date();
       const status = currDate.getTime() > coupDate.getTime() ? "Expired" : "Active";
-      
       console.log("-------------------insidee of coupo1--------");
       Coupon.findOneAndUpdate(
         { code: code },
@@ -1130,6 +1125,8 @@ exports.applyCoupon = (req, res) => {
 
             if (Vcoupon.minBill < bill) {
               req.session.applyedCoupon = Vcoupon;
+              const final =bill-(bill * coupon.value) / 100;
+              req.session.orderBill=final
             }
             res.json(coupon1);
           });
@@ -1139,6 +1136,25 @@ exports.applyCoupon = (req, res) => {
     }
   });
 };
+
+exports.razorpayRedirect=(req,res)=>{
+const bill=req.session.orderBill
+
+var options = {
+  amount: bill*100,  // amount in the smallest currency unit
+  currency: "INR",
+  receipt: "order_rcptid_11"
+};
+instance.orders.create(options, function(err, order) {
+  console.log("--------------------payment created------------")
+  res.json({razorpay:true})
+});
+
+
+}
+
+
+
 
 ///admin-----------------------------------------------------------------------------------------------------
 exports.getAdminLogin = (req, res) => {
@@ -1172,16 +1188,10 @@ exports.adminLogin = (req, res) => {
     });
 };
 
-exports.adminLoggedIn = (req, res, next) => {
-  if (req.session.admin) {
-    next();
-  } else {
-    res.redirect("/admin");
-  }
-};
+
 
 exports.userManagement = (req, res) => {
-  User.find((err, users) => {
+  User.find((err, users)=> {
     if (!err) {
       req.session.users = users;
       res.render("admin/adminUsers", {
@@ -1295,12 +1305,7 @@ exports.userUnBlock = (req, res) => {
     });
 };
 
-exports.adminLogout = (req, res) => {
-  req.session.user = false;
-  req.session.admin = false;
-  req.session.destroy();
-  res.redirect("/admin");
-};
+
 
 exports.adminCategory = (req, res) => {
   Category.find().then((result) => {
@@ -1393,7 +1398,7 @@ exports.productLoad = (req, res) => {
   //     }
   //   });
 
-  Product.find({ isDeleted: false })
+  Product.find({ isDeleted: false }).sort({updatedAt:-1})
     .then((products) => {
       console.log("product deatils");
       req.session.products = products;
@@ -1524,7 +1529,7 @@ exports.productSearch = (req, res) => {
 };
 
 exports.ordersLoad = (req, res) => {
-  Order.find({}).then((orders) => {
+  Order.find({}).sort({orderDate:-1}).then((orders) => {
     res.render("admin/adminOrders", { orders });
   });
 };
@@ -1714,3 +1719,65 @@ exports.couponUpdate = (req, res) => {
       res.send("An error occurred while updating the coupon.");
     });
 };
+
+
+exports.orderReport=(req,res)=>{
+  Order.find({"items.orderStatus":"processed"})
+  .then((orders)=>{
+    res.render("admin/reports",{orders})
+  })
+}
+
+exports.orderExcel = (req, res) => {
+  Order.find()
+      .then((SalesReport) => {
+
+
+          console.log(SalesReport)
+          try {
+              const workbook = new excelJs.Workbook();
+
+              const worksheet = workbook.addWorksheet("Sales Report");
+
+              worksheet.columns = [
+                  { header: "S no.", key: "s_no" ,width:10},
+                  { header: "OrderID", key: "_id" ,width:30},
+                  { header: "Date", key: "orderDate",width:20 },
+                  { header: "Products", key: "productName",width:30 },
+                  { header: "Method", key: "paymentMode" ,width:10 },
+                  //     { header: "status", key: "status" },
+                  { header: "Amount", key: "orderBill" },
+              ];
+              let counter = 1;
+              SalesReport.forEach((report) => {
+                  report.s_no = counter;
+                  report.productName = "";
+                  // report.name = report.userid;
+                  report.items.forEach((eachproduct) => {
+                      report.productName += eachproduct.productName + ", ";
+                  });
+                  worksheet.addRow(report);
+                  counter++;
+              });
+
+              worksheet.getRow(1).eachCell((cell) => {
+                  cell.font = { bold: true };
+              });
+
+
+              res.header(
+                  "Content-Type",
+                  "application/vnd.oppenxmlformats-officedocument.spreadsheatml.sheet"
+              );
+              res.header("Content-Disposition", "attachment; filename=report.xlsx");
+
+              workbook.xlsx.write(res);
+          } catch (err) {
+              console.log(err.message);
+          }
+      })
+      .catch((err) => {
+          console.log(err.message);
+      })
+
+}

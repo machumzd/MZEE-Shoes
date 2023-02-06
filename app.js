@@ -1,7 +1,7 @@
 const express=require("express")
 require("dotenv").config()
 const session=require("express-session")
-
+const Razorpay=require('razorpay')
 const logger = require("morgan")
 const path=require("path")
 const cookieParser=require('cookie-parser');
@@ -26,6 +26,11 @@ app.use(session({
     cookie:{maxAge:600000}
   }));
 
+
+  var instance = new Razorpay({
+    key_id: '',
+    key_secret: '',
+  });
 
 
 app.set('view engine','hbs')
