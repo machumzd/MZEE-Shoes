@@ -1,4 +1,4 @@
-{{>head}}
+
 {{>adminNav}}
 
 <section class="vh-100">
@@ -41,7 +41,7 @@
               <th scope="row">{{counter @index}}</th>
               <td>{{productName}}</td>
               <td>{{price}}</td>
-              <td ">{{description}}</td>
+              <td style="max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{description}}</td>
                <td>{{stock}}</td>
                 <td>{{category}}</td>
 

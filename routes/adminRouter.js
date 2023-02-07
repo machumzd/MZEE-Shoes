@@ -49,7 +49,15 @@ router.post("/admin/coupon/update",controlls.couponUpdate)
 router.get("/admin/dashboard/report",controlls.orderReport)
 router.get("/admin/exportExcel",controlls.orderExcel)
 
+router.get("/admin/banner",controlls.bannerLoad)
+router.post('/admin/banners/add',store.any(),controlls.bannerAdd)
+router.get("/admin/banner/edit",controlls.bannerEdit)
+router.post("/admin/banner/update",store.any(),controlls.bannerUpdate)
+
+router.post("/admin/banner/disable",controlls.bannerDisable)
+router.post("/admin/banner/enable",controlls.bannerEnable)
 
 router.get("/admin-logout",auth.adminLogout)
+
 
 module.exports=router;

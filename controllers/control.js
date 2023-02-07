@@ -1,21 +1,23 @@
-const twilio = require("twilio");
 const config = require("../config/config");
+
 const Admin = require("../model/adminModel");
 const User = require("../model/userModel");
 const Category = require("../model/categoryModel");
 const Product = require("../model/productModel");
-const bcrypt = require("bcrypt");
-const client = new twilio(config.accountSID, config.authTocken);
 const Address = require("../model/addressModel");
 const Cart = require("../model/cartModel");
-const { Error } = require("mongoose");
-const nodemailer = require("nodemailer");
 const Order = require("../model/orderModel");
 const Coupon = require("../model/couponModel");
-const { log } = require("console");
-const { response } = require("express");
-const excelJs=require("exceljs")
-const Razorpay = require('razorpay');
+const Banner = require("../model/bannerModel");
+
+const bcrypt = require("bcrypt");
+const twilio = require("twilio");
+const client = new twilio(config.accountSID, config.authTocken);
+
+const nodemailer = require("nodemailer");
+const excelJs = require("exceljs");
+const Razorpay = require("razorpay");
+
 //otp purpose
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000);
@@ -90,6 +92,18 @@ const getProducts = function () {
   });
 };
 
+const getBanners = function () {
+  return new Promise((res, rej) => {
+    Banner.find({ status: "Active" })
+      .then((banners) => {
+        res(banners);
+      })
+      .catch(() => {
+        const error = new Error("could not find Banners");
+        rej(error);
+      });
+  });
+};
 const getCoupons = function () {
   return new Promise((res, rej) => {
     Coupon.find({})
@@ -211,30 +225,33 @@ exports.signIn = async (req, res) => {
 };
 
 exports.userHome = (req, res) => {
-  getCategory().then((categories) => {
-    getProducts().then((products) => {
-      if (req.session.user) {
-        userData = req.session.userData;
-        getCarts(userData._id).then((carts) => {
+  getBanners().then((banners) => {
+    getCategory().then((categories) => {
+      getProducts().then((products) => {
+        if (req.session.user) {
+          userData = req.session.userData;
+          getCarts(userData._id).then((carts) => {
+            console.log("----------------banners-------"+banners)
+            res.render("user/index", {
+              userData: userData,
+              cart: carts,
+              banners:banners,
+              categories: categories,
+              products: products,
+            });
+          });
+          console.log("login success");
+        } else {
           res.render("user/index", {
-            userData: userData,
-            cart: carts,
             categories: categories,
             products: products,
+            banners:banners
           });
-        });
-        console.log("login success");
-      } else {
-        res.render("user/index", {
-          categories: categories,
-          products: products,
-        });
-      }
+        }
+      });
     });
   });
 };
-
-
 
 exports.mobileOtp = (req, res) => {
   res.render("user/mobileOtp");
@@ -333,19 +350,26 @@ exports.displayCategory = (req, res) => {
   Product.find({ $and: [{ category: category }, { isDeleted: false }] })
 
     .then((products) => {
-      console.log("message from products" + products);
       getCategory()
         .then((categories) => {
           const userData = req.session.userData;
-          getCarts(userData._id).then((carts) => {
-            res.render("user/shop.hbs", {
+          if (userData) {
+            getCarts(userData._id).then((carts) => {
+              res.render("user/shop", {
+                products,
+                cart: carts,
+                categoryName: category,
+                userData: userData,
+                categories: categories,
+              });
+            });
+          } else {
+            res.render("user/shop", {
               products,
-              cart: carts,
               categoryName: category,
-              userData: userData,
               categories: categories,
             });
-          });
+          }
         })
 
         .catch((err) => {
@@ -929,6 +953,7 @@ exports.checkout = (req, res) => {
         getAddress(userData._id).then((address) => {
           if (req.session.user) {
             getTotalSum(userData._id).then((totalBill) => {
+              req.session.oldBill = totalBill;
               res.render("user/checkout", {
                 userData,
                 address,
@@ -962,6 +987,7 @@ exports.payment = (req, res) => {
       } else {
         getTotalSum(userData._id).then((totalBill) => {
           console.log("this is frorm ------payment" + req.session.couponCode);
+          req.session.orderBill = totalBill;
 
           res.render("user/payment", {
             categories,
@@ -997,15 +1023,16 @@ exports.paymentMode = (req, res) => {
     const address = req.session.selectedAddress;
     const paymentMode = req.body.radio;
     const orderBill = req.session.cartBill;
+
     Address.findOne({ _id: address }).then((address) => {
       if (paymentMode == "COD") {
         console.log("in function going section");
         createOrders(cart, paymentMode, address, orderBill);
         res.json({ codSuccess: true });
-      }else{
+      } else {
         console.log("im in razorpay");
-        createOrders(cart,paymentMode,address,orderBill);
-        res.redirect("/razorpay")
+        createOrders(cart, paymentMode, address, orderBill);
+        res.redirect("/razorpay");
       }
     });
   });
@@ -1034,11 +1061,9 @@ exports.orderSuccessRedirect = (req, res) => {
             Order.updateOne(
               { _id: newOrder._id },
               { $set: { orderBill: final } }
-             
             ).then(() => {
               res.redirect("/orderSuccess");
               console.log("success guys");
-              
             });
           });
         } else {
@@ -1060,9 +1085,12 @@ exports.orders = async (req, res) => {
   const userData = req.session.userData;
 
   getCategory().then(async (categories) => {
-    const data = await Order.find({ owner: req.session.userData._id }).sort({orderDate:-1}).lean();
-
-    res.render("user/orders", { data, userData, categories });
+    const data = await Order.find({ owner: req.session.userData._id })
+      .sort({ orderDate: -1 })
+      .lean();
+    const oldBill = req.session.oldBill;
+    console.log("---------------------oldbill---------------" + oldBill);
+    res.render("user/orders", { data, userData, categories, oldBill });
   });
 };
 
@@ -1107,26 +1135,34 @@ exports.returnOrder = (req, res) => {
 exports.applyCoupon = (req, res) => {
   const code = req.body.coupon;
   const bill = req.body.bill;
-  req.session.orderBill=bill
+
   Coupon.findOne({ code: code }).then((coupon1) => {
     if (coupon1) {
       const coupDate = new Date(coupon1.expiryDate);
       const currDate = new Date();
-      const status = currDate.getTime() > coupDate.getTime() ? "Expired" : "Active";
+      const status =
+        currDate.getTime() > coupDate.getTime() ? "Expired" : "Active";
       console.log("-------------------insidee of coupo1--------");
       Coupon.findOneAndUpdate(
         { code: code },
         { $set: { status: status } }
       ).then((coupon3) => {
-        console.log("---------------------inside of coupon3---"+coupon3.code)
+        console.log("---------------------inside of coupon3---" + coupon3.code);
         Coupon.findOne({ code: code }) //extra validation
           .then((Vcoupon) => {
-            console.log("-----------------------inside of vcoupon----------"+bill,Vcoupon.minBill)
+            console.log(
+              "-----------------------inside of vcoupon----------" + bill,
+              Vcoupon.minBill
+            );
 
             if (Vcoupon.minBill < bill) {
               req.session.applyedCoupon = Vcoupon;
-              const final =bill-(bill * coupon.value) / 100;
-              req.session.orderBill=final
+              const final = bill - (bill * Vcoupon.value) / 100;
+
+              req.session.orderBill = final;
+              console.log(
+                "-------------afteer applyin bill---" + req.session.orderBill
+              );
             }
             res.json(coupon1);
           });
@@ -1137,24 +1173,24 @@ exports.applyCoupon = (req, res) => {
   });
 };
 
-exports.razorpayRedirect=(req,res)=>{
-const bill=req.session.orderBill
+exports.razorpayRedirect = (req, res) => {
+  const bill = req.session.orderBill;
+  console.log("-----------the bill is -----------" + bill);
+  const razorpay = new Razorpay({
+    key_id: config.secretId,
+    key_secret: config.secretKey,
+  });
 
-var options = {
-  amount: bill*100,  // amount in the smallest currency unit
-  currency: "INR",
-  receipt: "order_rcptid_11"
+  const options = {
+    amount: bill * 100, // amount in the smallest currency unit
+    currency: "INR",
+  };
+
+  razorpay.orders.create(options, function (err, order) {
+    console.log("------------the RP order is------" + order);
+    res.json({ razorpay: true, order, bill });
+  });
 };
-instance.orders.create(options, function(err, order) {
-  console.log("--------------------payment created------------")
-  res.json({razorpay:true})
-});
-
-
-}
-
-
-
 
 ///admin-----------------------------------------------------------------------------------------------------
 exports.getAdminLogin = (req, res) => {
@@ -1188,10 +1224,8 @@ exports.adminLogin = (req, res) => {
     });
 };
 
-
-
 exports.userManagement = (req, res) => {
-  User.find((err, users)=> {
+  User.find((err, users) => {
     if (!err) {
       req.session.users = users;
       res.render("admin/adminUsers", {
@@ -1305,8 +1339,6 @@ exports.userUnBlock = (req, res) => {
     });
 };
 
-
-
 exports.adminCategory = (req, res) => {
   Category.find().then((result) => {
     if (req.session.editCategory) {
@@ -1398,7 +1430,8 @@ exports.productLoad = (req, res) => {
   //     }
   //   });
 
-  Product.find({ isDeleted: false }).sort({updatedAt:-1})
+  Product.find({ isDeleted: false })
+    .sort({ updatedAt: -1 })
     .then((products) => {
       console.log("product deatils");
       req.session.products = products;
@@ -1529,9 +1562,11 @@ exports.productSearch = (req, res) => {
 };
 
 exports.ordersLoad = (req, res) => {
-  Order.find({}).sort({orderDate:-1}).then((orders) => {
-    res.render("admin/adminOrders", { orders });
-  });
+  Order.find({})
+    .sort({ orderDate: -1 })
+    .then((orders) => {
+      res.render("admin/adminOrders", { orders });
+    });
 };
 
 exports.editStatusLoad = (req, res) => {
@@ -1623,22 +1658,24 @@ exports.editStatus = (req, res) => {
 };
 
 exports.couponLoad = (req, res) => {
-  Coupon.find({}).then((coupon) => {
-    if (coupon) {
-      if (req.query.edit) {
-        Coupon.findOne({ _id: req.query.edit }).then((edit) => {
-          res.render("admin/coupons", { couponEdit: edit, coupon });
-        });
+  Coupon.find({})
+    .sort({ _id: -1 })
+    .then((coupon) => {
+      if (coupon) {
+        if (req.query.edit) {
+          Coupon.findOne({ _id: req.query.edit }).then((edit) => {
+            res.render("admin/coupons", { couponEdit: edit, coupon });
+          });
+        } else {
+          req.query.edit = false;
+          const message = req.session.couponMessage;
+          const errorMessage = req.session.couponErrMessage;
+          res.render("admin/coupons", { coupon, message, errorMessage });
+        }
       } else {
-        req.query.edit = false;
-        const message = req.session.couponMessage;
-        const errorMessage = req.session.couponErrMessage;
-        res.render("admin/coupons", { coupon, message, errorMessage });
+        res.render("admin/coupons");
       }
-    } else {
-      res.render("admin/coupons");
-    }
-  });
+    });
 };
 
 exports.couponAdd = (req, res) => {
@@ -1648,26 +1685,34 @@ exports.couponAdd = (req, res) => {
   const expiry = req.body.couponExpiry;
   const bill = req.body.minBill;
   if (code != "" && value != "" && expiry != "" && bill != "") {
-    if (value > 0 && value <= 100) {
-      const couponData = new Coupon({
-        code: code,
-        value: value,
-        minBill: bill,
-        expiryDate: Date(),
-        status: "Active",
-      });
-
-      couponData.save().then((coupon) => {
-        req.session.couponErrMessage = "";
-        const message = "new Coupon Added Successfully";
-        req.session.couponErrMessage = message;
+    Coupon.findOne({ code: code }).then((find) => {
+      if (find) {
+        req.session.couponMessage = "";
+        req.session.couponErrMessage = "Coupon Aldready Exists";
         res.redirect("/admin/coupons");
-      });
-    } else {
-      req.session.couponMessage = "";
-      req.session.couponErrMessage = "coupon Value(0-100 only)";
-      res.redirect("/admin/coupons");
-    }
+      } else {
+        if (value > 0 && value <= 100) {
+          const couponData = new Coupon({
+            code: code,
+            value: value,
+            minBill: bill,
+            expiryDate: Date(),
+            status: "Active",
+          });
+
+          couponData.save().then((coupon) => {
+            req.session.couponErrMessage = "";
+            const message = "new Coupon Added Successfully";
+            req.session.couponMessage = message;
+            res.redirect("/admin/coupons");
+          });
+        } else {
+          req.session.couponMessage = "";
+          req.session.couponErrMessage = "coupon Value(0-100 only)";
+          res.redirect("/admin/coupons");
+        }
+      }
+    });
   } else {
     req.session.couponMessage = "";
     req.session.couponErrMessage = "fields dont be null";
@@ -1712,6 +1757,7 @@ exports.couponUpdate = (req, res) => {
     }
   )
     .then(() => {
+      req.session.couponMessage = "coupon Updated Successfully";
       res.redirect("/admin/coupons");
     })
     .catch((error) => {
@@ -1720,64 +1766,163 @@ exports.couponUpdate = (req, res) => {
     });
 };
 
-
-exports.orderReport=(req,res)=>{
-  Order.find({"items.orderStatus":"processed"})
-  .then((orders)=>{
-    res.render("admin/reports",{orders})
-  })
-}
+exports.orderReport = (req, res) => {
+  Order.find({ "items.orderStatus": "Processed" }).then((orders) => {
+    res.render("admin/reports", { orders });
+  });
+};
 
 exports.orderExcel = (req, res) => {
   Order.find()
-      .then((SalesReport) => {
+    .then((SalesReport) => {
+      console.log(SalesReport);
+      try {
+        const workbook = new excelJs.Workbook();
 
+        const worksheet = workbook.addWorksheet("Sales Report");
 
-          console.log(SalesReport)
-          try {
-              const workbook = new excelJs.Workbook();
+        worksheet.columns = [
+          { header: "S no.", key: "s_no", width: 10 },
+          { header: "OrderID", key: "_id", width: 30 },
+          { header: "Date", key: "orderDate", width: 20 },
+          { header: "Products", key: "productName", width: 30 },
+          { header: "Method", key: "paymentMode", width: 10 },
+          //     { header: "status", key: "status" },
+          { header: "Amount", key: "orderBill" },
+        ];
+        let counter = 1;
+        SalesReport.forEach((report) => {
+          report.s_no = counter;
+          report.productName = "";
+          // report.name = report.userid;
+          report.items.forEach((eachproduct) => {
+            report.productName += eachproduct.productName + ", ";
+          });
+          worksheet.addRow(report);
+          counter++;
+        });
 
-              const worksheet = workbook.addWorksheet("Sales Report");
+        worksheet.getRow(1).eachCell((cell) => {
+          cell.font = { bold: true };
+        });
 
-              worksheet.columns = [
-                  { header: "S no.", key: "s_no" ,width:10},
-                  { header: "OrderID", key: "_id" ,width:30},
-                  { header: "Date", key: "orderDate",width:20 },
-                  { header: "Products", key: "productName",width:30 },
-                  { header: "Method", key: "paymentMode" ,width:10 },
-                  //     { header: "status", key: "status" },
-                  { header: "Amount", key: "orderBill" },
-              ];
-              let counter = 1;
-              SalesReport.forEach((report) => {
-                  report.s_no = counter;
-                  report.productName = "";
-                  // report.name = report.userid;
-                  report.items.forEach((eachproduct) => {
-                      report.productName += eachproduct.productName + ", ";
-                  });
-                  worksheet.addRow(report);
-                  counter++;
-              });
+        res.header(
+          "Content-Type",
+          "application/vnd.oppenxmlformats-officedocument.spreadsheatml.sheet"
+        );
+        res.header("Content-Disposition", "attachment; filename=report.xlsx");
 
-              worksheet.getRow(1).eachCell((cell) => {
-                  cell.font = { bold: true };
-              });
+        workbook.xlsx.write(res);
+      } catch (err) {
+        console.log(err.message);
+      }
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+};
 
+exports.bannerLoad = (req, res) => {
+  Banner.find({}).then((banner) => {
+    if (banner) {
+      if (req.query.edit) {
+        Banner.findOne({ _id: req.query.edit }).then((result) => {
+          res.render("admin/banner", { banner, bannerEdit: result });
+        });
+      } else {
+        const message = req.session.bannerMessage;
+        res.render("admin/banner", { banner, message });
+      }
+    } else {
+      res.render("admin/banner");
+    }
+  });
+};
 
-              res.header(
-                  "Content-Type",
-                  "application/vnd.oppenxmlformats-officedocument.spreadsheatml.sheet"
-              );
-              res.header("Content-Disposition", "attachment; filename=report.xlsx");
-
-              workbook.xlsx.write(res);
-          } catch (err) {
-              console.log(err.message);
-          }
-      })
-      .catch((err) => {
-          console.log(err.message);
-      })
-
+exports.bannerAdd = (req, res) => {
+  if(req.body!=""){
+  const newBanner = new Banner({
+    title: req.body.title,
+    subTitle: req.body.subtitle,
+    description: req.body.description,
+    image: req.files[0] && req.files[0].filename ? req.files[0].filename : "",
+    redirect: req.body.redirect,
+    status: "Active",
+  });
+  newBanner.save().then(() => {
+    res.redirect("/admin/banner");
+  });
+}else{
+  req.session.bannerErrMessage="field don't be null"                //validation pending
+   res.redirect("/admin/banner");
 }
+};
+
+exports.bannerEdit = (req, res) => {
+  const id = req.query.id;
+  res.redirect(`/admin/banner?edit=${id}`);
+};
+
+exports.bannerUpdate = (req, res) => {
+  const id = req.query.id;
+  const updateObj = {
+    $set: {
+      title: req.body.title,
+      subTitle: req.body.subtitle,
+      description: req.body.description,
+      redirect: req.body.redirect,
+      status: "Active",
+    },
+  };
+  if (req.files[0] && req.files[0].filename) {
+    updateObj.$set.image = req.files[0].filename;
+  }
+  Banner.updateOne({ _id: id }, updateObj)
+    .then(() => {
+      const message = "Product Updated Successfully";
+      req.session.bannerMessage = message;
+      res.redirect("/admin/banner");
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+};
+
+exports.bannerDisable = (req, res) => {
+  console.log("----------------im in disable---------");
+  const id = req.query.id;
+  Banner.updateOne(
+    { _id: id },
+    {
+      $set: {
+        status: "Disabled",
+      },
+    }
+  )
+    .then(() => {
+      req.session.bannerMessage = "Disabled Suceessfully";
+      res.redirect("/admin/banner");
+    })
+    .catch((err) => {
+      console.log("disable  button error" + err);
+    });
+};
+
+exports.bannerEnable = (req, res) => {
+  const id = req.query.id;
+  Banner.updateOne(
+    { _id: id },
+    {
+      $set: {
+        status: "Active",
+      },
+    }
+  )
+    .then(() => {
+      req.session.bannerMessage = "Enabled Suceessfully";
+      res.redirect("/admin/banner");
+    })
+    .catch((err) => {
+      console.log("enable  button error" + err);
+    });
+};

@@ -81,50 +81,50 @@
                                                 height="70" width="180">
                                         </label>
                                     </div>
-                          
-                                
 
 
 
 
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 mt-4">
+                        <div class="card border-0 ">
+                            <div class="card-header card-2">
+                                <p class="card-text text-muted mt-md-4 space">ORDER SUMMARY </p>
+                                <hr class="my-2">
+                            </div>
+
+
+                            <div class="card-body pt-0">
+
+                                {{#each cart}}
+                                <div class="row  justify-content-between">
+                                    <div class="col-auto col-md-7">
+                                        <div class="media flex-column flex-sm-row">
+                                            <img class=" img-fluid mb-2" src="/images/{{img1}}" width="62" height="62">
+                                            <div class="media-body  my-auto">
+                                                <div class="row ">
+                                                    <div class="col-auto">
+                                                        <h6 class="mb-0"><b>{{productName}}</b></h6>
+                                                        <small class="text-muted">{{category}}</small>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-5 mt-4">
-                                                <div class="card border-0 ">
-                                                    <div class="card-header card-2">
-                                                        <p class="card-text text-muted mt-md-4 space">ORDER SUMMARY </p>
-                                                        <hr class="my-2">
-                                                    </div>
-
-
-                                                    <div class="card-body pt-0">
-
-                                                        {{#each cart}}
-                                                        <div class="row  justify-content-between">
-                                                            <div class="col-auto col-md-7">
-                                                                <div class="media flex-column flex-sm-row">
-                                                                    <img class=" img-fluid mb-2" src="/images/{{img1}}" width="62" height="62">
-                                                                    <div class="media-body  my-auto">
-                                                                        <div class="row ">
-                                                                            <div class="col-auto">
-                                                                                <h6 class="mb-0"><b>{{productName}}</b></h6>
-                                                                                <small class="text-muted">{{category}}</small>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                        </div>
+                                    </div>
                                     <div class=" pl-0 flex-sm-col col-auto  my-auto">
                                         <h6 class="">{{quantity}} </h6>
                                     </div>
                                     <div class=" pl-0 flex-sm-col col-auto  my-auto ">
                                         <h6><b>₹ {{bill}}</b></h6>
                                     </div>
-                                  </div>
-                                   <hr class="my-2">
-                                 {{/each}}
-  
+                                </div>
+                                <hr class="my-2">
+                                {{/each}}
+
 
 
 
@@ -199,7 +199,7 @@
 
 
 {{>foot}}
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 
 <script>
 
@@ -226,70 +226,64 @@
                     location.replace('/orderRedirect')
                 } else if (response.razorpay) {
                     console.log("razorpay working")
-                    razorpayPayment(response.order)
+                    razorpay(response.order,response.bill)
                 }
             }
         })
     })
+</script>
 
-function razorpayPayment(order){
-    var orderId ;
-$(document).ready(function(){
-    var settings = {
-  "url": "/create/orderId",
-  "method": "POST",
-  "timeout": 0,
-  "headers": {
-    "Content-Type": "application/json"
-  },
-  "data": JSON.stringify({
-    "amount": "50000"
-  }),
-};
-var options = {
-    "key": "", // Enter the Key ID generated from the Dashboard
-    "amount": "50000", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-    "currency": "INR",
-    "name": "Mzee Shoes",
-    "description": "Buy Shoes",
-    "image": "/images/logo.png",
-    "order_id": orderId, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-    "handler": function (response){
-        alert(response.razorpay_payment_id);
-        alert(response.razorpay_order_id);
-        alert(response.razorpay_signature)
-    },
-
-//creates new orderId everytime
-$.ajax(settings).done(function (response) {
-
-  orderId=response.orderId;
-  console.log(orderId);
-  $("button").show();
-});
- "theme": {
-        "color": "#3399cc"
+<script>
+    
+    function razorpay(order,bill) {
+        console.log(bill)
+        var options = {
+            "key": "rzp_test_8bFkeBhywF7wRI", // Enter the Key ID generated from the Dashboard
+            "amount": bill*100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+            "currency": "INR",
+            "name": "Mzee Shoes",
+            "description": "Buy  Shoes",
+            "image": "/images/logo.png",
+            "handler": function (response) {
+                RazoverifyPayment(response, order)
+            },
+            "prefill": {
+                "name": "Mzee Shoes",
+                "email": "MzeeShoes@gmail.com",
+                "contact": "+91 7994299413"
+            },
+            "notes": {
+                "address": "Mzee-Shoes, 3rd Floor, 80 Feet Road, Koramangala, Bangalore, Karnataka, India"
+            },
+            "theme": {
+                "color": "#3399cc"
+            }
+        }
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
     }
-});
-var rzp1 = new Razorpay(options);
-rzp1.on('payment.failed', function (response){
-        alert(response.error.code);
-        alert(response.error.description);
-        alert(response.error.source);
-        alert(response.error.step);
-        alert(response.error.reason);
-        alert(response.error.metadata.order_id);
-        alert(response.error.metadata.payment_id);
-});
- rzp1.open();
-    e.preventDefault();
+    function RazoverifyPayment(payment, order) {
+        location.replace('/orderRedirect')
 
-}
-
-
-
-
-
+        $.ajax({
+            url: '/userhome/razo-verify-payment',
+            data: {
+                payment,
+                order
+            },
+            method: 'post',
+            success: (response) => {
+                if (response.status) {
+                    console.log("succes")
+                    location.href = '/orderSuccess'
+                } else {
+                    // need to render payment faild page
+                    location.reload()
+                    alert("payment failed")
+                }
+            }
+        })
+    }
 </script>
 
 
@@ -312,7 +306,7 @@ rzp1.on('payment.failed', function (response){
                 },
                 body: JSON.stringify({
                     coupon: coupon,
-                    bill:bill,
+                    bill: bill,
                     id: id
                 })
             })
@@ -368,12 +362,13 @@ rzp1.on('payment.failed', function (response){
 
     }
 
-  window.onload = function () {
-    var msg = document.getElementById("validation");
-    if (msg.innerHTML !== "") {
-      setTimeout(function () {
-        msg.style.display = "none";
-      }, 2000); // 3000 milliseconds = 3 seconds
-    }
-  };
+    window.onload = function () {
+        var msg = document.getElementById("validation");
+        if (msg.innerHTML !== "") {
+            setTimeout(function () {
+                msg.style.display = "none";
+            }, 2000); // 3000 milliseconds = 3 seconds
+        }
+    };
 </script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>

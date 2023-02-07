@@ -11,6 +11,8 @@ module.exports={
     authTocken : process.env.TWILIO_AUTH_TOCKEN,
     email:process.env.EMAIL,
     pass:process.env.PASSWORD,
+    secretKey:process.env.RP_SECRET_KEY,
+    secretId:process.env.RP_SECRET_ID,
      connectToDb: (cb) => {
         mongoose.connect(process.env.dataBase,{ useNewUrlParser: true })
             .then(() => {

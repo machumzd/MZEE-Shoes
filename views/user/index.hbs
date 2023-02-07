@@ -15,6 +15,7 @@
 
 
         <div class="carousel-item active">
+          
           <div class="container">
             <div class="row">
               <div class="col-md-7">
@@ -38,7 +39,8 @@
               </div>
               <div class="col-md-5 ">
                 <div class="img-box p-5 overflow-hidden">
-                  <img src="/images/shoe1.png" class="img-fluid object-fit-none" alt="">
+                  <img src="/images/image1-1674647141715.png" class="img-fluid"
+                    style="max-width: 100%; max-height: 100%; object-fit: cover;" alt="">
                 </div>
               </div>
             </div>
@@ -46,7 +48,7 @@
         </div>
 
 
-
+        {{#each banners}}
         <div class="carousel-item">
           <div class="container">
             <div class="row">
@@ -54,29 +56,30 @@
                 <div class="detail-box">
                   <h1>
                     <span style="font-weight: 300;">
-                      Wear Casuals show
+                      {{title}}
                     </span>
                     <br>
-                    Who you are
+                    {{subTitle}}
                   </h1>
                   <p class="carousel-p">
-                    casual always for fashion
+                    {{description}}
                   </p>
-                  <a href="/displayCategory?id=CASUAL">
+                  <a href="/{{redirect}}">
                     Discover
                   </a>
                 </div>
               </div>
               <div class="col-md-5 ">
-                <div class="img-box overflow-hidden ">
-                  <img src="/images/shoe3.png" class=" object-fit-none img-fluid" alt="">
+                <div class="img-box p-5 overflow-hidden">
+                  <img src="/images/{{image}}" class="img-fluid"
+                    style="max-width: 100%; max-height: 100%; object-fit: cover;" alt="">
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-
+        {{/each}}
 
 
       </div>

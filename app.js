@@ -12,6 +12,7 @@ const hbs=require("hbs")
 
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
+const { config } = require("dotenv")
 
 
 
@@ -25,13 +26,6 @@ app.use(session({
     secret:"process.env.secret",
     cookie:{maxAge:600000}
   }));
-
-
-  var instance = new Razorpay({
-    key_id: '',
-    key_secret: '',
-  });
-
 
 app.set('view engine','hbs')
 app.set('views',path.join(__dirname,'views'));
