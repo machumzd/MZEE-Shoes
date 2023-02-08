@@ -4,6 +4,8 @@ const controlls = require("../controllers/control");
 const multer = require("multer");
 const auth=require("../helpers/auth")
 
+
+
 router.get("/", function (req, res) {
   if (req.session.user || req.session.admin) {
     res.redirect("/user");
@@ -13,7 +15,7 @@ router.get("/", function (req, res) {
 });
 
 router.get("/signup", controlls.signUp);
-router.get("/login", controlls.userSignin);
+router.get("/login",controlls.userSignin);
 router.get("/user", controlls.userHome);
 router.get("/logout", auth.userLogout);
 router.get("/why", controlls.why);

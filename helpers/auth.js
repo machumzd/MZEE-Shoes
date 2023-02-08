@@ -30,3 +30,4 @@ exports.userLogout = (req, res) => {
     req.session.destroy();
     res.redirect("/admin");
   };
+

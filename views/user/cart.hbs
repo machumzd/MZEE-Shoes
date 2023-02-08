@@ -62,8 +62,7 @@
                           document.getElementById("form" + data).setAttribute("value", parseInt(x) + 1);
                           document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) + 1) * price);
                           //document.getElementById("4plus"+data).value=bill
-                           document.getElementById("totalBill").innerHTML= "₹ " + ((parseInt(x) + 1) * price);
-                          document.getElementById("totalBills").innerHTML= "₹ " + ((parseInt(x) + 1) * price);
+
                           const id = data;
                           console.log("im in steponup")
                           fetch("/addToCart/operation", {
@@ -81,7 +80,9 @@
                               return response.json();
                             })
                             .then(data => {
-                              console.log("this add data"+data)
+                              document.getElementById("totalBill").innerHTML = "₹ " + data
+                              document.getElementById("totalBills").innerHTML = "₹ " + data
+                              console.log("this add data" + data)
                             })
                             .catch(error => {
                               console.log(error);
@@ -98,12 +99,11 @@
                           element.nextElementSibling.value = parseInt(x) - 1;
                           const bill = document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) - 1) * price);
                           //document.getElementById("4minus"+data).value=bill
-                           document.getElementById("totalBill").innerHTML= "₹ " + ((parseInt(x) - 1) * price);
-                          document.getElementById("totalBills").innerHTML= "₹ " + ((parseInt(x) - 1) * price); 
+                          document.getElementById("totalBill").innerHTML = "₹ " + ((parseInt(x) - 1) * price);
+                          document.getElementById("totalBills").innerHTML = "₹ " + ((parseInt(x) - 1) * price);
 
 
                           const id = data;
-                          console.log("im in stepondqown")
                           fetch("/addToCart/operation", {
                             method: "POST",
                             headers: {
@@ -119,7 +119,9 @@
                               return response.json();
                             })
                             .then(data => {
-                              console.log("the data is" + data)
+                              document.getElementById("totalBill").innerHTML = "₹ " + data
+                              document.getElementById("totalBills").innerHTML = "₹ " + data
+
 
                             })
                             .catch(error => {
@@ -129,39 +131,6 @@
                           document.getElementById("limitMessage" + data).innerHTML = "You can't add less than 0 items"
                         }
                       }
-
-
-
-
-
-
-                      /*
-                       function validateData(id) {
-                              const element = document.getElementById(id)
-                              const priceText = document.getElementById('priceText' + id)     //price of single item
-                              const price = document.getElementById('bill' + id)     //bill of single item
-                              const total = document.getElementById('final')   //total price
-                              const final = document.getElementById("totalBill")  //final price
-                      
-                              console.log("element.value"+element.value)
-                              console.log("priceText.innerHTML"+priceText)
-                              console.log("price.value"+price.value)
-                              console.log("total.innerHTML"+total.innerHTML)
-                              console.log("final.innerHTML"+final.innerHTML)
-                      
-                      
-                              const rate = priceText.innerHTML
-                              priceText.innerHTML = Number(price.innerHTML) * Number(element.value)
-                              const diff = Number(priceText.innerHTML) - Number(rate)
-                      
-                              total.innerHTML = Number(diff) + Number(total.innerHTML)
-                              final.innerHTML = Number(total.innerHTML)
-                          }
-                      
-                      */
-
-
-
                     </script>
 
                     <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
@@ -214,12 +183,14 @@
                     <input type="hidden" id="totalPrice">
                   </div>
 
-                  {{!-- {{#if (cart.length < 1)}} <button type="button" disabled
-                    class="btn btn-secondary btn-block btn-lg" data-mdb-ripple-color="dark">Proceed to Checkout</button>
-                    {{else}} --}}
-                    <a href="/cart/checkout"><button type="button" class="btn btn-dark btn-block btn-lg" style="border-radius: 20px;"
-                        data-mdb-ripple-color="dark">Proceed to Checkout</button></a>
+                  {{#if cart}}
+                  <a href="/cart/checkout"><button type="button" class="btn btn-dark btn-block btn-lg"
+                      style="border-radius: 20px;" data-mdb-ripple-color="dark">Proceed to Checkout</button></a>
 
+                  {{else}}
+                  <button type="button" disabled class="btn btn-secondary btn-block btn-lg"
+                    data-mdb-ripple-color="dark">Proceed to Checkout</button>
+                  {{/if}}
 
                 </div>
               </div>

@@ -11,7 +11,7 @@
                                 <div class="p-5">
                                     <div class="d-flex justify-content-between align-items-center mb-5">
                                         <h1 class="mb-0 text-black">Coupons</h1>
-                                        <h5 class="text-success text-center ">{{message}}</h5>
+                                        <h5 class="text-success text-center " id="message">{{message}}</h5>
 
                                         <h6 class="mb-0 text-muted">{{coupon.length}} Coupons </h6>
                                     </div>
@@ -148,6 +148,16 @@
             "pageLength": 5
         });
     });
+</script>
+<script>
+  window.onload = function () {
+    var msg = document.getElementById("message");
+    if (msg.innerHTML !== "") {
+      setTimeout(function () {
+        msg.style.display = "none";
+      }, 2000); // 3000 milliseconds = 3 seconds
+    }
+  };
 </script>
 
 {{>foot}}

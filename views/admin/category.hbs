@@ -55,7 +55,7 @@
             <div class="form-outline mb-4">
               <input type="category" name="category" id="category" class="form-control form-control-lg border-dark"
                 placeholder="Add category" />
-                <h5 class="text-danger text-center">{{message}}</h5>
+                <h5 class="text-danger text-center" id="message">{{message}}</h5>
             </div>
 
             
@@ -69,3 +69,13 @@
   </div>
 </section>
 {{>foot}}
+<script>
+  window.onload = function () {
+    var msg = document.getElementById("message");
+    if (msg.innerHTML !== "") {
+      setTimeout(function () {
+        msg.style.display = "none";
+      }, 2000); // 3000 milliseconds = 3 seconds
+    }
+  };
+</script>

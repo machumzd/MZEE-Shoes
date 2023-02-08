@@ -4,6 +4,7 @@ const controlls=require("../controllers/control")
 const store = require('../helpers/multer')
 const auth=require('../helpers/auth')
 
+
 router.get('/admin',controlls.getAdminLogin)
 router.post('/admin',controlls.adminLogin)
 
@@ -33,25 +34,25 @@ router.post('/admin/products/delete',controlls.productDelete)
 router.post('/admin/products/search',auth.adminLoggedIn,controlls.productSearch)
 
 
-router.get('/admin/orders',controlls.ordersLoad)
-router.get('/admin/orders/status',controlls.editStatusLoad)
+router.get('/admin/orders',auth.adminLoggedIn,controlls.ordersLoad)
+router.get('/admin/orders/status',auth.adminLoggedIn,controlls.editStatusLoad)
 router.post('/admin/orders/status',controlls.editStatus)
 
 
 
 router.get('/admin/dashboard',auth.adminLoggedIn,controlls.userDashboard)
-router.get('/admin/coupons',controlls.couponLoad)
+router.get('/admin/coupons',auth.adminLoggedIn,controlls.couponLoad)
 router.post('/admin/coupons/add',controlls.couponAdd)
 router.get('/admin/coupon/delete',controlls.couponDelete)
 router.get("/admin/coupon/edit",controlls.couponEdit)
 router.post("/admin/coupon/update",controlls.couponUpdate)
 
-router.get("/admin/dashboard/report",controlls.orderReport)
-router.get("/admin/exportExcel",controlls.orderExcel)
+router.get("/admin/dashboard/report",auth.adminLoggedIn,controlls.orderReport)
+router.get("/admin/exportExcel",auth.adminLoggedIn,controlls.orderExcel)
 
-router.get("/admin/banner",controlls.bannerLoad)
+router.get("/admin/banner",auth.adminLoggedIn,controlls.bannerLoad)
 router.post('/admin/banners/add',store.any(),controlls.bannerAdd)
-router.get("/admin/banner/edit",controlls.bannerEdit)
+router.get("/admin/banner/edit",auth.adminLoggedIn,controlls.bannerEdit)
 router.post("/admin/banner/update",store.any(),controlls.bannerUpdate)
 
 router.post("/admin/banner/disable",controlls.bannerDisable)

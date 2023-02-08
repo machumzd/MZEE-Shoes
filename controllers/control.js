@@ -197,7 +197,7 @@ exports.signIn = async (req, res) => {
 
     if (password != "" && email != "") {
       const user = await User.findOne({ email: req.body.email });
-      if (!user) {
+      if (!user&&email!=""&&password!="") {
         throw new Error("Email or Password is Incorrect,Try again");
       }
 
@@ -205,7 +205,7 @@ exports.signIn = async (req, res) => {
         req.body.password,
         user.password
       );
-      if (!passwordMatch) {
+      if (!passwordMatch&&email!=""&&password!="") {
         throw new Error("Email or Password is Incorrect,Try again");
       }
 
@@ -220,7 +220,6 @@ exports.signIn = async (req, res) => {
     }
   } catch (err) {
     req.session.user = false;
-    res.render("/login", { message: err.message });
   }
 };
 
@@ -231,7 +230,6 @@ exports.userHome = (req, res) => {
         if (req.session.user) {
           userData = req.session.userData;
           getCarts(userData._id).then((carts) => {
-            console.log("----------------banners-------"+banners)
             res.render("user/index", {
               userData: userData,
               cart: carts,
@@ -240,7 +238,6 @@ exports.userHome = (req, res) => {
               products: products,
             });
           });
-          console.log("login success");
         } else {
           res.render("user/index", {
             categories: categories,
@@ -423,7 +420,6 @@ exports.proSearch = (req, res) => {
 exports.productView = (req, res) => {
   const id = req.query.id;
   const name = req.query.name;
-  console.log("this is id:" + req.query.id);
   Product.findOne({ $or: [{ _id: id }, { productName: name }] }).then(
     (productDetails) => {
       getCategory().then((categories) => {
@@ -724,6 +720,7 @@ exports.addToCart = (req, res) => {
     }).then((result) => {
       Cart.findOne({ productName: result.productName }).then((cart) => {
         if (!cart) {
+
           const cartAdd = new Cart({
             owner: userData._id,
             productId: result._id,
@@ -744,12 +741,17 @@ exports.addToCart = (req, res) => {
               console.log("cannot get cart" + err);
             });
         } else {
+          if(cart.quantity<8){
           Cart.updateOne(
             { _id: cart._id },
             { $inc: { quantity: 1, bill: result.price } }
           ).then((updatedCart) => {
             res.redirect(`/productView?id=${result._id}`);
           });
+        }else{
+          res.redirect(`/productView?id=${result._id}`);
+          console.log("cant add its 8")
+        }
         }
       });
     });
@@ -867,7 +869,8 @@ exports.cartOperation = (req, res) => {
   req.session.cartMessage = "";
 
   Cart.findOne({ owner: userData._id })
-    .then((cart) => {
+  .then((cart) => {
+   
       if (!cart) {
         return res.redirect(`/cart?id=${userData._id}`);
       } else {
@@ -887,12 +890,12 @@ exports.cartOperation = (req, res) => {
             },
             { new: true }
           ).then((response) => {
-            res.json(response);
-
-            // return res.redirect(`/cart?id=${userData._id}`);
+            getTotalSum(userData._id).then((totalsum)=>{
+            res.json(totalsum);
+            })
           });
         }
-
+  
         if (req.body.sub) {
           const id = req.body.id;
           const price = req.body.price;
@@ -901,8 +904,10 @@ exports.cartOperation = (req, res) => {
             {
               $inc: { quantity: -1, bill: -price },
             }
-          ).then(() => {
-            res.json(response);
+          ).then((response) => {
+            getTotalSum(userData._id).then((totalsum)=>{
+            res.json(totalsum);
+            })
           });
         }
       }
@@ -911,6 +916,10 @@ exports.cartOperation = (req, res) => {
       console.error(error);
       return res.status(500).send("Internal server error");
     });
+    
+   
+  
+
 };
 
 const getTotalSum = function (id) {
@@ -1825,7 +1834,7 @@ exports.orderExcel = (req, res) => {
 
 //banner
 exports.bannerLoad = (req, res) => {
-  Banner.find({}).then((banner) => {
+  Banner.find({}).sort({_id:1}).then((banner) => {
     if (banner) {
       if (req.query.edit) {
         Banner.findOne({ _id: req.query.edit }).then((result) => {
@@ -1865,7 +1874,6 @@ exports.bannerAdd = (req, res) => {
 }else{
   req.session.bannerMessage=""
   req.session.bannerErrMessage="fields don't be null"
-  console.log("-------------------null-----------"+req.session.bannerErrMessage)      
    res.redirect("/admin/banner");
 }
 };
@@ -1903,7 +1911,6 @@ exports.bannerUpdate = (req, res) => {
 };
 
 exports.bannerDisable = (req, res) => {
-  console.log("----------------im in disable---------");
   const id = req.query.id;
   Banner.updateOne(
     { _id: id },

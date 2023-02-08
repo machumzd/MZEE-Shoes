@@ -2,7 +2,7 @@ const express=require("express")
 require("dotenv").config()
 const session=require("express-session")
 const Razorpay=require('razorpay')
-const logger = require("morgan")
+const logger = require("./helpers/logger")
 const path=require("path")
 const cookieParser=require('cookie-parser');
 const db = require('./config/config')
@@ -10,10 +10,17 @@ const app=express();
 const hbs=require("hbs")
 
 
+
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
 const { config } = require("dotenv")
 
+
+// logger(app);
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')))
 
 
 app.use(function(req, res, next) { 
@@ -56,11 +63,6 @@ hbs.registerPartials(__dirname + '/views/layouts', function (err){});
 hbs.registerPartials(__dirname + '/views/partials', function (err) {});
 
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')))
 
 hbs.registerHelper("counter", function (index){
   return index + 1;
