@@ -49,13 +49,13 @@
                                                     {{else}}
                                                     <td class="text-danger">{{status}}</td>
                                                     {{/ifeq}}
-                                                   <td class="">
+                                                    <td class="">
                                                         <a href="/admin/banner/edit?id={{_id}}"
                                                             class="btn btn-success mb-1">Edit</a>
                                                         {{#ifeq status "Active"}}
                                                         <form action="/admin/banner/disable?id={{_id}}" method="post">
                                                             <a><button type="submit"
-                                                                class="btn btn-danger">Disable</button></a>
+                                                                    class="btn btn-danger">Disable</button></a>
                                                         </form>
                                                         {{/ifeq}}
                                                         {{#ifeq status "Disabled"}}
@@ -95,22 +95,25 @@
 
                                                 <input name="title" style="border: 1px solid black"
                                                     value="{{bannerEdit.title}}" placeholder="title" type="text"
-                                                    id="form3Examplea2" class="form-control form-control-lg " />
+                                                    id="form3Examplea2" class="form-control form-control-lg "
+                                                    required />
 
                                                 <input name="subtitle" style="border: 1px solid black"
                                                     value="{{bannerEdit.subTitle}}" placeholder="subtitle" type="text"
                                                     id="form3Examplea2"
-                                                    class="form-control form-control-lg mt-3 border-dark" />
+                                                    class="form-control form-control-lg mt-3 border-dark" required />
 
                                                 <textarea name="description" rows="2" style="border: 1px solid black"
                                                     type="text" value="{{bannerEdit.description}}" placeholder=""
                                                     id="form3Examplea2"
-                                                    class="form-control form-control-lg mt-3 border-dark">{{bannerEdit.description}}</textarea>
+                                                    class="form-control form-control-lg mt-3 border-dark"
+                                                    required>{{bannerEdit.description}}</textarea>
 
                                                 <input name="redirect" style="border: 1px solid black"
                                                     value="{{bannerEdit.redirect}}" placeholder="redirect link"
                                                     type="text" id="form3Examplea2"
-                                                    class="form-control form-control-lg mt-3 mb-2 border-dark" />
+                                                    class="form-control form-control-lg mt-3 mb-2 border-dark"
+                                                    required />
 
                                                 <label class="img">{{bannerEdit.image}}</label>
                                                 <input name="image" style="border: 1px solid black" value="" type="file"
@@ -149,25 +152,74 @@
                                                 accept="image/*" />
 
 
-
+                                            <h5 class="text-danger text-center ">{{errMessage}}</h5>
 
                                             <div class="form-outline " style="text-align: center">
                                                 <h5 class="text-danger text-center ">{{errorMessage}}</h5>
                                                 <button type="submit"
                                                     class="btn btn-info btn-lg btn-block w-100 border-dark">Add+</button>
                                             </div>
+
                                         </form>
                                         {{/if}}
                                     </div>
-
                                 </div>
 
                             </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>  
+               <h3 class="mb-0 text-black text-center">Banners Display</h3> 
+               <div class="row">
+        {{#each banner}}
+
+        <div class="mt-4" style="background-color:#FBDDAB;border-radius:20px">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="detail-box" style="padding:10rem 0 1rem 7rem">
+                            <h1 style="font-weight:800">
+                                <span style="font-weight: 300;">
+                                    {{title}}
+                                </span>
+                                <br>
+                                {{subTitle}}
+                            </h1>
+                            <p class="carousel-p">
+                                {{description}}
+                            </p>
+                            <a href="/{{redirect}}" style="display: inline-block;
+    padding: 10px 40px;
+    background-color: #db4566;
+    color: #ffffff;
+    border: 1px solid #db4566;
+    border-radius: 5px;
+    -webkit-transition: all .3s;
+    transition: all .3s;
+    margin-top: 25px;
+    text-transform: uppercase;">
+                                Discover
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-5 ">
+                        <div class="img-box p-5 overflow-hidden">
+                            <img src="/images/{{image}}" class="img-fluid"
+                                style="max-width: 100%; max-height: 100%; object-fit: cover;" alt="">
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        {{/each}}
+</div>
+
+
     </div>
     </div>
     </div>

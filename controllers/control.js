@@ -1822,6 +1822,8 @@ exports.orderExcel = (req, res) => {
     });
 };
 
+
+//banner
 exports.bannerLoad = (req, res) => {
   Banner.find({}).then((banner) => {
     if (banner) {
@@ -1831,7 +1833,8 @@ exports.bannerLoad = (req, res) => {
         });
       } else {
         const message = req.session.bannerMessage;
-        res.render("admin/banner", { banner, message });
+        const errMessage=req.session.bannerErrMessage
+        res.render("admin/banner", { banner, message,errMessage });
       }
     } else {
       res.render("admin/banner");
@@ -1840,26 +1843,37 @@ exports.bannerLoad = (req, res) => {
 };
 
 exports.bannerAdd = (req, res) => {
-  if(req.body!=""){
+  const title=req.body.title
+  const subTitle=req.body.subtitle
+  const description= req.body.description
+  const redirect=req.body.redirect
+
+  if(title!=""&&subTitle!=""&&description!=""&&redirect!=""){
   const newBanner = new Banner({
-    title: req.body.title,
-    subTitle: req.body.subtitle,
-    description: req.body.description,
+    title:title,
+    subTitle: subTitle,
+    description: description,
     image: req.files[0] && req.files[0].filename ? req.files[0].filename : "",
-    redirect: req.body.redirect,
+    redirect: redirect,
     status: "Active",
   });
   newBanner.save().then(() => {
+    req.session.bannerErrMessage=""
+    req.session.bannerMessage="Banner Added Successfully"
     res.redirect("/admin/banner");
   });
 }else{
-  req.session.bannerErrMessage="field don't be null"                //validation pending
+  req.session.bannerMessage=""
+  req.session.bannerErrMessage="fields don't be null"
+  console.log("-------------------null-----------"+req.session.bannerErrMessage)      
    res.redirect("/admin/banner");
 }
 };
 
 exports.bannerEdit = (req, res) => {
   const id = req.query.id;
+  req.session.bannerErrMessage=""
+  req.session.bannerMessage=""
   res.redirect(`/admin/banner?edit=${id}`);
 };
 
@@ -1879,7 +1893,7 @@ exports.bannerUpdate = (req, res) => {
   }
   Banner.updateOne({ _id: id }, updateObj)
     .then(() => {
-      const message = "Product Updated Successfully";
+      const message = "Banner Updated Successfully";
       req.session.bannerMessage = message;
       res.redirect("/admin/banner");
     })
@@ -1900,6 +1914,7 @@ exports.bannerDisable = (req, res) => {
     }
   )
     .then(() => {
+      req.session.bannerErrMessage=""
       req.session.bannerMessage = "Disabled Suceessfully";
       res.redirect("/admin/banner");
     })
@@ -1919,6 +1934,7 @@ exports.bannerEnable = (req, res) => {
     }
   )
     .then(() => {
+      req.session.bannerErrMessage=""
       req.session.bannerMessage = "Enabled Suceessfully";
       res.redirect("/admin/banner");
     })
