@@ -2,7 +2,7 @@ const express=require("express")
 require("dotenv").config()
 const session=require("express-session")
 const Razorpay=require('razorpay')
-const logger = require("./helpers/logger")
+const logger = require("./middleware/logger")
 const path=require("path")
 const cookieParser=require('cookie-parser');
 const db = require('./config/config')
@@ -13,7 +13,7 @@ const hbs=require("hbs")
 
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
-const { config } = require("dotenv")
+
 
 
 // logger(app);
@@ -61,7 +61,6 @@ hbs.registerHelper('ifnoteq', function (a, b, options) {
 hbs.registerPartials(__dirname + '/views/layouts', function (err){});
 
 hbs.registerPartials(__dirname + '/views/partials', function (err) {});
-
 
 
 hbs.registerHelper("counter", function (index){

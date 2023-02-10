@@ -28,7 +28,10 @@
                                     <div class="form-check mt-3">
                                         <input type="radio" class="form-check-input js-radioInput" id="radio1"
                                             name="selectedAddressIndex" onclick="" value="{{_id}}">
-                                        <p class="display-address">{{name}}</p>
+                                     <p class="display-address">{{name}}<span class="mx-3">
+                                        <a href="/profile?edit={{_id}}&checkout=true"
+                              style="text-decoration: none">Edit</a>
+                              </span></p>
                                         <p class="display-address">{{address1}},{{address2}}</p>
                                         <p class="display-address">{{city}},{{state}}</p>
                                         <p class="display-address">{{mobile}}</p>
@@ -37,7 +40,7 @@
                                     </div>
                                     {{/each}}
 
-                                    <a href="/profile?add=true" style="text-decoration: none; color: green;">
+                                    <a href="/profile?&add=true&checkout=true" style="text-decoration: none; color: green;">
                                         <p>Add a new address</p>
                                     </a>
                             </div>
@@ -114,7 +117,8 @@
                                 <div class="row mb-5 mt-4 ">
                                     <div class="col-md-7 col-lg-6"><button id="my_button" type="submit"
                                             disabled="disabled" value="submit" name="submit"
-                                            class="btn btn-primary btn-block btn-lg border-dark" style="width: 100%;  border-radius:30px;">Proceed to Payment</button>
+                                            class="btn btn-primary btn-block btn-lg border-dark"
+                                            style="width: 100%;  border-radius:30px;">Proceed to Payment</button>
                                     </div>
                                     </form>
                                 </div>

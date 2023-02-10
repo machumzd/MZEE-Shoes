@@ -37,7 +37,7 @@
                                         </div>
                                         <div class="col-md-3 col-lg-3 col-xl-3">
                                             <h6 class="text-muted">{{category}}</h6>
-                                            <a href="/user/product?id={{item}}" style="text-decoration: none">
+                                            <a href="/productView?id={{productId}}" style="text-decoration: none">
                                                 <h6 class="text-black mb-0">
                                                     {{productName}}
                                                 </h6>
@@ -58,7 +58,13 @@
                                             <h6><button type="" disabled class="btn btn-secondary border-dark">cancelled</button>
                                             </h6>
                                             {{/ifeq}}
-                                            
+                                            {{#ifnoteq orderStatus "Delivered"}}
+                                            {{#ifnoteq orderStatus "Cancelled"}}
+                                             {{#ifnoteq orderStatus "Return initiated"}}
+                                                <a><button  onclick="Cancel('{{_id}}')" data-bs-toggle="modal" data-bs-target="#cancelBut" class="btn btn-danger border-dark">Cancel</button></a>
+                                            {{/ifnoteq}}
+                                            {{/ifnoteq}}
+                                            {{/ifnoteq}}
                                             {{#ifeq orderStatus "Delivered"}}
                                             <form action="/returnOrder?id={{_id}}"
                                                 method="post">
@@ -71,11 +77,10 @@
                                             </h6>
                                            {{/ifeq}}
 
-                                            {{#ifeq orderStatus "Processed"}}
+             
 
-                                                <a><button  onclick="Cancel('{{_id}}')" data-bs-toggle="modal" data-bs-target="#cancelBut" class="btn btn-danger border-dark">Cancel</button></a>
                                     
-                                            {{/ifeq}}
+                    
                                         </div>
                                     </div>
 

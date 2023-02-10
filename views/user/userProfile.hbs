@@ -17,7 +17,7 @@
 
 
 
-              <div class="col-lg-4 bg-grey container">
+              <div class="col-lg-4 bg-grey container" style="background-color:paleturquoise;">
                 <div class="card mb-4" style="border: none;">
                   <div class="card-body mt-5 ms-2">
                     <div class="d-flex flex-row">
@@ -41,13 +41,11 @@
 
                     <div class="pt-5">
                       <h6 class="mb-0"><a href="/user" class="text-body"><i
-                                                    class="fas fa-long-arrow-alt-left me-1"></i>Back to home</a></h6>
+                            class="fas fa-long-arrow-alt-left me-1"></i>Back to home</a></h6>
                     </div>
-  <div class="pt-5">
-                      <h6 class="mb-0"><a href="/cart/checkout" class="text-body"><i
-                                                    class="fas fa-long-arrow-alt-left me-1"></i>Back to Checkout</a></h6>
+                    <div class="pt-5">
                     </div>
-                    
+
                   </div>
                 </div>
               </div>
@@ -73,7 +71,9 @@
                     <p class="card-text text-muted mt-4 mb-0  space">EDIT DELIVERY ADDRESS</p>
                   </div>
                   <div>
-                    <form class="row g-3 mt-0" action="/profile/uploadAddress?id={{editAddress._id}}"
+                    {{#if toCheckout}}
+                    <form class="row g-3 mt-0" action="/profile/uploadAddress?id={{editAddress._id}}&checkout=true"
+                      {{else}} <form class="row g-3 mt-0" action="/profile/uploadAddress?id={{editAddress._id}}" {{/if}}
                       method="post">
                       <div class="col-md-6">
                         <label for="" class="form-label">Name</label>
@@ -124,7 +124,9 @@
                     <p class="card-text text-muted mt-4 mb-0  space">ADD DELIVERY ADDRESS</p>
                   </div>
                   <div>
+
                     <form class="row g-3 mt-0" action="/profile/addAddress?id={{_id}}" method="post">
+
                       <div class="col-md-6">
                         <label for="" class="form-label">Name</label>
                         <input type="text" value="" class="form-control" id="name" name="name" required>
@@ -175,7 +177,7 @@
                       <label class="form-label mt-0 mb-0" for="form3Examplea2">Enter Current Password</label>
                       <input name="currPass" style="border: 1px solid black" type="password" id="form3Examplea2"
                         class="form-control form-control-lg mt-0" />
-                        
+
 
                       <label class="form-label mt-2 mb-0" for="form3Examplea2">Enter New Password</label>
                       <input name="newPass" style="border: 1px solid black" type="password" id="form3Examplea2"
@@ -184,9 +186,9 @@
                       <label class="form-label mt-2 mb-0" for="form3Examplea2">Repeat Password</label>
                       <input name="repeatPass" style="border: 1px solid black" type="password" id="form3Examplea2"
                         class="form-control form-control-lg mt-0" />
-                           <div class="d-flex justify-content-around align-items-center mb-4">
-                  <h6>Forgot your password<a href="/forgotPassword"> click here</a></h6>
-                </div>
+                      <div class="d-flex justify-content-around align-items-center mb-4">
+                        <h6>Forgot your password<a href="/forgotPassword"> click here</a></h6>
+                      </div>
                       <h5 class="text-danger text-center">{{errorMessage}}</h5>
 
                       <div class="form-outline " style="text-align: center">
@@ -226,7 +228,8 @@
                         <p class="display-address">{{address1}},{{address2}}</p>
                         <p class="display-address">{{city}},{{state}}</p>
                         <p class="display-address">{{mobile}}</p>
-                        <p class="display-address">{{zip}}</p>
+                        <p class="display-address">{{zip}}<span><a href="/profile/deleteAddress?id={{_id}}"
+                              class="text-danger ps-2" style="text-decoration: none; ">Delete</a></span></p>
                       </li>
                     </ul>
 

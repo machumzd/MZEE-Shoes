@@ -31,3 +31,25 @@ exports.userLogout = (req, res) => {
     res.redirect("/admin");
   };
 
+
+
+  // const userloggedin= ()=>{
+  //   if (req.session.user) {
+  //     next();
+  //   } else {
+  //     res.redirect("/login");
+  //   }
+  // };
+  
+  // const adminLoggedIn=()=>{
+  //   if (req.session.admin) {
+  //     next();
+  //   } else {
+  //     res.redirect("/admin");
+  //   }
+  // };
+
+  // exports.module={
+  //   userloggedin,
+  //   adminLoggedIn
+  // }

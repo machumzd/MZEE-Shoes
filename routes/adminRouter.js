@@ -2,7 +2,7 @@ const express=require("express")
 const router=express.Router()
 const controlls=require("../controllers/control")
 const store = require('../helpers/multer')
-const auth=require('../helpers/auth')
+const auth=require('../middleware/auth')
 
 
 router.get('/admin',controlls.getAdminLogin)

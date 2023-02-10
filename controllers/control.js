@@ -9,6 +9,7 @@ const Cart = require("../model/cartModel");
 const Order = require("../model/orderModel");
 const Coupon = require("../model/couponModel");
 const Banner = require("../model/bannerModel");
+const Wishlist = require("../model/wishlistModel");
 
 const bcrypt = require("bcrypt");
 const twilio = require("twilio");
@@ -38,7 +39,14 @@ exports.why = (req, res) => {
   getCategory().then((categories) => {
     if (userData) {
       getCarts(userData._id).then((carts) => {
-        res.render("user/why", { categories, userData, cart: carts });
+        getWishlists(userData._id).then((wishlists) => {
+          res.render("user/why", {
+            categories,
+            userData,
+            wishlist: wishlists,
+            cart: carts,
+          });
+        });
       });
     } else {
       res.render("user/why", { categories, userData });
@@ -79,6 +87,37 @@ const getCategory = function () {
   });
 };
 
+const getTotalSum = function (id) {
+  return new Promise((res, rej) => {
+    Cart.find({ owner: id }).then((result) => {
+      if (result == null) {
+        constsum = 0;
+        res(sum);
+      } else {
+        Cart.aggregate([
+          {
+            $match: {
+              owner: id,
+            },
+          },
+          {
+            $group: {
+              _id: "$owner",
+              total: {
+                $sum: "$bill",
+              },
+            },
+          },
+        ])
+          .exec()
+          .then((sum) => {
+            res(sum[0].total);
+          });
+      }
+    });
+  });
+};
+
 const getProducts = function () {
   return new Promise((res, rej) => {
     Product.find({ isDeleted: false })
@@ -87,6 +126,19 @@ const getProducts = function () {
       })
       .catch(() => {
         const error = new Error("could not find products");
+        rej(error);
+      });
+  });
+};
+
+const getWishlists = function (id) {
+  return new Promise((res, rej) => {
+    Wishlist.findOne({ owner: id })
+      .then((wishlists) => {
+        res(wishlists);
+      })
+      .catch(() => {
+        const error = new Error("could not find wishlists");
         rej(error);
       });
   });
@@ -197,7 +249,7 @@ exports.signIn = async (req, res) => {
 
     if (password != "" && email != "") {
       const user = await User.findOne({ email: req.body.email });
-      if (!user&&email!=""&&password!="") {
+      if (!user && email != "" && password != "") {
         throw new Error("Email or Password is Incorrect,Try again");
       }
 
@@ -205,7 +257,7 @@ exports.signIn = async (req, res) => {
         req.body.password,
         user.password
       );
-      if (!passwordMatch&&email!=""&&password!="") {
+      if (!passwordMatch && email != "" && password != "") {
         throw new Error("Email or Password is Incorrect,Try again");
       }
 
@@ -230,19 +282,22 @@ exports.userHome = (req, res) => {
         if (req.session.user) {
           userData = req.session.userData;
           getCarts(userData._id).then((carts) => {
-            res.render("user/index", {
-              userData: userData,
-              cart: carts,
-              banners:banners,
-              categories: categories,
-              products: products,
+            getWishlists(userData._id).then((wishlists) => {
+              res.render("user/index", {
+                userData: userData,
+                cart: carts,
+                banners: banners,
+                wishlist: wishlists,
+                categories: categories,
+                products: products,
+              });
             });
           });
         } else {
           res.render("user/index", {
             categories: categories,
             products: products,
-            banners:banners
+            banners: banners,
           });
         }
       });
@@ -352,12 +407,15 @@ exports.displayCategory = (req, res) => {
           const userData = req.session.userData;
           if (userData) {
             getCarts(userData._id).then((carts) => {
-              res.render("user/shop", {
-                products,
-                cart: carts,
-                categoryName: category,
-                userData: userData,
-                categories: categories,
+              getWishlists(userData._id).then((wishlists) => {
+                res.render("user/shop", {
+                  products,
+                  cart: carts,
+                  wishlist: wishlists,
+                  categoryName: category,
+                  userData: userData,
+                  categories: categories,
+                });
               });
             });
           } else {
@@ -425,11 +483,14 @@ exports.productView = (req, res) => {
       getCategory().then((categories) => {
         if (req.session.userData) {
           getCarts(req.session.userData._id).then((carts) => {
-            res.render("user/productView", {
-              categories: categories,
-              cart: carts,
-              userData: req.session.userData,
-              product: productDetails,
+            getWishlists(userData._id).then((wishlists) => {
+              res.render("user/productView", {
+                categories: categories,
+                cart: carts,
+                wishlist: wishlists,
+                userData: req.session.userData,
+                product: productDetails,
+              });
             });
           });
         } else {
@@ -450,51 +511,98 @@ exports.userProfile = (req, res) => {
   const successMessage = req.session.successMessage;
   console.log("address id =" + userData._id);
   getCategory().then((categories) => {
-    if (req.query.add) {
-      //add address n
-      const addAddress = "for et edit address panel";
-      res.render("user/userProfile", { addAddress, userData, categories });
-    } else if (req.query.edit) {
-      const id = req.query.edit;
-      Address.findOne({ _id: id }).then((address) => {
-        const toEditAddress = "this for edit purpose it redirected to profile";
-        res.render("user/userProfile", {
-          toEditAddress,
-          editAddress: address,
-          userData,
-          categories,
-        });
-      });
-    } else if (req.query.passEdit) {
-      const toEditPassword = "this for password editing";
-      res.render("user/userProfile", {
-        toEditPassword,
-        userData,
-        errorMessage,
-        categories,
-      });
-    } else if (req.query.userEdit) {
-      const toEditUser = "this for Edit user Page";
-      res.render("user/userProfile", {
-        toEditUser,
-        userData,
-        categories,
-        successMessage,
-      });
-    } else {
-      Address.find({ owner: userData._id }).then((address) => {
-        if (address) {
+    getCarts(userData._id).then((carts) => {
+      getWishlists(userData._id).then((wishlists) => {
+        if (req.query.add) {
+          if (req.query.checkout) {
+            const addAddress = "for edit address panel";
+            const toCheckout = "to go checkout";
+            res.render("user/userProfile", {
+              addAddress,
+              toCheckout,
+              userData,
+              cart: carts,
+              wishlist: wishlists,
+              categories,
+            });
+          } else {
+            const addAddress = "for et edit address panel";
+            res.render("user/userProfile", {
+              addAddress,
+              userData,
+              categories,
+            });
+          }
+        } else if (req.query.edit) {
+          const id = req.query.edit;
+          if (req.query.checkout) {
+            Address.findOne({ _id: id }).then((address) => {
+              const toEditAddress =
+                "this for edit purpose it redirected to profile";
+              const toCheckout = "this for checkout";
+              res.render("user/userProfile", {
+                toEditAddress,
+                editAddress: address,
+                toCheckout,
+                wishlist: wishlists,
+                cart: carts,
+
+                userData,
+                categories,
+              });
+            });
+          } else {
+            Address.findOne({ _id: id }).then((address) => {
+              const toEditAddress =
+                "this for edit purpose it redirected to profile";
+              res.render("user/userProfile", {
+                toEditAddress,
+                editAddress: address,
+                userData,
+                wishlist: wishlists,
+                cart: carts,
+                categories,
+              });
+            });
+          }
+        } else if (req.query.passEdit) {
+          const toEditPassword = "this for password editing";
           res.render("user/userProfile", {
+            toEditPassword,
             userData,
-            address,
+            errorMessage,
+            cart: carts,
+            wishlist: wishlists,
             categories,
+          });
+        } else if (req.query.userEdit) {
+          const toEditUser = "this for Edit user Page";
+          res.render("user/userProfile", {
+            toEditUser,
+            userData,
+            categories,
+            cart: carts,
+            wishlist: wishlists,
             successMessage,
           });
         } else {
-          res.render("user/userProfile", { userData, categories });
+          Address.find({ owner: userData._id }).then((address) => {
+            if (address) {
+              res.render("user/userProfile", {
+                userData,
+                address,
+                wishlist: wishlists,
+                cart: carts,
+                categories,
+                successMessage,
+              });
+            } else {
+              res.render("user/userProfile", { userData, categories });
+            }
+          });
         }
       });
-    }
+    });
   });
 };
 
@@ -543,15 +651,29 @@ exports.uploadAddress = (req, res) => {
     }
   )
     .then(() => {
-      req.query.edit = false;
       const message = "Address Updated Successfully";
       req.session.successMessage = message;
       req.session.errorMessage = "";
-      res.redirect("/profile");
+      if (req.query.checkout) {
+        req.query.checkout = false;
+        res.redirect("/cart/checkout");
+      } else {
+        res.redirect("/profile");
+      }
     })
     .catch((err) => {
       console.log("error in address updation section" + err);
     });
+};
+
+exports.deleteAddress = (req, res) => {
+  const id = req.query.id;
+  Address.deleteOne({ _id: id }).then(() => {
+    const message = "Address Deleted Successfully";
+    req.session.errorMessage = "";
+    req.session.successMessage = message;
+    res.redirect("/profile");
+  });
 };
 
 exports.changePassword = (req, res) => {
@@ -685,27 +807,31 @@ exports.cart = (req, res) => {
   const id = req.query.id;
   const cartMessage = req.session.cartMessage;
   getCategory().then((categories) => {
-    Cart.find({ owner: id }).then((cart) => {
-      if (cart.length == 0 || !cart) {
-        res.render("user/cart", {
-          cart,
-          categories,
-          cartBill: 0,
-          userData,
-          message: cartMessage,
-        });
-      } else {
-        getTotalSum(id).then((result) => {
-          req.session.cartBill = result;
+    getWishlists(userData._id).then((wishlists) => {
+      Cart.find({ owner: id }).then((cart) => {
+        if (cart.length == 0 || !cart) {
           res.render("user/cart", {
             cart,
             categories,
-            cartBill: result,
+            wishlist: wishlists,
+            cartBill: 0,
             userData,
             message: cartMessage,
           });
-        });
-      }
+        } else {
+          getTotalSum(id).then((result) => {
+            req.session.cartBill = result;
+            res.render("user/cart", {
+              cart,
+              categories,
+              wishlist: wishlists,
+              cartBill: result,
+              userData,
+              message: cartMessage,
+            });
+          });
+        }
+      });
     });
   });
 };
@@ -720,7 +846,6 @@ exports.addToCart = (req, res) => {
     }).then((result) => {
       Cart.findOne({ productName: result.productName }).then((cart) => {
         if (!cart) {
-
           const cartAdd = new Cart({
             owner: userData._id,
             productId: result._id,
@@ -741,17 +866,17 @@ exports.addToCart = (req, res) => {
               console.log("cannot get cart" + err);
             });
         } else {
-          if(cart.quantity<8){
-          Cart.updateOne(
-            { _id: cart._id },
-            { $inc: { quantity: 1, bill: result.price } }
-          ).then((updatedCart) => {
+          if (cart.quantity < 8) {
+            Cart.updateOne(
+              { _id: cart._id },
+              { $inc: { quantity: 1, bill: result.price } }
+            ).then((updatedCart) => {
+              res.redirect(`/productView?id=${result._id}`);
+            });
+          } else {
             res.redirect(`/productView?id=${result._id}`);
-          });
-        }else{
-          res.redirect(`/productView?id=${result._id}`);
-          console.log("cant add its 8")
-        }
+            console.log("cant add its 8");
+          }
         }
       });
     });
@@ -775,6 +900,113 @@ exports.deleteCart = (req, res) => {
     });
 };
 
+exports.cartOperation = (req, res) => {
+  console.log("----------------------im in operation");
+  const userData = req.session.userData;
+  req.session.cartMessage = "";
+
+  Cart.findOne({ owner: userData._id })
+    .then((cart) => {
+      if (!cart) {
+        return res.redirect(`/cart?id=${userData._id}`);
+      } else {
+        if (req.body.add) {
+          console.log("req body=-------" + req.body.id);
+          const id = req.body.id;
+          const price = parseInt(req.body.price);
+          Cart.findOneAndUpdate(
+            {
+              _id: id,
+            },
+            {
+              $inc: {
+                quantity: 1,
+                bill: price,
+              },
+            },
+            { new: true }
+          ).then((response) => {
+            getTotalSum(userData._id).then((totalsum) => {
+              res.json(totalsum);
+            });
+          });
+        }
+
+        if (req.body.sub) {
+          const id = req.body.id;
+          const price = req.body.price;
+          Cart.findOneAndUpdate(
+            { _id: id },
+            {
+              $inc: { quantity: -1, bill: -price },
+            }
+          ).then((response) => {
+            getTotalSum(userData._id).then((totalsum) => {
+              res.json(totalsum);
+            });
+          });
+        }
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      return res.status(500).send("Internal server error");
+    });
+};
+
+exports.wishlist = (req, res) => {
+  const userData = req.session.userData;
+  if (req.session.user) {
+    getCategory().then((categories) => {
+      getCarts(userData._id).then((carts)=>{
+  
+      Wishlist.findOne({ owner: userData._id }).then((wishlist) => {
+        res.render("user/wishlist", { userData, cart:carts,categories, wishlist });
+      });
+    })
+    });
+  } else {
+    res.redirect("/login");
+  }
+};
+
+exports.addToWishlist = (req, res) => {
+  const id = req.query.id;
+  const userData = req.session.userData;
+  if (userData) {
+    Product.findOne({ _id: id }).then((product) => {
+      Wishlist.findOneAndUpdate(
+        { owner: userData._id },
+        { $addToSet: { items: product } }
+      ).then((updateWishlist) => {
+        if (updateWishlist) {
+          res.redirect("/user");
+        } else {
+          const newWishlist = new Wishlist({
+            owner: userData._id,
+            items: product,
+          });
+          newWishlist.save().then(() => {
+            res.redirect("/user");
+          });
+        }
+      });
+    });
+  } else {
+    res.redirect("/login");
+  }
+};
+
+
+exports.deleteWishlist=(req,res)=>{
+  const id=req.query.id
+
+ const userData=req.session.userData
+  Wishlist.findOneAndUpdate({owner:userData._id},{$pull:{items:{_id:id}}})
+  .then(()=>{
+      res.redirect(`/wishlist?id=${userData._id}`)
+  })
+}
 exports.emailOtp = (req, res) => {
   const enteredEmail = req.body.email;
   const OTP = generateOTP();
@@ -863,98 +1095,10 @@ exports.verifyPassword = (req, res) => {
   }
 };
 
-exports.cartOperation = (req, res) => {
-  console.log("----------------------im in operation");
-  const userData = req.session.userData;
-  req.session.cartMessage = "";
-
-  Cart.findOne({ owner: userData._id })
-  .then((cart) => {
-   
-      if (!cart) {
-        return res.redirect(`/cart?id=${userData._id}`);
-      } else {
-        if (req.body.add) {
-          console.log("req body=-------" + req.body.id);
-          const id = req.body.id;
-          const price = parseInt(req.body.price);
-          Cart.findOneAndUpdate(
-            {
-              _id: id,
-            },
-            {
-              $inc: {
-                quantity: 1,
-                bill: price,
-              },
-            },
-            { new: true }
-          ).then((response) => {
-            getTotalSum(userData._id).then((totalsum)=>{
-            res.json(totalsum);
-            })
-          });
-        }
-  
-        if (req.body.sub) {
-          const id = req.body.id;
-          const price = req.body.price;
-          Cart.findOneAndUpdate(
-            { _id: id },
-            {
-              $inc: { quantity: -1, bill: -price },
-            }
-          ).then((response) => {
-            getTotalSum(userData._id).then((totalsum)=>{
-            res.json(totalsum);
-            })
-          });
-        }
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      return res.status(500).send("Internal server error");
-    });
-    
-   
-  
-
-};
-
-const getTotalSum = function (id) {
-  return new Promise((res, rej) => {
-    Cart.find({ owner: id }).then((result) => {
-      if (result == null) {
-        constsum = 0;
-        res(sum);
-      } else {
-        Cart.aggregate([
-          {
-            $match: {
-              owner: id,
-            },
-          },
-          {
-            $group: {
-              _id: "$owner",
-              total: {
-                $sum: "$bill",
-              },
-            },
-          },
-        ])
-          .exec()
-          .then((sum) => {
-            res(sum[0].total);
-          });
-      }
-    });
-  });
-};
 exports.checkout = (req, res) => {
   const userData = req.session.userData;
   getCategory().then((categories) => {
+    getWishlists(userData._id).then((wishlists)=>{
     Cart.find({ owner: userData._id }).then((cart) => {
       if (cart.length == 0) {
         res.redirect("/cart");
@@ -966,6 +1110,7 @@ exports.checkout = (req, res) => {
               res.render("user/checkout", {
                 userData,
                 address,
+                wishlist:wishlists,
                 categories,
                 totalBill,
                 cart,
@@ -977,6 +1122,7 @@ exports.checkout = (req, res) => {
         });
       }
     });
+  });
   });
 };
 
@@ -990,6 +1136,7 @@ exports.payment = (req, res) => {
   const userData = req.session.userData;
   req.session.selectedAddress = selectedAddress;
   getCategory().then((categories) => {
+    getWishlists(userData._id).then((wishlists)=>{
     Cart.find({ owner: userData._id }).then((cart) => {
       if (cart.length == 0) {
         res.redirect("/cart");
@@ -1000,6 +1147,7 @@ exports.payment = (req, res) => {
 
           res.render("user/payment", {
             categories,
+            wishlist:wishlists,
             coupon: req.session.couponCode,
             selectedAddress,
             cart,
@@ -1008,6 +1156,7 @@ exports.payment = (req, res) => {
           });
         });
       }
+    })
     });
   });
 };
@@ -1056,17 +1205,17 @@ exports.orderSuccessRedirect = (req, res) => {
   newOrder
     .save()
     .then(() => {
+      Wishlist.updateMany({ owner: userData._id }, { $pull: { items: { _id: { $in: order.items.map(item => item.productId) } }} })
+      .then(()=>{
       Cart.deleteMany({ owner: newOrder.owner }).then(() => {
         if (req.session.applyedCoupon) {
           const applyedCoupon = req.session.applyedCoupon;
-          console.log("--------------------coupon applied-------");
           Coupon.findOneAndUpdate(
             { _id: applyedCoupon._id },
             { $set: { status: "Applied" } }
           ).then((coupon) => {
             const final =
               newOrder.orderBill - (newOrder.orderBill * coupon.value) / 100;
-            console.log("-------------------------final-----------" + final);
             Order.updateOne(
               { _id: newOrder._id },
               { $set: { orderBill: final } }
@@ -1081,26 +1230,35 @@ exports.orderSuccessRedirect = (req, res) => {
         }
       });
     })
+    })
     .catch((err) => {
       console.log("cant render order success" + err);
     });
-};
+}
 
 exports.orderSuccess = (req, res) => {
   res.render("user/orderSuccess");
 };
-
-exports.orders = async (req, res) => {
+exports.orders = (req, res) => {
   const userData = req.session.userData;
 
-  getCategory().then(async (categories) => {
-    const data = await Order.find({ owner: req.session.userData._id })
-      .sort({ orderDate: -1 })
-      .lean();
-    const oldBill = req.session.oldBill;
-    console.log("---------------------oldbill---------------" + oldBill);
-    res.render("user/orders", { data, userData, categories, oldBill });
-  });
+  getCategory()
+    .then((categories) => {
+      return getCarts(userData._id).then((carts) => {
+        return getWishlists(userData._id).then((wishlists) => {
+          return Order.find({ owner: req.session.userData._id })
+            .sort({ orderDate: -1 })
+            .lean()
+            .then((data) => {
+              const oldBill = req.session.oldBill;
+              res.render("user/orders", { data, userData, cart:carts,wishlist:wishlists,categories, oldBill });
+            });
+        });
+      });
+    })
+    .catch((error) => {
+      // handle the error
+    });
 };
 
 exports.cancelOrder = (req, res) => {
@@ -1587,8 +1745,6 @@ exports.editStatusLoad = (req, res) => {
 };
 
 exports.editStatus = (req, res) => {
-  console.log("order id========" + req.session.order2Id);
-  console.log("approve id===========" + req.query.orderId);
   const order2Id = req.session.order2Id;
   if (req.query.approve) {
     const id = req.query.orderId;
@@ -1607,7 +1763,7 @@ exports.editStatus = (req, res) => {
         console.log(err);
       });
   } else if (req.query.deny) {
-    const id = req.query.ordeId;
+    const id = req.query.deny;
     Order.findOneAndUpdate(
       {
         _id: order2Id,
@@ -1615,7 +1771,7 @@ exports.editStatus = (req, res) => {
       },
       { $set: { "items.$.orderStatus": "Cancelled" } }
     )
-      .then(() => {
+      .then((result) => {
         res.redirect(`/admin/orders/status?id=${order2Id}`);
       })
       .catch((err) => {
@@ -1648,7 +1804,6 @@ exports.editStatus = (req, res) => {
       { $set: { "items.$.orderStatus": "Delivered" } }
     )
       .then((result) => {
-        console.log("result--------" + result.items[0].quantity);
         Product.updateOne(
           { _id: itemId },
           {
@@ -1776,13 +1931,13 @@ exports.couponUpdate = (req, res) => {
 };
 
 exports.orderReport = (req, res) => {
-  Order.find({ "items.orderStatus": "Processed" }).then((orders) => {
+  Order.find({ "items.orderStatus": "Delivered" }).then((orders) => {
     res.render("admin/reports", { orders });
   });
 };
 
 exports.orderExcel = (req, res) => {
-  Order.find()
+  Order.find({ "items.orderStatus": "Delivered" })
     .then((SalesReport) => {
       console.log(SalesReport);
       try {
@@ -1831,57 +1986,58 @@ exports.orderExcel = (req, res) => {
     });
 };
 
-
 //banner
 exports.bannerLoad = (req, res) => {
-  Banner.find({}).sort({_id:1}).then((banner) => {
-    if (banner) {
-      if (req.query.edit) {
-        Banner.findOne({ _id: req.query.edit }).then((result) => {
-          res.render("admin/banner", { banner, bannerEdit: result });
-        });
+  Banner.find({})
+    .sort({ _id: 1 })
+    .then((banner) => {
+      if (banner) {
+        if (req.query.edit) {
+          Banner.findOne({ _id: req.query.edit }).then((result) => {
+            res.render("admin/banner", { banner, bannerEdit: result });
+          });
+        } else {
+          const message = req.session.bannerMessage;
+          const errMessage = req.session.bannerErrMessage;
+          res.render("admin/banner", { banner, message, errMessage });
+        }
       } else {
-        const message = req.session.bannerMessage;
-        const errMessage=req.session.bannerErrMessage
-        res.render("admin/banner", { banner, message,errMessage });
+        res.render("admin/banner");
       }
-    } else {
-      res.render("admin/banner");
-    }
-  });
+    });
 };
 
 exports.bannerAdd = (req, res) => {
-  const title=req.body.title
-  const subTitle=req.body.subtitle
-  const description= req.body.description
-  const redirect=req.body.redirect
+  const title = req.body.title;
+  const subTitle = req.body.subtitle;
+  const description = req.body.description;
+  const redirect = req.body.redirect;
 
-  if(title!=""&&subTitle!=""&&description!=""&&redirect!=""){
-  const newBanner = new Banner({
-    title:title,
-    subTitle: subTitle,
-    description: description,
-    image: req.files[0] && req.files[0].filename ? req.files[0].filename : "",
-    redirect: redirect,
-    status: "Active",
-  });
-  newBanner.save().then(() => {
-    req.session.bannerErrMessage=""
-    req.session.bannerMessage="Banner Added Successfully"
+  if (title != "" && subTitle != "" && description != "" && redirect != "") {
+    const newBanner = new Banner({
+      title: title,
+      subTitle: subTitle,
+      description: description,
+      image: req.files[0] && req.files[0].filename ? req.files[0].filename : "",
+      redirect: redirect,
+      status: "Active",
+    });
+    newBanner.save().then(() => {
+      req.session.bannerErrMessage = "";
+      req.session.bannerMessage = "Banner Added Successfully";
+      res.redirect("/admin/banner");
+    });
+  } else {
+    req.session.bannerMessage = "";
+    req.session.bannerErrMessage = "fields don't be null";
     res.redirect("/admin/banner");
-  });
-}else{
-  req.session.bannerMessage=""
-  req.session.bannerErrMessage="fields don't be null"
-   res.redirect("/admin/banner");
-}
+  }
 };
 
 exports.bannerEdit = (req, res) => {
   const id = req.query.id;
-  req.session.bannerErrMessage=""
-  req.session.bannerMessage=""
+  req.session.bannerErrMessage = "";
+  req.session.bannerMessage = "";
   res.redirect(`/admin/banner?edit=${id}`);
 };
 
@@ -1921,7 +2077,7 @@ exports.bannerDisable = (req, res) => {
     }
   )
     .then(() => {
-      req.session.bannerErrMessage=""
+      req.session.bannerErrMessage = "";
       req.session.bannerMessage = "Disabled Suceessfully";
       res.redirect("/admin/banner");
     })
@@ -1941,7 +2097,7 @@ exports.bannerEnable = (req, res) => {
     }
   )
     .then(() => {
-      req.session.bannerErrMessage=""
+      req.session.bannerErrMessage = "";
       req.session.bannerMessage = "Enabled Suceessfully";
       res.redirect("/admin/banner");
     })

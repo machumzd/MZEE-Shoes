@@ -59,9 +59,9 @@
                         document.getElementById("limitMessage" + data).innerHTML = ""
                         const x = element.previousElementSibling.value;
                         if (x < 8) {
-                          document.getElementById("form" + data).setAttribute("value", parseInt(x) + 1);
-                          document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) + 1) * price);
-                          //document.getElementById("4plus"+data).value=bill
+                          element.previousElementSibling.value = parseInt(x) + 1;
+                          const bill = document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) + 1) * price);
+
 
                           const id = data;
                           console.log("im in steponup")
@@ -99,8 +99,6 @@
                           element.nextElementSibling.value = parseInt(x) - 1;
                           const bill = document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) - 1) * price);
                           //document.getElementById("4minus"+data).value=bill
-                          document.getElementById("totalBill").innerHTML = "₹ " + ((parseInt(x) - 1) * price);
-                          document.getElementById("totalBills").innerHTML = "₹ " + ((parseInt(x) - 1) * price);
 
 
                           const id = data;
@@ -121,8 +119,6 @@
                             .then(data => {
                               document.getElementById("totalBill").innerHTML = "₹ " + data
                               document.getElementById("totalBills").innerHTML = "₹ " + data
-
-
                             })
                             .catch(error => {
                               console.log(error);

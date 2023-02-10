@@ -15,7 +15,7 @@
 
 
         <div class="carousel-item active">
-          
+
           <div class="container">
             <div class="row">
               <div class="col-md-7">
@@ -136,12 +136,23 @@
               ₹{{price}}
             </span>
           </h6>
-          <div class="btn-box">
+          <div class="btn-box d-flex flex-row">
             <a href="/productView?id={{_id}}" class="btn">
               Explore
             </a>
+
+            <span class="p-1">
+              <form action="/wishlist/add?id={{_id}}" method="post">
+                <a> <button type="submit" class="btn border-0 text-danger">
+                    <i class="fa-solid fa-heart p-1" id="whishlistAdd" area-hidden="true"></i></button>
+                </a>
+              </form>
+
+
+            </span>
           </div>
         </div>
+
       </div>
 
       {{/each}}

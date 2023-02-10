@@ -172,27 +172,27 @@
                     </div>
                 </div>
             </div>
-        </div>  
-               <h3 class="mb-0 text-black text-center">Banners Display</h3> 
-               <div class="row">
-        {{#each banner}}
+        </div>
+        <h3 class="mb-0 text-black text-center">Banners Display</h3>
+        <div class="row">
+            {{#each banner}}
 
-        <div class="mt-4" style="background-color:#FBDDAB;border-radius:20px">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-7">
-                        <div class="detail-box" style="padding:10rem 0 1rem 7rem">
-                            <h1 style="font-weight:800">
-                                <span style="font-weight: 300;">
-                                    {{title}}
-                                </span>
-                                <br>
-                                {{subTitle}}
-                            </h1>
-                            <p class="carousel-p">
-                                {{description}}
-                            </p>
-                            <a href="/{{redirect}}" style="display: inline-block;
+            <div class="mt-4" style="background-color:#FBDDAB;border-radius:20px">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="detail-box" style="padding:10rem 0 1rem 7rem">
+                                <h1 style="font-weight:800">
+                                    <span style="font-weight: 300;">
+                                        {{title}}
+                                    </span>
+                                    <br>
+                                    {{subTitle}}
+                                </h1>
+                                <p class="carousel-p">
+                                    {{description}}
+                                </p>
+                                <a href="/{{redirect}}" style="display: inline-block;
     padding: 10px 40px;
     background-color: #db4566;
     color: #ffffff;
@@ -202,22 +202,22 @@
     transition: all .3s;
     margin-top: 25px;
     text-transform: uppercase;">
-                                Discover
-                            </a>
+                                    Discover
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-5 ">
-                        <div class="img-box p-5 overflow-hidden">
-                            <img src="/images/{{image}}" class="img-fluid"
-                                style="max-width: 100%; max-height: 100%; object-fit: cover;" alt="">
+                        <div class="col-md-5 ">
+                            <div class="img-box p-5 overflow-hidden">
+                                <img src="/images/{{image}}" class="img-fluid"
+                                    style="max-width: 100%; max-height: 100%; object-fit: cover;" alt="">
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{/each}}
-</div>
+            {{/each}}
+        </div>
 
 
     </div>
@@ -234,13 +234,13 @@
     });
 </script>
 <script>
-  window.onload = function () {
-    var msg = document.getElementById("message");
-    if (msg.innerHTML !== "") {
-      setTimeout(function () {
-        msg.style.display = "none";
-      }, 2000); // 3000 milliseconds = 3 seconds
-    }
-  };
+    window.onload = function () {
+        var msg = document.getElementById("message");
+        if (msg.innerHTML !== "") {
+            setTimeout(function () {
+                msg.style.display = "none";
+            }, 2000); // 3000 milliseconds = 3 seconds
+        }
+    };
 </script>
 {{>foot}}

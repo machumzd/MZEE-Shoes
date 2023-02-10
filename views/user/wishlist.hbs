@@ -1,0 +1,78 @@
+{{>head}}
+
+{{#if userData}}
+{{>userNavLogged}}
+{{else}}
+{{>userNav}}
+{{/if}}
+
+<!-- end hero area -->
+
+<!-- shop section -->
+
+<section class="shop_section layout_padding">
+  <div class="container">
+    <div class="heading_container heading_center">
+      <h2>
+        Wishlist
+      </h2>
+    </div>
+    <div class="row">
+
+{{#if wishlist}}
+
+{{#each wishlist}}
+      {{#each items}}
+      <div class="col-sm-6 col-md-4 col-lg-3">
+
+        <div class="box" style="background-color:{{bgColor}}">
+          <a href="">
+            <div class="img-box">
+              <img src="/images/{{img1}}" alt="">
+            </div>
+
+            <div class="new">
+              <span>
+                new
+              </span>
+            </div>
+          </a>
+        </div>
+        <div class="mt-2 detail-box">
+          <h6>
+            {{productName}}
+          </h6>
+          <h6>
+            Price
+            <span>
+              ₹{{price}}
+            </span>
+          </h6>
+          <div class="btn-box">
+            <a href="/productView?id={{_id}}" class="btn">
+              Explore
+              </a>
+              <span class="p-1">
+                  <form action="/wishlist/delete?id={{_id}}" method="post">
+            <a> <button type="submit" class="btn border-0 text-danger ">
+<i class="fa-solid fa-heart  p-1" area-hidden="true"></i></button>
+</a>
+</form>
+              </span>
+            
+          </div>
+        </div>
+      </div>
+{{/each}}
+      {{/each}}
+ {{else}}
+  <h4 class="text-center text-danger">No Products Found</h4>
+{{/if}}
+    </div>
+   
+  </div>
+</section>
+
+<!-- end shop section -->
+{{>footer}}
+{{>foot}}

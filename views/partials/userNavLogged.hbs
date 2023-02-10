@@ -29,18 +29,20 @@
               Why Us
             </a>
           </li>
+
           <div class="user_option">
-            <a href="/profile"
-              style="background-color:black;color:white;padding:5px 20px 5px 20px;border-radius:14px;">
+            <a href="/profile" style="background-color:black;color:white;padding:5px 20px 5px 20px;border-radius:14px;">
               <i class="fa fa-user" aria-hidden="true"></i>
               <span>
                 {{userData.name}}
               </span>
             </a>
+
             {{#if cart}}
             <a class="nav-icon-link my-auto position-relative" href="/cart?id={{userData._id}}"> <i
                 class="fa fa-shopping-bag" aria-hidden="true"></i><span
-                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartLength">{{cart.length}}
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                id="cartLength">{{cart.length}}
               </span></a>
             </a>
             {{else}}
@@ -49,9 +51,19 @@
               <i class="fa fa-shopping-bag" aria-hidden="true"></i>
             </a>
             {{/if}}
-            <a href="">
+
+            {{#if wishlist}}
+
+            <a class="nav-icon-link my-auto position-relative" href="/wishlist?id={{userData._id}}"><i
+                class="fa-solid fa-heart" area-hidden="true"></i><span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                id="wishlistLength">{{wishlist.items.length}}
+              </span></a>
+            {{else}}
+            <a href="/wishlist?id={{userData._id}}">
               <i class="fa-solid fa-heart" area-hidden="true"></i>
             </a>
+            {{/if}}
             <form class="form-inline mx-2" action="/search">
               <input type="text" class="search_area" name="search" placeholder="search">
               <button class="btn nav_search-btn" type="submit">
