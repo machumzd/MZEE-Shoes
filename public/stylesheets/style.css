@@ -254,7 +254,8 @@ a:focus {
   border-bottom: 1px solid #000000;
   width: 6.2rem;
   border: none;
-  background: none;
+  border-radius: 15px;
+  background-color:#f9f8f7;
 
 
 }

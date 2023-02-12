@@ -132,9 +132,9 @@
 </div>
 {{>foot}}
 <script>
-    var inputElems = document.getElementsByClassName("js-radioInput");
-    for (var i = inputElems.length - 1; i >= 0; --i) {
-        var elem = inputElems[i];
+    const inputElems = document.getElementsByClassName("js-radioInput");
+    for (const i = inputElems.length - 1; i >= 0; --i) {
+        const elem = inputElems[i];
         elem.onchange = function () {
             document.getElementById("my_button").removeAttribute("disabled");
         };

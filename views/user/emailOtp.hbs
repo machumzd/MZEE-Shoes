@@ -16,7 +16,6 @@
         <span class=""></span>
       </button>
 
-
       <section class="vh-100">
         <div class="container py-5 h-75">
           <div class="row d-flex align-items-center justify-content-center h-100">
@@ -24,18 +23,15 @@
             <div class="col-md-12 col-lg-12 col-xl-12">
 
               <form onsubmit="loginValidate()" action="/forgotPassword" method="post">
-              <script src="../javascripts/validation.js"></script>
+                <script src="../javascripts/validation.js"></script>
 
                 <h1 class="pb-3 font-weight-bold">verify with your Email</h1>
-  <h5 class="text-danger text-center">{{message}}</h5>
+                <h5 class="text-danger text-center">{{message}}</h5>
                 <!-- Mobile input -->
                 <div class="form-outline mb-4">
-
-                  <input type="text" id="lEmail" name="email"
-                    class="form-control form-control-lg border-dark" placeholder="Enter your Email Address"/>
+                  <input type="text" id="lEmail" name="email" class="form-control form-control-lg border-dark"
+                    placeholder="Enter your Email Address" />
                   <div class="error" id="lEmailErr"></div>
-               
-                  
                 </div>
 
 
@@ -46,7 +42,6 @@
 
                 <!-- Submit button -->
                 <button type="submit" class="btn btn-primary btn-lg btn-block w-100 border-dark">Send Otp</button>
-
               </form>
             </div>
           </div>

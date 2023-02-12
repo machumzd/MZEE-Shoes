@@ -367,13 +367,11 @@ exports.verifyOtp = (req, res) => {
       }
     } else {
       if (req.session.verifypage) {
-        console.log("in verify page");
         const otp = req.query.otp;
         User.findOne({ token: otp })
           .then((result) => {
             if (result) {
               if (req.session.changePassword) {
-                console.log("in change password");
                 res.render("user/changePassword");
               } else {
                 req.session.userData = result;
@@ -509,7 +507,6 @@ exports.userProfile = (req, res) => {
   const userData = req.session.userData;
   const errorMessage = req.session.errorMessage;
   const successMessage = req.session.successMessage;
-  console.log("address id =" + userData._id);
   getCategory().then((categories) => {
     getCarts(userData._id).then((carts) => {
       getWishlists(userData._id).then((wishlists) => {
@@ -875,7 +872,6 @@ exports.addToCart = (req, res) => {
             });
           } else {
             res.redirect(`/productView?id=${result._id}`);
-            console.log("cant add its 8");
           }
         }
       });
@@ -888,7 +884,6 @@ exports.addToCart = (req, res) => {
 exports.deleteCart = (req, res) => {
   const userData = req.session.userData;
   const id = req.query.id;
-  console.log("the id is " + req.query.id);
   Cart.deleteOne({ _id: id })
     .then((result) => {
       const message = "cart deleted Successfully";
@@ -901,7 +896,6 @@ exports.deleteCart = (req, res) => {
 };
 
 exports.cartOperation = (req, res) => {
-  console.log("----------------------im in operation");
   const userData = req.session.userData;
   req.session.cartMessage = "";
 
@@ -911,7 +905,6 @@ exports.cartOperation = (req, res) => {
         return res.redirect(`/cart?id=${userData._id}`);
       } else {
         if (req.body.add) {
-          console.log("req body=-------" + req.body.id);
           const id = req.body.id;
           const price = parseInt(req.body.price);
           Cart.findOneAndUpdate(
@@ -958,12 +951,16 @@ exports.wishlist = (req, res) => {
   const userData = req.session.userData;
   if (req.session.user) {
     getCategory().then((categories) => {
-      getCarts(userData._id).then((carts)=>{
-  
-      Wishlist.findOne({ owner: userData._id }).then((wishlist) => {
-        res.render("user/wishlist", { userData, cart:carts,categories, wishlist });
+      getCarts(userData._id).then((carts) => {
+        Wishlist.findOne({ owner: userData._id }).then((wishlist) => {
+          res.render("user/wishlist", {
+            userData,
+            cart: carts,
+            categories,
+            wishlist,
+          });
+        });
       });
-    })
     });
   } else {
     res.redirect("/login");
@@ -971,7 +968,7 @@ exports.wishlist = (req, res) => {
 };
 
 exports.addToWishlist = (req, res) => {
-  const id = req.query.id;
+  const id = req.body.id;
   const userData = req.session.userData;
   if (userData) {
     Product.findOne({ _id: id }).then((product) => {
@@ -980,33 +977,34 @@ exports.addToWishlist = (req, res) => {
         { $addToSet: { items: product } }
       ).then((updateWishlist) => {
         if (updateWishlist) {
-          res.redirect("/user");
+          res.json(updateWishlist);
         } else {
           const newWishlist = new Wishlist({
             owner: userData._id,
             items: product,
           });
           newWishlist.save().then(() => {
-            res.redirect("/user");
+            res.json("done");
           });
         }
       });
     });
   } else {
-    res.redirect("/login");
+    res.json("not logged in");
   }
 };
 
+exports.deleteWishlist = (req, res) => {
+  const id = req.query.id;
 
-exports.deleteWishlist=(req,res)=>{
-  const id=req.query.id
-
- const userData=req.session.userData
-  Wishlist.findOneAndUpdate({owner:userData._id},{$pull:{items:{_id:id}}})
-  .then(()=>{
-      res.redirect(`/wishlist?id=${userData._id}`)
-  })
-}
+  const userData = req.session.userData;
+  Wishlist.findOneAndUpdate(
+    { owner: userData._id },
+    { $pull: { items: { _id: id } } }
+  ).then(() => {
+    res.redirect(`/wishlist?id=${userData._id}`);
+  });
+};
 exports.emailOtp = (req, res) => {
   const enteredEmail = req.body.email;
   const OTP = generateOTP();
@@ -1032,7 +1030,6 @@ exports.emailOtp = (req, res) => {
           transporter
             .sendMail(options)
             .then(() => {
-              console.log("otp sented");
               req.session.verifypage = true;
               req.session.changePassword = true;
               res.render("user/otpVerify");
@@ -1059,7 +1056,6 @@ exports.sendEmailOtp = (req, res) => {
 };
 
 exports.verifyPassword = (req, res) => {
-  console.log("in verify pass");
   const password = req.body.password;
   const cPassword = req.body.cPassword;
   const id = req.session.userId;
@@ -1076,7 +1072,6 @@ exports.verifyPassword = (req, res) => {
             }
           )
             .then(() => {
-              console.log("to user login");
               req.session.user = false;
               res.redirect("/login");
             })
@@ -1098,31 +1093,31 @@ exports.verifyPassword = (req, res) => {
 exports.checkout = (req, res) => {
   const userData = req.session.userData;
   getCategory().then((categories) => {
-    getWishlists(userData._id).then((wishlists)=>{
-    Cart.find({ owner: userData._id }).then((cart) => {
-      if (cart.length == 0) {
-        res.redirect("/cart");
-      } else {
-        getAddress(userData._id).then((address) => {
-          if (req.session.user) {
-            getTotalSum(userData._id).then((totalBill) => {
-              req.session.oldBill = totalBill;
-              res.render("user/checkout", {
-                userData,
-                address,
-                wishlist:wishlists,
-                categories,
-                totalBill,
-                cart,
+    getWishlists(userData._id).then((wishlists) => {
+      Cart.find({ owner: userData._id }).then((cart) => {
+        if (cart.length == 0) {
+          res.redirect("/cart");
+        } else {
+          getAddress(userData._id).then((address) => {
+            if (req.session.user) {
+              getTotalSum(userData._id).then((totalBill) => {
+                req.session.oldBill = totalBill;
+                res.render("user/checkout", {
+                  userData,
+                  address,
+                  wishlist: wishlists,
+                  categories,
+                  totalBill,
+                  cart,
+                });
               });
-            });
-          } else {
-            res.redirect("/login");
-          }
-        });
-      }
+            } else {
+              res.redirect("/login");
+            }
+          });
+        }
+      });
     });
-  });
   });
 };
 
@@ -1136,33 +1131,30 @@ exports.payment = (req, res) => {
   const userData = req.session.userData;
   req.session.selectedAddress = selectedAddress;
   getCategory().then((categories) => {
-    getWishlists(userData._id).then((wishlists)=>{
-    Cart.find({ owner: userData._id }).then((cart) => {
-      if (cart.length == 0) {
-        res.redirect("/cart");
-      } else {
-        getTotalSum(userData._id).then((totalBill) => {
-          console.log("this is frorm ------payment" + req.session.couponCode);
-          req.session.orderBill = totalBill;
-
-          res.render("user/payment", {
-            categories,
-            wishlist:wishlists,
-            coupon: req.session.couponCode,
-            selectedAddress,
-            cart,
-            userData,
-            totalBill,
+    getWishlists(userData._id).then((wishlists) => {
+      Cart.find({ owner: userData._id }).then((cart) => {
+        if (cart.length == 0) {
+          res.redirect("/cart");
+        } else {
+          getTotalSum(userData._id).then((totalBill) => {
+            req.session.orderBill = totalBill;
+            res.render("user/payment", {
+              categories,
+              wishlist: wishlists,
+              coupon: req.session.couponCode,
+              selectedAddress,
+              cart,
+              userData,
+              totalBill,
+            });
           });
-        });
-      }
-    })
+        }
+      });
     });
   });
 };
 
 exports.paymentMode = (req, res) => {
-  console.log("in function");
   const userData = req.session.userData;
 
   function createOrders(cart, paymentMode, address, orderBill) {
@@ -1184,11 +1176,9 @@ exports.paymentMode = (req, res) => {
 
     Address.findOne({ _id: address }).then((address) => {
       if (paymentMode == "COD") {
-        console.log("in function going section");
         createOrders(cart, paymentMode, address, orderBill);
         res.json({ codSuccess: true });
       } else {
-        console.log("im in razorpay");
         createOrders(cart, paymentMode, address, orderBill);
         res.redirect("/razorpay");
       }
@@ -1205,36 +1195,40 @@ exports.orderSuccessRedirect = (req, res) => {
   newOrder
     .save()
     .then(() => {
-      Wishlist.updateMany({ owner: userData._id }, { $pull: { items: { _id: { $in: order.items.map(item => item.productId) } }} })
-      .then(()=>{
-      Cart.deleteMany({ owner: newOrder.owner }).then(() => {
-        if (req.session.applyedCoupon) {
-          const applyedCoupon = req.session.applyedCoupon;
-          Coupon.findOneAndUpdate(
-            { _id: applyedCoupon._id },
-            { $set: { status: "Applied" } }
-          ).then((coupon) => {
-            const final =
-              newOrder.orderBill - (newOrder.orderBill * coupon.value) / 100;
-            Order.updateOne(
-              { _id: newOrder._id },
-              { $set: { orderBill: final } }
-            ).then(() => {
-              res.redirect("/orderSuccess");
-              console.log("success guys");
-            });
-          });
-        } else {
-          res.redirect("/orderSuccess");
-          console.log("success guys");
+      Wishlist.updateMany(
+        { owner: userData._id },
+        {
+          $pull: {
+            items: { _id: { $in: order.items.map((item) => item.productId) } },
+          },
         }
+      ).then(() => {
+        Cart.deleteMany({ owner: newOrder.owner }).then(() => {
+          if (req.session.applyedCoupon) {
+            const applyedCoupon = req.session.applyedCoupon;
+            Coupon.findOneAndUpdate(
+              { _id: applyedCoupon._id },
+              { $set: { status: "Applied" } }
+            ).then((coupon) => {
+              const final =
+                newOrder.orderBill - (newOrder.orderBill * coupon.value) / 100;
+              Order.updateOne(
+                { _id: newOrder._id },
+                { $set: { orderBill: final } }
+              ).then(() => {
+                res.redirect("/orderSuccess");
+              });
+            });
+          } else {
+            res.redirect("/orderSuccess");
+          }
+        });
       });
-    })
     })
     .catch((err) => {
       console.log("cant render order success" + err);
     });
-}
+};
 
 exports.orderSuccess = (req, res) => {
   res.render("user/orderSuccess");
@@ -1251,7 +1245,14 @@ exports.orders = (req, res) => {
             .lean()
             .then((data) => {
               const oldBill = req.session.oldBill;
-              res.render("user/orders", { data, userData, cart:carts,wishlist:wishlists,categories, oldBill });
+              res.render("user/orders", {
+                data,
+                userData,
+                cart: carts,
+                wishlist: wishlists,
+                categories,
+                oldBill,
+              });
             });
         });
       });
@@ -1309,27 +1310,19 @@ exports.applyCoupon = (req, res) => {
       const currDate = new Date();
       const status =
         currDate.getTime() > coupDate.getTime() ? "Expired" : "Active";
-      console.log("-------------------insidee of coupo1--------");
       Coupon.findOneAndUpdate(
         { code: code },
         { $set: { status: status } }
       ).then((coupon3) => {
-        console.log("---------------------inside of coupon3---" + coupon3.code);
         Coupon.findOne({ code: code }) //extra validation
           .then((Vcoupon) => {
-            console.log(
-              "-----------------------inside of vcoupon----------" + bill,
-              Vcoupon.minBill
-            );
+            console.log(Vcoupon.minBill);
 
             if (Vcoupon.minBill < bill) {
               req.session.applyedCoupon = Vcoupon;
               const final = bill - (bill * Vcoupon.value) / 100;
 
               req.session.orderBill = final;
-              console.log(
-                "-------------afteer applyin bill---" + req.session.orderBill
-              );
             }
             res.json(coupon1);
           });
@@ -1342,7 +1335,6 @@ exports.applyCoupon = (req, res) => {
 
 exports.razorpayRedirect = (req, res) => {
   const bill = req.session.orderBill;
-  console.log("-----------the bill is -----------" + bill);
   const razorpay = new Razorpay({
     key_id: config.secretId,
     key_secret: config.secretKey,
@@ -1354,7 +1346,6 @@ exports.razorpayRedirect = (req, res) => {
   };
 
   razorpay.orders.create(options, function (err, order) {
-    console.log("------------the RP order is------" + order);
     res.json({ razorpay: true, order, bill });
   });
 };
@@ -1406,7 +1397,6 @@ exports.userManagement = (req, res) => {
 };
 exports.userSearch = (req, res) => {
   const search = req.body.search;
-  console.log("search ,,," + search);
   User.find({
     $or: [
       { name: { $regex: search, $options: "i" } },
@@ -1463,19 +1453,10 @@ exports.userUpdate = (req, res) => {
     });
 };
 
-// exports.userDelete = (req, res) => {
-//   const id = req.body.id;
-//   req.session.adminMessage = "";
-//   User.deleteOne({ _id: id }).then((response) => {
-//     const message = "User Deleted Successfully";
-//     req.session.adminMessage = message;
-//     res.json(response)
-//     res.redirect("/admin/users");
-//   });
-// };
 exports.userDashboard = (req, res) => {
   res.render("admin/adminDashboard");
 };
+
 exports.userBlock = (req, res) => {
   const id = req.body.id;
   req.session.adminMessage = "";
@@ -1521,6 +1502,7 @@ exports.adminCategory = (req, res) => {
     }
   });
 };
+
 exports.adminCategoryLoad = (req, res) => {
   if (req.body.category != "") {
     Category.find({
@@ -1549,6 +1531,7 @@ exports.adminCategoryLoad = (req, res) => {
     res.redirect("/admin/category");
   }
 };
+
 exports.categoryDelete = (req, res) => {
   const id = req.query.id;
   Category.deleteOne({ _id: id })
@@ -1584,23 +1567,9 @@ exports.categoryUpdate = (req, res) => {
 };
 
 exports.productLoad = (req, res) => {
-  //   Product.find((err,isDeleted) => {
-  //     if (!err) {
-  //       console.log("product deatils")
-  //       req.session.products = products;
-  //       res.render("admin/adminProducts", {
-  //         products,
-  //         adminMessage: req.session.productMessage,
-  //       });
-  //     } else {
-  //       console.log(err.message);
-  //     }
-  //   });
-
   Product.find({ isDeleted: false })
     .sort({ updatedAt: -1 })
     .then((products) => {
-      console.log("product deatils");
       req.session.products = products;
       res.render("admin/adminProducts", {
         products,
@@ -1692,11 +1661,11 @@ exports.productUpdate = (req, res) => {
       console.log(err.message);
     });
 };
+
 exports.productDelete = (req, res) => {
   const id = req.body.id;
   Product.findByIdAndUpdate(id, { $set: { isDeleted: true } })
     .then((response) => {
-      console.log(response);
       const message = "product was soft deleted Successfully";
       req.session.productMessage = message;
       res.json(response);
@@ -1705,6 +1674,7 @@ exports.productDelete = (req, res) => {
       console.log(error.message);
     });
 };
+
 exports.productSearch = (req, res) => {
   const search = req.body.productsearch;
   Product.find({
@@ -1756,7 +1726,6 @@ exports.editStatus = (req, res) => {
       { $set: { "items.$.orderStatus": "Approved" } }
     )
       .then(() => {
-        console.log("product succesfuly changed");
         res.redirect(`/admin/orders/status?id=${order2Id}`);
       })
       .catch((err) => {
@@ -1795,7 +1764,6 @@ exports.editStatus = (req, res) => {
   } else if (req.query.delivered) {
     const id = req.query.orderId;
     const itemId = req.query.itemId;
-    console.log("item id....." + itemId);
     Order.findOneAndUpdate(
       {
         _id: order2Id,
@@ -1898,6 +1866,7 @@ exports.couponEdit = (req, res) => {
   const id = req.query.id;
   res.redirect(`/admin/coupons?edit=${id}`);
 };
+
 exports.couponUpdate = (req, res) => {
   const id = req.query.id;
   const code = req.body.couponCode;
@@ -1905,9 +1874,7 @@ exports.couponUpdate = (req, res) => {
   const expiry = new Date(req.body.couponExpiry);
   const bill = req.body.minBill;
   const currDate = new Date();
-
   const status = currDate.getTime() < expiry.getTime() ? "Active" : "Expired";
-
   Coupon.findOneAndUpdate(
     { _id: id },
     {
@@ -1942,34 +1909,28 @@ exports.orderExcel = (req, res) => {
       console.log(SalesReport);
       try {
         const workbook = new excelJs.Workbook();
-
         const worksheet = workbook.addWorksheet("Sales Report");
-
         worksheet.columns = [
           { header: "S no.", key: "s_no", width: 10 },
           { header: "OrderID", key: "_id", width: 30 },
           { header: "Date", key: "orderDate", width: 20 },
           { header: "Products", key: "productName", width: 30 },
           { header: "Method", key: "paymentMode", width: 10 },
-          //     { header: "status", key: "status" },
           { header: "Amount", key: "orderBill" },
         ];
         let counter = 1;
         SalesReport.forEach((report) => {
           report.s_no = counter;
           report.productName = "";
-          // report.name = report.userid;
           report.items.forEach((eachproduct) => {
             report.productName += eachproduct.productName + ", ";
           });
           worksheet.addRow(report);
           counter++;
         });
-
         worksheet.getRow(1).eachCell((cell) => {
           cell.font = { bold: true };
         });
-
         res.header(
           "Content-Type",
           "application/vnd.oppenxmlformats-officedocument.spreadsheatml.sheet"

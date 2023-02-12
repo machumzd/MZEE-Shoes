@@ -9,12 +9,8 @@ const db = require('./config/config')
 const app=express();
 const hbs=require("hbs")
 
-
-
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
-
-
 
 // logger(app);
 app.use(express.json());
@@ -22,12 +18,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')))
 
-
 app.use(function(req, res, next) { 
   res.header('Cache-Control', 'no-cache, no-store');
    next();
  });
-
 
 app.use(session({
     secret:"process.env.secret",
@@ -37,15 +31,12 @@ app.use(session({
 app.set('view engine','hbs')
 app.set('views',path.join(__dirname,'views'));
 
-
-
 hbs.registerHelper('formatDate', function(date) {
   let day = ("0" + date.getDate()).slice(-2);
   let month = ('0' + (date.getMonth() + 1)).slice(-2);
   let year = date.getFullYear().toString();
   return `${day}-${month}-${year}`;
 });
-
 
 hbs.registerHelper('ifeq', function (a, b, options) {
     if (a == b) { return options.fn(this); }

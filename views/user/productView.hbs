@@ -55,15 +55,12 @@
                                         ₹{{product.price}}/- per pair
                                     </span>
                                     40% off
-                                    <span>
-                                        <form action="/wishlist/add?id={{product._id}}" method="post">
-                                            <a> <button type="submit" class="btn border-0 text-danger">
-                                                    <h4> <i class="fa-solid fa-heart " id="whishlistAdd"
-                                                            area-hidden="true"></i></h4>
-                                                </button>
-                                            </a>
-                                        </form>
-                                    </span>
+                                    <span class="p-1">
+              <a> <button onclick="wishlistClick('{{_id}}')" class="btn border-0" style="color:red">
+                  <h3><i class="fa-solid fa-heart p-1" area-hidden="true"></i></h3></button>
+              </a>
+
+            </span>
                                 </div>
                             </div>
                             <p class="about">
@@ -87,7 +84,7 @@
 
 <script>
     function change_image(image) {
-        var container = document.getElementById("main-image");
+        const container = document.getElementById("main-image");
         container.src = image.src;
     }
 
@@ -98,42 +95,42 @@
     jQuery(document).ready(function ($) {
 
         $('.zoom-image img').click(function (event) {
-            var ix = $(this).offset().left;
-            var iy = $(this).offset().top;
+            const ix = $(this).offset().left;
+            const iy = $(this).offset().top;
             console.log(ix + '-' + iy);
 
-            var mx = event.pageX;
-            var my = event.pageY;
+            const mx = event.pageX;
+            const my = event.pageY;
             console.log(mx + '-' + my);
         })
 
         $('.zoom-image img').hover(function () {
 
-            var img = $(this).attr('src');
+            const img = $(this).attr('src');
 
             $(this).after("<div class='hover-image' style='background-image: url(" + img + "); background-size: 300px;'></div>");
 
             $(this).mousemove(function (event) {
 
                 // Mouse Position
-                var mx = event.pageX;
-                var my = event.pageY;
+                const mx = event.pageX;
+                const my = event.pageY;
 
                 // Image Position
-                var ix = $(this).offset().left;
-                var iy = $(this).offset().top;
+                const ix = $(this).offset().left;
+                const iy = $(this).offset().top;
 
                 // Mouse Position Relavtive to Image
-                var x = mx - (ix);
-                var y = my - (iy);
+                const x = mx - (ix);
+                const y = my - (iy);
 
                 // Image Height and Width
-                var w = $(this).width();
-                var h = $(this).height();
+                const w = $(this).width();
+                const h = $(this).height();
 
                 // Mouse Position Relative to Image, in %
-                var xp = (-x / w) * -100;
-                var yp = (-y / h) * -100;
+                const xp = (-x / w) * -100;
+                const yp = (-y / h) * -100;
 
                 $(this).parent().find('.hover-image').attr('style',
 
@@ -151,6 +148,33 @@
 
 </script>
 
+<script>
+  function wishlistClick(data) {
+    const id = data;
+    fetch("/wishlist/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        if (data == "not logged in") {
+          window.location.href = "/login";
+        } else {
+          location.reload();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
 
+</script>
 
 {{>foot}}

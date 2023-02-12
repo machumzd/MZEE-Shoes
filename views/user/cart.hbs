@@ -201,28 +201,10 @@
 
 
 {{>foot}}
-
-
-{{!--
-<script>
-  function stepondown() {
-    var x = document.getElementById("form1").value;
-    if (x > 1) {
-      document.getElementById("form1").value = x - 1;
-    }
-  }
-
-  function steponup() {
-    var x = document.getElementById("form1").value;
-    if (x < 5) {
-      document.getElementById("form1").value = parseInt(x) + 1;
-    }
-  }
-</script> --}}
 <script>
   window.onload = function () {
-    var msg = document.getElementById("serverMessage");
-    var limitMessage = document.getElementById("limitMessage")
+    const msg = document.getElementById("serverMessage");
+    const limitMessage = document.getElementById("limitMessage")
     if (msg.innerHTML !== "") {
       setTimeout(function () {
         msg.style.display = "none";

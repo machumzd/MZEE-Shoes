@@ -71,7 +71,7 @@
 {{>foot}}
 <script>
   window.onload = function () {
-    var msg = document.getElementById("message");
+    const msg = document.getElementById("message");
     if (msg.innerHTML !== "") {
       setTimeout(function () {
         msg.style.display = "none";

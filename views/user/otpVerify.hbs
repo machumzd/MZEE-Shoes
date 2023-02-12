@@ -1,7 +1,6 @@
 {{>head}}
 
 <div class="hero_area">
-  <!-- header section strats -->
   <header class="header_section">
     <nav class="navbar navbar-expand-lg custom_nav-container ">
       <a class="navbar-brand" href="/user">
@@ -14,38 +13,63 @@
         <span class=""></span>
       </button>
 
-
       <section class="vh-100">
         <div class="container py-5 h-75">
           <div class="row d-flex align-items-center justify-content-center h-100">
-
             <div class="col-md-12 col-lg-12 col-xl-12">
-
               <form action="/otpVerify" method="/otpVerify">
                 <h1 class="pb-3 font-weight-bold">Enter your Otp</h1>
-
                 <!-- Mobile input -->
                 <div class="form-outline mb-4">
-
                   <input type="otp" id="otp" name="otp" class="form-control form-control-lg border-dark"
                     placeholder="please enter the Otp" maxlength="6" style="letter-spacing:0.5rem;" />
                   <div class="error" id="otpErr"></div>
                 </div>
 
-
                 <h5 class="text-danger text-center">{{message}}</h5>
-                <div class="d-flex justify-content-around align-items-center mb-3">
-                  <h6>Edit your number?<a href="/otp"> Go back</a></h6><br>
-                  <h6>Edit your Email?<a href="/forgotPassword"> Go back</a></h6>
-
+                <div class="text-center mb-2">
+                  <h6>Edit your number?<a href="/otp"> Go back</a></h6><span>
+                    <h6>Edit your Email?<a href="/forgotPassword"> Go back</a></h6>
+                  </span>
                 </div>
 
                 <!-- Submit button -->
                 <button type="submit" class="btn btn-warning btn-lg btn-block w-100 border-dark">Verify Otp</button>
-
               </form>
+              <span id="verifiBtn"> <button disabled="true"
+                  class="btn btn-success btn-lg btn-block w-100 border-dark mt-2">resend Otp in<span
+                    class="timer"></span> </span>
+              <span id="counter"></span>
+              </span></button>
             </div>
           </div>
         </div>
-      </section>
-      {{>foot}}
+</div>
+</section>
+
+<script>
+  function countdown() {
+    var seconds = 59;
+    function tick() {
+      var counter = document.getElementById("counter");
+      seconds--;
+      counter.innerHTML =
+        "0:" + (seconds < 10 ? "0" : "") + String(seconds);
+      if (seconds > 0) {
+        setTimeout(tick, 1000);
+      } else {
+        document.getElementById("verifiBtn").innerHTML = `
+             <button type="submit" class="btn btn-primary btn-lg btn-block w-100 border-dark mt-2" onclick="location.reload()">resend Otp</button>
+            `;
+        document.getElementById("counter").innerHTML = "";
+      }
+    }
+    tick();
+  }
+  countdown();
+</script>
+
+
+
+{{>footer}}
+{{>foot}}

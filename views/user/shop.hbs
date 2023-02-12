@@ -52,6 +52,11 @@
             <a href="/productView?id={{_id}}" class="btn">
               Explore
             </a>
+            <span class="p-1">
+              <a> <button onclick="wishlistClick('{{_id}}')" class="btn border-0" style="color:brown">
+                  <i class="fa-solid fa-heart p-1" area-hidden="true"></i></button>
+              </a>
+            </span>
           </div>
         </div>
       </div>
@@ -64,7 +69,34 @@
    
   </div>
 </section>
+<script>
+  function wishlistClick(data) {
+    const id = data;
+    fetch("/wishlist/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        if (data == "not logged in") {
+          window.location.href = "/login";
+        } else {
+          location.reload();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
 
+</script>
 <!-- end shop section -->
 {{>footer}}
 {{>foot}}

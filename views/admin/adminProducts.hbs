@@ -8,7 +8,7 @@
 
       <div class="col-md-3 col-lg-6 col-xl-12">
 
-        <h1 class="">Products</h1>
+        <h1 class="mt-5">Products</h1>
         <h5 class="text-danger text-center ">{{adminMessage}}</h5>
         <a href="/admin/products/add" class="btn btn-primary mb-3">Add Product</a>
         <form class=" d-flex flex-row justify-content-end mt-5" action="/admin/products/search" method="post">
@@ -17,28 +17,28 @@
         </form>
 
 
-
-        <table class="table">
+<div class="container mt-5 table-responsive">
+        <table class="table table-striped" id="myTable">
 
           <thead>
 
             <tr>
 
-              <th scope="col">#</th>
-              <th scope="col">Product name</th>
-              <th scope="col">Price</th>
-              <th scope="col">Description</th>
-              <th scope="col">Stock</th>
-              <th scope="col">Category</th>
-              <th scope="col">img 1</th>
-              <th scope="col">img 2</th>
-              <th scope="col">Action</th>
+              <th>#</th>
+              <th>Product name</th>
+              <th>Price</th>
+              <th>Description</th>
+              <th>Stock</th>
+              <th>Category</th>
+              <th>img 1</th>
+              <th>img 2</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {{#each products}}
-            <tr style="line-height: 17px; text-overflow:ellipsis;">
-              <th scope="row">{{counter @index}}</th>
+            <tr>
+              <th>{{counter @index}}</th>
               <td>{{productName}}</td>
               <td>{{price}}</td>
               <td style="max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{description}}</td>
@@ -61,6 +61,8 @@
             {{/each}}
           </tbody>
         </table>
+        </div>
+
       </div>
     </div>
   </div>
@@ -92,6 +94,11 @@
 </div>
 
 
+  <script>
+    $(document).ready( function () {
+    $('#myTable').DataTable();
+} );
+  </script>
 
 <script>
   function Delete(data) {
