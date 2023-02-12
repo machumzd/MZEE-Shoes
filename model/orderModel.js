@@ -24,6 +24,7 @@ const orderSchema = new Schema({
         category:{type:String},
         img1:{type:String},
         bill:{type:Number},
+        size:{type:Number},
         quantity:{type:Number},
         orderStatus:{type:String}}
     ] 

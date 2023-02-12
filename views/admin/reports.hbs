@@ -1,23 +1,31 @@
 {{>adminNav}}
 
-<style type="text/css" media="print">
-    img {
-        display: block;
+<style>
+  @media (max-width: 767px) {
+    .d-flex.flex-column.flex-md-row {
+      flex-direction: column;
+      align-items: center;
     }
+    .align-self-center {
+      text-align: center;
+      margin: 10px   0;
+    }
+      .btn-group.contact {
+    margin-bottom: 0;
+  }
+  .btn-group.contact .btn-primary {
+    width: 100px;
+  }
+  }
 </style>
-
 <div class="container mt-5 table-responsive">
-    <form class="w-50 d-flex flex-row" action="" method="post">
-        <input name="couponExpiry" style="border: 1px
-                                                solid black;max-width:10em;" type="date" id="form3Examplea2" class="
-                                                form-control-lg "/>
-        <h6 class="m-2  ">to</h6>
-        <input name="couponExpiry" style="border: 1px
-                                                solid black;max-width:10em;" type="date" id="form3Examplea2" class="
-                                                form-control-lg me-3"/>
-        <button class="btn btn-primary" onclick="getOrders()">Get Orders</button>
+    <form class="d-flex flex-column flex-md-row" action="/orderSearch" style="max-width:35em; height:auto;" method="post">
+  <input name="fromdate" style="border: 1px solid black; max-width:10em;" type="date" id="form3Examplea2" class="form-control-lg me-2" required/>
+  <h6 class="align-self-center">to</h6>
+  <input name="todate" style="border: 1px solid black; max-width:10em;" type="date" id="form3Examplea2" class="form-control-lg ms-2 me-3" required/>
+  <button class="btn btn-primary mt-3 mt-md-0" onclick="getOrders()">Get Orders</button>
+</form>
 
-    </form>
     <div style="display: flex; flex-direction: row-reverse;">
         <div class="btn-group contact mb-3">
             <a class="btn btn-primary dropdown-toggle mb-2" data-bs-toggle="dropdown" aria-expanded="false">
@@ -40,7 +48,10 @@
                     <th>Product name</th>
                     <th>Order ID</th>
                     <th>Category</th>
+                    <th>size</th>
                     <th>Quantity</th>
+                    <th>bill</th>
+                    
                     <th>Status</th>
                     <th>Payment mode</th>
 
@@ -56,11 +67,13 @@
                 {{#each items}}
                 <tr>
 
-                    <td><img height="100" width="100" src="/images/{{img1}}" alt="img"></td>
+                    <td><img class="img-fluid" style="max-width:4.5em" src="/images/{{img1}}" alt="img"></td>
                     <td>{{productName}} </td>
                     <td>{{_id}} </td>
                     <td>{{category}} </td>
+                    <td>{{size}} </td>
                     <td>{{quantity}} </td>
+                    <td>{{bill}}</td>
                     <td style="max-width: 200px">{{orderStatus}} </td>
                     {{/each}}
                     <td>{{paymentMode}} </td>

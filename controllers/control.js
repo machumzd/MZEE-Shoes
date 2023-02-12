@@ -245,11 +245,11 @@ exports.userSignin = (req, res) => {
 exports.signIn = async (req, res) => {
   try {
     const password = req.body.password;
-    const email = req.body.password;
+    const email = req.body.email;
 
     if (password != "" && email != "") {
       const user = await User.findOne({ email: req.body.email });
-      if (!user && email != "" && password != "") {
+      if (!user) {
         throw new Error("Email or Password is Incorrect,Try again");
       }
 
@@ -257,7 +257,7 @@ exports.signIn = async (req, res) => {
         req.body.password,
         user.password
       );
-      if (!passwordMatch && email != "" && password != "") {
+      if (!passwordMatch) {
         throw new Error("Email or Password is Incorrect,Try again");
       }
 
@@ -272,6 +272,7 @@ exports.signIn = async (req, res) => {
     }
   } catch (err) {
     req.session.user = false;
+    res.render("user/login", { message: err.message });
   }
 };
 
@@ -836,12 +837,11 @@ exports.cart = (req, res) => {
 exports.addToCart = (req, res) => {
   const id = req.query.id;
   const userData = req.session.userData;
-
   if (userData) {
     Product.findOne({
       _id: id,
     }).then((result) => {
-      Cart.findOne({ productName: result.productName }).then((cart) => {
+      Cart.findOne({ productId: result._id }).then((cart) => {
         if (!cart) {
           const cartAdd = new Cart({
             owner: userData._id,
@@ -850,6 +850,8 @@ exports.addToCart = (req, res) => {
             price: result.price,
             category: result.category,
             quantity: 1,
+            stock: result.stock,
+            size: req.body.size,
             bill: result.price,
             img1: result.img1,
             orderStatus: "pending",
@@ -863,10 +865,13 @@ exports.addToCart = (req, res) => {
               console.log("cannot get cart" + err);
             });
         } else {
-          if (cart.quantity < 8) {
+          if (cart.quantity < cart.stock) {
             Cart.updateOne(
               { _id: cart._id },
-              { $inc: { quantity: 1, bill: result.price } }
+              {
+                $inc: { quantity: 1, bill: result.price },
+                $set: { size: req.body.size },
+              }
             ).then((updatedCart) => {
               res.redirect(`/productView?id=${result._id}`);
             });
@@ -1617,6 +1622,7 @@ exports.productUpload = (req, res) => {
 
 exports.productEdit = (req, res) => {
   const id = req.query.id;
+  console.log(req.body.checkbox);
   req.session.productQuery = id;
   Product.findOne({ _id: id })
     .then((result) => {
@@ -1900,6 +1906,18 @@ exports.couponUpdate = (req, res) => {
 exports.orderReport = (req, res) => {
   Order.find({ "items.orderStatus": "Delivered" }).then((orders) => {
     res.render("admin/reports", { orders });
+  });
+};
+
+
+exports.orderSearch = (req, res) => {
+  const from = new Date(req.body.fromdate);
+  const to = new Date(req.body.todate);
+  Order.find({
+    "items.orderStatus": "Delivered",
+    orderDate: { $gte: from, $lt: to },
+  }).then((orders) => {
+    res.render("admin/reports", { orders});
   });
 };
 

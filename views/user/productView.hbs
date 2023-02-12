@@ -21,7 +21,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="images">
-
+   <form action="/user/addtoCart?id={{product._id}}" method="post">
                             <div class="text-center col-12 zoom-image" data-image="./image/{{product.img1}}">
                                 <img class="col-12" id="main-image" src="/images/{{product.img1}} " width="520"
                                     style="background-color:{{product.bgColor}};border-radius:30px;" />
@@ -66,7 +66,8 @@
                             <p class="about">
                                 {{product.description}}
                             </p>
-                            <form action="/user/addtoCart?id={{product._id}}" method="post">
+                         
+                         <input type="number" name="size" min="1" max="10" id="size" placeholder="Enter size" class="form-control mb-3 w-25 border-dark" required>
                                 <button type="submit" class="btn btn-outline-dark bg-dark text-light w-50 mb-5 p-3"
                                     style="width: 100%; margin-top: 3vw; border-radius:50px;">Add to cart</button>
 

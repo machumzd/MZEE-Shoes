@@ -32,10 +32,9 @@ const productSchema=new Schema({
 
     },bgColor:{
         type:String
-    },Trending:{
-        type:Boolean
-    },offer:{
-        type:String
+    },trending:{
+        type:Boolean,
+        default:false
     },isDeleted:{
         type:Boolean
     }

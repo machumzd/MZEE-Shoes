@@ -24,10 +24,16 @@ const cartSchema=new Schema({
         category: {
             type: String,
             required: true
+        },stock:{
+            type:Number
         },
         img1: {
             type: String,
             required: true
+        },
+        size:{
+            type:Number,
+            required:true
         },
     bill: {
         type: Number,

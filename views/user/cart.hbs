@@ -17,15 +17,10 @@
                 <div class="p-5">
                   <div class="d-flex justify-content-between align-items-center mb-5">
                     <h1 class="fw-bold mb-0 text-black">Shopping Cart</h1>
-
                     <h6 class="mb-0 text-muted">{{cart.length}} items</h6>
                   </div>
                   <hr class="my-4">
                   {{#if cart}}
-
-
-
-
                   {{#each cart}}
 
                   <div class="row mb-4 d-flex justify-content-between align-items-center">
@@ -34,8 +29,9 @@
                     </div>
                     <div class="col-md-3 col-lg-3 col-xl-3">
                       <h6 class="text-muted">{{category}}</h6>
-                      <a href="/productView?name={{productName}} " style="text-decoration: none">
+                      <a href="/productView?id={{_id}} " style="text-decoration: none">
                         <h6 class="text-black mb-0">{{productName}}</h6>
+                        <h6 class="text-muted">size:{{size}}</h6>
                       </a>
                     </div>
 
@@ -47,90 +43,13 @@
                       </button>
                       <input id="form{{_id}}" min="1" max="8" name="quantity" value="{{quantity}}" type="text"
                         class="form-control form-control-sm" />
-                      <button class="btn btn-link px-2" onclick="steponup(this, '{{_id}}', '{{price}}','{{cartBill}}')">
+                      <button class="btn btn-link px-2" onclick="steponup(this, '{{_id}}', '{{price}}','{{cartBill}}','{{stock}}')">
                         <i class="fas fa-plus"></i>
                       </button>
+                      
                     </div>
-
-
-                    <script>
-
-                      function steponup(element, data, price, cartBill) {
-                        document.getElementById("limitMessage" + data).innerHTML = ""
-                        const x = element.previousElementSibling.value;
-                        if (x < 8) {
-                          element.previousElementSibling.value = parseInt(x) + 1;
-                          const bill = document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) + 1) * price);
-
-
-                          const id = data;
-                          console.log("im in steponup")
-                          fetch("/addToCart/operation", {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                              add: "add",
-                              price: price,
-                              id: id
-                            })
-                          })
-                            .then(response => {
-                              return response.json();
-                            })
-                            .then(data => {
-                              document.getElementById("totalBill").innerHTML = "₹ " + data
-                              document.getElementById("totalBills").innerHTML = "₹ " + data
-                              console.log("this add data" + data)
-                            })
-                            .catch(error => {
-                              console.log(error);
-                            });
-                        } else {
-                          document.getElementById("limitMessage" + data).innerHTML = "You can't add more than 8 items"
-                        }
-                      }
-
-                      function stepondown(element, data, price, cartBill) {
-                        document.getElementById("limitMessage" + data).innerHTML = ""
-                        const x = element.nextElementSibling.value;
-                        if (x > 0) {
-                          element.nextElementSibling.value = parseInt(x) - 1;
-                          const bill = document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) - 1) * price);
-                          //document.getElementById("4minus"+data).value=bill
-
-
-                          const id = data;
-                          fetch("/addToCart/operation", {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                              sub: "sub",
-                              price: price,
-                              id: id
-                            })
-                          })
-                            .then(response => {
-                              return response.json();
-                            })
-                            .then(data => {
-                              document.getElementById("totalBill").innerHTML = "₹ " + data
-                              document.getElementById("totalBills").innerHTML = "₹ " + data
-                            })
-                            .catch(error => {
-                              console.log(error);
-                            });
-                        } else {
-                          document.getElementById("limitMessage" + data).innerHTML = "You can't add less than 0 items"
-                        }
-                      }
-                    </script>
-
+                    
                     <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                      <h3 id="final" class="fw-normal"></h3>
                       <h6 class="mb-0 itemPrice" id="bill{{_id}}" value="">₹ {{bill}}</h6>
                     </div>
                     <div class="col-md-1 col-lg-1 col-xl-1 text-end">
@@ -138,7 +57,6 @@
                         <button type="submit" class="text-muted"
                           style="cursor: pointer; background: none;color: inherit;border: none;padding: 0;font: inherit;cursor: pointer;outline: inherit;"><i
                             class="fas fa-times"></i></button>
-
                       </form>
                     </div>
                     <h8 id="limitMessage{{_id}}" class="ps-5 text-center text-danger"></h8>
@@ -201,6 +119,81 @@
 
 
 {{>foot}}
+<script>
+
+  function steponup(element, data, price, cartBill,stock) {
+    document.getElementById("limitMessage" + data).innerHTML = ""
+    const x = element.previousElementSibling.value;
+    if (x < stock) {
+      element.previousElementSibling.value = parseInt(x) + 1;
+      const bill = document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) + 1) * price);
+
+
+      const id = data;
+      console.log("im in steponup")
+      fetch("/addToCart/operation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          add: "add",
+          price: price,
+          id: id
+        })
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          document.getElementById("totalBill").innerHTML = "₹ " + data
+          document.getElementById("totalBills").innerHTML = "₹ " + data
+          console.log("this add data" + data)
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    } else {
+      document.getElementById("limitMessage" + data).innerHTML = `You can't add more than ${stock} items`
+    }
+  }
+
+  function stepondown(element, data, price, cartBill) {
+    document.getElementById("limitMessage" + data).innerHTML = ""
+    const x = element.nextElementSibling.value;
+    if (x > 0) {
+      element.nextElementSibling.value = parseInt(x) - 1;
+      const bill = document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) - 1) * price);
+      //document.getElementById("4minus"+data).value=bill
+
+
+      const id = data;
+      fetch("/addToCart/operation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          sub: "sub",
+          price: price,
+          id: id
+        })
+      })
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          document.getElementById("totalBill").innerHTML = "₹ " + data
+          document.getElementById("totalBills").innerHTML = "₹ " + data
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    } else {
+      document.getElementById("limitMessage" + data).innerHTML = "You can't add less than 0 items"
+    }
+  }
+</script>
 <script>
   window.onload = function () {
     const msg = document.getElementById("serverMessage");
