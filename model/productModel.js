@@ -1,5 +1,6 @@
 const mongoose=require('mongoose')
 const { stringify } = require('querystring')
+const { isNumber } = require('util')
 const Schema=mongoose.Schema
 
 const productSchema=new Schema({
@@ -35,7 +36,10 @@ const productSchema=new Schema({
     },trending:{
         type:Boolean,
         default:false
-    },isDeleted:{
+    },offer:{
+        type:Number
+    }
+    ,isDeleted:{
         type:Boolean
     }
 

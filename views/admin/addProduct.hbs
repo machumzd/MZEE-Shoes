@@ -47,28 +47,35 @@
 
                     </div>
 
+                     <div class="form-outline mb-4">
+                        <input type="number" id="offer" name="offer" min="0" max="100" class="form-control form-control-lg border-dark"
+                            placeholder="Offer Percentage 0-100 (in %)" required/>
+                    </div>
+
               <div class="form-group mb-2">
   <h5><label for="checkbox">trending:</label>
-  <input type="checkbox" id="checkbox" name="trending"></h5>
+  <input type="checkbox" id="checkbox" value="true" name="trending"></h5>
 </div>
 
 
                     <div class="form-outline mb-4">
-                        <input type="file" multiple class="form-control form-control-lg border-dark" name="image1" id="formFile"
-                            accept="image/*">
+                        <input type="file" class="form-control form-control-lg border-dark" name="image1" id="formFile"
+                            accept="image/*" required>
                     </div>
 
 
                     <div class="form-outline mb-4">
                         <input type="file" class="form-control form-control-lg border-dark" name="image2" id="formFile"
-                            accept="image/*" >
+                            accept="image/*" required>
                     </div>
 
                     <div class="d-flex justify-content-around align-items-center mb-3">
                         <h6>Want to go back<a href="/admin/products"> click here</a></h6>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg btn-block w-100 border-dark">Add
+              <h5 class="text-danger text-center ">{{message}}</h5>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block w-100 border-dark mb-5">Add
                         Product</button>
 
                 </form>

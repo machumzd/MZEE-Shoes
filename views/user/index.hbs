@@ -106,11 +106,13 @@
 
     <div class="heading_container">
       <h2>
-        Latest Trending
+        Latest Products
       </h2>
     </div>
-    <div class="row">
-      {{#each products}}
+    <div class="row"> 
+       {{#each products}}
+     
+    
       <div class="col-sm-6 col-md-4 col-lg-3">
 
         <div class="box" style="background-color:{{bgColor}}!important">
@@ -124,6 +126,13 @@
                 new
               </span>
             </div>
+            {{#ifnoteq offer 0}}
+             <div class="new2">
+              <span>
+                {{offer}}%
+              </span>
+            </div>
+            {{/ifnoteq}}
           </a>
         </div>
         <div class="mt-2 detail-box">
@@ -269,6 +278,7 @@
     <div class="row">
 
       {{#each products}}
+      {{#if trending}}
       <div class="col-sm-6 col-md-4 col-lg-3">
 
         <div class="box" style="background-color:{{bgColor}}">
@@ -282,6 +292,13 @@
                 new
               </span>
             </div>
+             {{#ifnoteq offer 0}}
+             <div class="new2">
+              <span>
+                {{offer}}%
+              </span>
+            </div>
+            {{/ifnoteq}}
           </a>
         </div>
         <div class=" mt-2 detail-box">
@@ -308,7 +325,7 @@
           </div>
         </div>
       </div>
-
+{{/if}}
       {{/each}}
     </div>
 

@@ -37,13 +37,13 @@
                                         <script>
                                             const ctx = document.getElementById('myChart');
 
-                                            new Chart(ctx, {
-                                                type: 'line',
+                                            var myChart = new Chart(ctx, {
+                                                type: 'doughnut',
                                                 data: {
-                                                    labels: ['january', 'February', 'March', 'April', 'May', 'June','July','August','september','october','november','december'],
+                                                    labels:[{{#each months}}"{{@key}}",{{/each}}],
                                                     datasets: [{
-                                                        label: 'Sales',
-                                                        data: [12, 19, 3, 5, 2, 3,9,5,6,8,8,9],
+                                                        label: "# of Orders",
+                                                        data: [{{#each months}}{{this}},{{/each}}],
                                                         borderWidth: 4
                                                     }]
                                                 },
@@ -62,22 +62,41 @@
                                     </div>
 
                                     <hr class="my-4">
-
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+ </div>
                 </div>
+                <div class="col-lg-4 bg-grey">
+                  <div class="p-5">
+                    <h3 class="fw-bold mb-5 mt-2 pt-1">Quarterly Report</h3>
+                    <hr class="my-4 mb-5">
+  
+                    
+                    <!-- <div class="p-5"> -->
+                        
+                        
+                        <div class="d-flex justify-content-between mb-4">
+                          <h5 class="text-uppercase" style="font-weight: 700">Payment modes</h5>
+                          <h5 id="totalSales" style="font-weight: 700"></h5>
+                        </div>                  
+                   
+  
+                    <div class="container">
+                        <canvas id="doughnut"></canvas>
+                    </div>
+                    
+    
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </div>
-</section>
+  </section>
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="/javascripts/chart.js"></script>
-
 
 {{>foot}}

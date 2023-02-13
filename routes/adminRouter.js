@@ -33,12 +33,9 @@ router.post('/admin/products/edit',store.any(),controlls.productUpdate)
 router.post('/admin/products/delete',controlls.productDelete)
 router.post('/admin/products/search',auth.adminLoggedIn,controlls.productSearch)
 
-
 router.get('/admin/orders',auth.adminLoggedIn,controlls.ordersLoad)
 router.get('/admin/orders/status',auth.adminLoggedIn,controlls.editStatusLoad)
 router.post('/admin/orders/status',controlls.editStatus)
-
-
 
 router.get('/admin/dashboard',auth.adminLoggedIn,controlls.userDashboard)
 router.get('/admin/coupons',auth.adminLoggedIn,controlls.couponLoad)

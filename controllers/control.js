@@ -1311,6 +1311,7 @@ exports.applyCoupon = (req, res) => {
 
   Coupon.findOne({ code: code }).then((coupon1) => {
     if (coupon1) {
+      if(coupon1.status!="Applied"){
       const coupDate = new Date(coupon1.expiryDate);
       const currDate = new Date();
       const status =
@@ -1332,6 +1333,9 @@ exports.applyCoupon = (req, res) => {
             res.json(coupon1);
           });
       });
+    }else{
+      res.json(coupon1);
+    }
     } else {
       res.json(307);
     }
@@ -1459,7 +1463,29 @@ exports.userUpdate = (req, res) => {
 };
 
 exports.userDashboard = (req, res) => {
-  res.render("admin/adminDashboard");
+  const months={}
+  const monthNames=["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+const payments={}
+const paymentModes=["COD","RAZORPAY"]
+
+  Order.find({}, function(err, orders) {
+    if (err) throw err;
+
+    orders.map(function(order) {
+      var month = monthNames[order.orderDate.getMonth()];
+      if (!months[month]) {
+        months[month] = 0;
+      }
+      months[month]++;
+    });
+
+
+    res.render("admin/adminDashboard", {
+      months: months,payments:payments
+    });
+  });
 };
 
 exports.userBlock = (req, res) => {
@@ -1589,7 +1615,8 @@ exports.productLoad = (req, res) => {
 exports.productAdd = (req, res) => {
   getCategory()
     .then((categories) => {
-      res.render("admin/addProduct", { categories });
+      const message=req.query.message
+      res.render("admin/addProduct", { categories ,message:message});
     })
     .catch(() => {
       console.log(err.message);
@@ -1597,32 +1624,45 @@ exports.productAdd = (req, res) => {
 };
 
 exports.productUpload = (req, res) => {
-  const productData = new Product({
-    productName: req.body.name,
-    price: req.body.price,
-    description: req.body.description,
-    stock: req.body.stock,
-    category: req.body.category,
-    bgColor: req.body.bgcolor,
-    img1: req.files[0] && req.files[0].filename ? req.files[0].filename : "",
-    img2: req.files[1] && req.files[1].filename ? req.files[1].filename : "",
-    isDeleted: false,
-  });
-  productData
-    .save()
-    .then(() => {
-      const message = "Product added successfully";
-      req.session.productMessage = message;
-      res.redirect("/admin/products");
-    })
-    .catch((err) => {
-      console.log(err.message);
+  if (
+    req.body.name != "" &&
+    req.body.price != "" &&
+    req.body.description != "" &&
+    req.body.stock != "" &&
+    req.body.category != ""
+  ) {
+    const trendingStatus = req.body.trending == undefined ? false : true;
+    const productData = new Product({
+      productName: req.body.name,
+      price: req.body.price,
+      description: req.body.description,
+      stock: req.body.stock,
+      trending: trendingStatus,
+      offer: req.body.offer,
+      category: req.body.category,
+      bgColor: req.body.bgcolor,
+      img1: req.files[0] && req.files[0].filename ? req.files[0].filename : "",
+      img2: req.files[1] && req.files[1].filename ? req.files[1].filename : "",
+      isDeleted: false,
     });
+    productData
+      .save()
+      .then(() => {
+        const message = "Product added successfully";
+        req.session.productMessage = message;
+        res.redirect("/admin/products");
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }else{
+    const message="fields don't be blank"
+    res.redirect(`admin/addProduct?message=${message}`)
+  }
 };
 
 exports.productEdit = (req, res) => {
   const id = req.query.id;
-  console.log(req.body.checkbox);
   req.session.productQuery = id;
   Product.findOne({ _id: id })
     .then((result) => {
@@ -1639,6 +1679,8 @@ exports.productEdit = (req, res) => {
 };
 
 exports.productUpdate = (req, res) => {
+  const trendingStatus = req.body.trending == undefined ? false : true;
+  // const trnding=req.body.checkbox==""?
   const id = req.session.productQuery;
   const updateObj = {
     $set: {
@@ -1646,6 +1688,8 @@ exports.productUpdate = (req, res) => {
       price: req.body.price,
       description: req.body.description,
       stock: req.body.stock,
+      trending: trendingStatus,
+      offer: req.body.offer,
       category: req.body.category,
       bgColor: req.body.bgcolor,
       isDeleted: false,
@@ -1684,10 +1728,15 @@ exports.productDelete = (req, res) => {
 exports.productSearch = (req, res) => {
   const search = req.body.productsearch;
   Product.find({
-    $or: [
-      { productName: { $regex: search, $options: "i" } },
-      { price: { $regex: search, $options: "i" } },
-      { category: { $regex: search, $options: "i" } },
+    $and: [
+      { isDeleted: false },
+      {
+        $or: [
+          { productName: { $regex: search, $options: "i" } },
+          { price: { $regex: search, $options: "i" } },
+          { category: { $regex: search, $options: "i" } },
+        ],
+      },
     ],
   })
     .then((result) => {
@@ -1909,7 +1958,6 @@ exports.orderReport = (req, res) => {
   });
 };
 
-
 exports.orderSearch = (req, res) => {
   const from = new Date(req.body.fromdate);
   const to = new Date(req.body.todate);
@@ -1917,14 +1965,13 @@ exports.orderSearch = (req, res) => {
     "items.orderStatus": "Delivered",
     orderDate: { $gte: from, $lt: to },
   }).then((orders) => {
-    res.render("admin/reports", { orders});
+    res.render("admin/reports", { orders });
   });
 };
 
 exports.orderExcel = (req, res) => {
   Order.find({ "items.orderStatus": "Delivered" })
     .then((SalesReport) => {
-      console.log(SalesReport);
       try {
         const workbook = new excelJs.Workbook();
         const worksheet = workbook.addWorksheet("Sales Report");
