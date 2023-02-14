@@ -1466,13 +1466,8 @@ exports.userDashboard = (req, res) => {
   const months={}
   const monthNames=["Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-
-const payments={}
-const paymentModes=["COD","RAZORPAY"]
-
-  Order.find({}, function(err, orders) {
-    if (err) throw err;
-
+  Order.find({})
+  .then((orders)=>{
     orders.map(function(order) {
       var month = monthNames[order.orderDate.getMonth()];
       if (!months[month]) {
@@ -1480,12 +1475,46 @@ const paymentModes=["COD","RAZORPAY"]
       }
       months[month]++;
     });
+  })
+ .then(()=>{
+  Order.aggregate([
+    {
+      $group: {
+        _id: "$paymentMode",
+        count: { $sum: 1 }
+      }
+    }
+  ])
+  .then((result)=>{
 
-
-    res.render("admin/adminDashboard", {
-      months: months,payments:payments
-    });
-  });
+    Order.find({__v:0}).count()
+    .then((orderCount)=>{
+      User.find({__v:0}).count()
+      .then((userCount)=>{
+        Order.aggregate([
+          { $unwind: '$items' },
+          { $match: { 'items.orderStatus': 'Delivered' } },
+          { $group: { _id: null, totalBill: { $sum: '$items.bill' } } }
+        ])
+        .then((orderSum) => {
+          
+          Order.aggregate([
+            { $unwind: '$items' },
+            { $match: { 'items.orderStatus': 'Delivered' } },
+            { $group: { _id: null, totalProducts: { $sum: '$items.quantity' } } }
+          ])
+          .then((quantitySum) => {
+       res.render("admin/adminDashboard", {
+            months: months,data:JSON.stringify(result),totalBill:orderSum[0].totalBill,orderCount:orderCount,userCount:userCount,totalQuantity:quantitySum[0].totalProducts
+          });
+        });
+        })
+      })
+      
+    })
+  
+ })
+}) 
 };
 
 exports.userBlock = (req, res) => {

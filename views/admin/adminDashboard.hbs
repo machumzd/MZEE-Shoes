@@ -1,13 +1,60 @@
-
 {{>adminNav}}
+<style>
+    .card2 {
+        background-color: #fff;
+        border-radius: 10px;
+        border: none;
+        position: relative;
+        margin-bottom: 30px;
+        box-shadow: 0 0.46875rem 2.1875rem rgba(90, 97, 105, 0.1), 0 0.9375rem 1.40625rem rgba(90, 97, 105, 0.1), 0 0.25rem 0.53125rem rgba(90, 97, 105, 0.12), 0 0.125rem 0.1875rem rgba(90, 97, 105, 0.1);
+    }
 
+    .l-bg-cherry {
+        background: linear-gradient(to right, #493240, #f09) !important;
+        color: #fff;
+    }
 
+    .l-bg-blue-dark {
+        background: linear-gradient(to right, #373b44, #4286f4) !important;
+        color: #fff;
+    }
+
+    .l-bg-green-dark {
+        background: linear-gradient(to right, #0a504a, #38ef7d) !important;
+        color: #fff;
+    }
+
+    .l-bg-orange-dark {
+        background: linear-gradient(to right, #a86008, #ffba56) !important;
+        color: #fff;
+    }
+
+    .card2 .card-statistic-3 .card-icon-large .fas,
+    .card .card-statistic-3 .card-icon-large .far,
+    .card .card-statistic-3 .card-icon-large .fab,
+    .card .card-statistic-3 .card-icon-large .fal {
+        font-size: 110px;
+    }
+
+    .card2 .card-statistic-3 .card-icon {
+        text-align: center;
+        line-height: 50px;
+        margin-left: 15px;
+        color: #000;
+        position: absolute;
+        right: -5px;
+        top: 20px;
+        opacity: 0.1;
+    }
+</style>
 <section class="h-100 h-custom" style="background-color: #ffff;">
     <div class="container py-5 h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-12 border-0">
                 <div class="card card-registration card-registration-2 border-0">
                     <div class="card-body p-0">
+                                    <h3 class="fw-bold mt-2 pt-1">Heii Admin Welcome <span class="text-danger">Back</span></h3>
+
                         <div class="row g-0">
                             <div class="col-lg-8">
                                 <div class="p-5">
@@ -21,82 +68,190 @@
                                         </a>
                                     </div>
                                     <hr class="my-4">
-
-
-
-
-
                                     <div class="row mb-4 d-flex justify-content-between align-items-center">
-
                                         <div>
                                             <canvas id="myChart"></canvas>
                                         </div>
-
-                                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-                                        <script>
-                                            const ctx = document.getElementById('myChart');
-
-                                            var myChart = new Chart(ctx, {
-                                                type: 'doughnut',
-                                                data: {
-                                                    labels:[{{#each months}}"{{@key}}",{{/each}}],
-                                                    datasets: [{
-                                                        label: "# of Orders",
-                                                        data: [{{#each months}}{{this}},{{/each}}],
-                                                        borderWidth: 4
-                                                    }]
-                                                },
-                                                options: {
-                                                    scales: {
-                                                        y: {
-                                                            beginAtZero: true
-                                                        }
-                                                    }
-                                                }
-                                            });
-                                        </script>
-
-
-
                                     </div>
 
                                     <hr class="my-4">
- </div>
-                </div>
-                <div class="col-lg-4 bg-grey">
-                  <div class="p-5">
-                    <h3 class="fw-bold mb-5 mt-2 pt-1">Quarterly Report</h3>
-                    <hr class="my-4 mb-5">
-  
-                    
-                    <!-- <div class="p-5"> -->
-                        
-                        
-                        <div class="d-flex justify-content-between mb-4">
-                          <h5 class="text-uppercase" style="font-weight: 700">Payment modes</h5>
-                          <h5 id="totalSales" style="font-weight: 700"></h5>
-                        </div>                  
-                   
-  
-                    <div class="container">
-                        <canvas id="doughnut"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 bg-grey">
+                                <div class="p-5">
+                                    <h3 class="fw-bold mb-5 mt-2 pt-1">Other Reports</h3>
+                                    <hr class="my-4 mb-5">
+                                    <div class="d-flex justify-content-between mb-4">
+                                        <h5 class="text-uppercase" style="font-weight: 700">Payment modes</h5>
+                                        <h5 id="totalSales" style="font-weight: 700"></h5>
+                                    </div>
+
+                                    <div class="container">
+                                        <canvas id="paymentModeChart"></canvas>
+                                    </div>
+                                    <input type="hidden" id="fordata" value="{{data}}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="row">
+                                <div class="col-xl-3 col-lg-6">
+                                    <div class="card2 l-bg-cherry">
+                                        <div class="card-statistic-3 p-4">
+                                            <div class="card-icon card-icon-large"><i class="fas fa-shopping-cart"></i>
+                                            </div>
+                                            <div class="mb-4">
+                                                <h5 class="card-title mb-0">Orders</h5>
+                                            </div>
+                                            <div class="row align-items-center mb-2 d-flex">
+                                                <div class="col-8">
+                                                    <h2 class="d-flex align-items-center mb-0">
+                                                        {{orderCount}}
+                                                    </h2>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-lg-6">
+                                    <div class="card2 l-bg-blue-dark">
+                                        <div class="card-statistic-3 p-4">
+                                            <div class="card-icon card-icon-large"><i class="fas fa-users"></i></div>
+                                            <div class="mb-4">
+                                                <h5 class="card-title mb-0">Customers</h5>
+                                            </div>
+                                            <div class="row align-items-center mb-2 d-flex">
+                                                <div class="col-8">
+                                                    <h2 class="d-flex align-items-center mb-0">
+                                                        {{userCount}}
+                                                    </h2>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-lg-6">
+                                    <div class="card2 l-bg-green-dark">
+                                        <div class="card-statistic-3 p-4">
+                                            <div class="card-icon card-icon-large"><i class="fas fa-ticket-alt"></i>
+                                            </div>
+                                            <div class="mb-4">
+                                                <h5 class="card-title mb-0">Selled Products</h5>
+                                            </div>
+                                            <div class="row align-items-center mb-2 d-flex">
+                                                <div class="col-8">
+                                                    <h2 class="d-flex align-items-center mb-0">
+                                                        {{totalQuantity}}
+                                                    </h2>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-lg-6">
+                                    <div class="card2 l-bg-orange-dark">
+                                        <div class="card-statistic-3 p-4">
+                                            <div class="card-icon card-icon-large"><i class="fas fa-dollar-sign"></i>
+                                            </div>
+                                            <div class="mb-4">
+                                                <h5 class="card-title mb-0">Total Revenue</h5>
+                                            </div>
+                                            <div class="row align-items-center mb-2 d-flex">
+                                                <div class="col-8">
+                                                    <h2 class="d-flex align-items-center mb-0">
+                                                        ₹ {{totalBill}}
+                                                    </h2>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    
-    
-                  </div>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </section>
-
-
+    </div>
+    </div>
+</section>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<script>
+    var ctx = document.getElementById("myChart").getContext("2d");
+    var myChart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: [{{#each months}}"{{@key}}",{{/each}}],
+    datasets: [{
+        label: "# of Orders",
+        data: [{{#each months}}{{this}}, {{/each}}],
+        backgroundColor: [
+            "rgba(255, 99, 132, 0.2)",
+            "rgba(54, 162, 235, 0.2)",
+            "rgba(255, 206, 86, 0.2)",
+            "rgba(75, 192, 192, 0.2)",
+            "rgba(153, 102, 255, 0.2)",
+            "rgba(255, 159, 64, 0.2)"
+        ],
+            borderColor: [
+                "rgba(255, 99, 132, 1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(255, 206, 86, 1)",
+                "rgba(75, 192, 192, 1)",
+                "rgba(153, 102, 255, 1)",
+                "rgba(255, 159, 64, 1)"
+            ],
+                borderWidth: 1
+    }]
+  },
+    options: {
+        animation: {
+            duration: 2000,
+                easing: "easeInOutQuad"
+        },
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+</script>
+<script>
+    const data = JSON.parse(document.getElementById("fordata").value)
+    var ctx = document.getElementById('paymentModeChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['cod', 'razorpay'],
+            datasets: [{
+                label: 'Payment Modes',
+                data: [data[0].count, data[1].count],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="/javascripts/chart.js"></script>
-
 {{>foot}}
