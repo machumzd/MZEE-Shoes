@@ -73,7 +73,6 @@ const sendOTP = (mobile, OTP) => {
 };
 
 //category get cheyyan
-
 const getCategory = function () {
   return new Promise((res, rej) => {
     Category.find()
@@ -1661,6 +1660,7 @@ exports.productUpload = (req, res) => {
     req.body.category != ""
   ) {
     const trendingStatus = req.body.trending == undefined ? false : true;
+
     const productData = new Product({
       productName: req.body.name,
       price: req.body.price,
@@ -1670,6 +1670,7 @@ exports.productUpload = (req, res) => {
       offer: req.body.offer,
       category: req.body.category,
       bgColor: req.body.bgcolor,
+      __v:1,
       img1: req.files[0] && req.files[0].filename ? req.files[0].filename : "",
       img2: req.files[1] && req.files[1].filename ? req.files[1].filename : "",
       isDeleted: false,
@@ -1709,7 +1710,7 @@ exports.productEdit = (req, res) => {
 
 exports.productUpdate = (req, res) => {
   const trendingStatus = req.body.trending == undefined ? false : true;
-  // const trnding=req.body.checkbox==""?
+  const newStatus=req.body.new== undefined ? 0 : 1;
   const id = req.session.productQuery;
   const updateObj = {
     $set: {
@@ -1719,6 +1720,7 @@ exports.productUpdate = (req, res) => {
       stock: req.body.stock,
       trending: trendingStatus,
       offer: req.body.offer,
+      __v:newStatus,
       category: req.body.category,
       bgColor: req.body.bgcolor,
       isDeleted: false,

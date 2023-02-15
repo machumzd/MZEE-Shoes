@@ -203,9 +203,9 @@
 
 <script>
 
-    var inputElems = document.getElementsByClassName("js-radioInput");
-    for (var i = inputElems.length - 1; i >= 0; --i) {
-        var elem = inputElems[i];
+    let inputElems = document.getElementsByClassName("js-radioInput");
+    for (let i = inputElems.length - 1; i >= 0; --i) {
+        let elem = inputElems[i];
         elem.onchange = function () {
             document.getElementById("my_button").removeAttribute("disabled");
         };
@@ -238,13 +238,13 @@
     
     function razorpay(order,bill) {
         console.log(bill)
-        var options = {
+        let options = {
             "key": "rzp_test_8bFkeBhywF7wRI", // Enter the Key ID generated from the Dashboard
             "amount": bill*100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
             "currency": "INR",
             "name": "Mzee Shoes",
             "description": "Buy  Shoes",
-            "image": "/images/logo.png",
+            "image": "https://i.postimg.cc/B6g5VdW9/logo.png",
             "handler": function (response) {
                 RazoverifyPayment(response, order)
             },
@@ -260,7 +260,7 @@
                 "color": "#3399cc"
             }
         }
-        var rzp1 = new Razorpay(options);
+        let rzp1 = new Razorpay(options);
         rzp1.open();
     }
     
@@ -292,7 +292,7 @@
 <script>
 
     function couponApply(id, value, bill) {
-        var coupon = document.getElementById("form3Examplea2").value;
+        let coupon = document.getElementById("form3Examplea2").value;
         console.log(value)
         console.log(bill)
         console.log(coupon);
@@ -365,7 +365,7 @@
     }
 
     window.onload = function () {
-        var msg = document.getElementById("validation");
+        let msg = document.getElementById("validation");
         if (msg.innerHTML !== "") {
             setTimeout(function () {
                 msg.style.display = "none";

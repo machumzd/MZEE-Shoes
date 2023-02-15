@@ -1,4 +1,3 @@
-
 {{>adminNav}}
 
 <section class="vh-100">
@@ -11,8 +10,8 @@
                     <h1 class="pb-3 font-weight-bold">Edit Product</h1>
                     <h5 class="text-danger">{{adminMessage}}</h5>
                     <div class="form-outline mb-4">
-                        <input type="text" id="name" value="{{product.productName}}" name="name" class="form-control form-control-lg border-dark"
-                            placeholder="Product Name" />
+                        <input type="text" id="name" value="{{product.productName}}" name="name"
+                            class="form-control form-control-lg border-dark" placeholder="Product Name" />
                     </div>
 
 
@@ -23,16 +22,17 @@
 
                     <div class="form-outline mb-4">
                         <textarea type="text" rows="6" id="description" name="description"
-                            class="form-control form-control-lg border-dark" placeholder="Description">{{product.description}}</textarea>
+                            class="form-control form-control-lg border-dark"
+                            placeholder="Description">{{product.description}}</textarea>
                     </div>
 
                     <div class="form-outline mb-4">
-                        <input type="number" id="stock" name="stock" value="{{product.stock}}" class="form-control form-control-lg border-dark"
-                            placeholder="stock" />
+                        <input type="number" id="stock" name="stock" value="{{product.stock}}"
+                            class="form-control form-control-lg border-dark" placeholder="stock" />
 
                     </div>
                     <div class="form-outline mb-4">
-                        <select name="category"  class="form-control form-control-lg border-dark" id="cars">
+                        <select name="category" class="form-control form-control-lg border-dark" id="cars">
                             <option>{{product.category}}</option>
                             {{#each categories}}
                             <option value={{category}}>{{category}}</option>
@@ -41,33 +41,42 @@
                     </div>
 
 
-                 <div class="form-outline mb-4">
-                        <input type="text" id="bgColor" name="bgcolor"  class="form-control form-control-lg" style="border: solid 3px {{product.bgColor}}"
-                            placeholder="background color" value="{{product.bgColor}}"/>
-                    </div>
-
-                        <div class="form-outline mb-4">
-                        <input type="number" id="offer" name="offer" pattern="\d*" maxlength="2" class="form-control form-control-lg border-dark"
-                            placeholder="Offer Percentage(in %)" value="{{product.offer}}" required/>
-
-                    </div>
-
-              <div class="form-group mb-2">
-  <h5><label for="checkbox">trending:</label>
-  <input type="checkbox" id="checkbox" value="true" name="trending">-{{product.trending}}</h5>
-</div>
                     <div class="form-outline mb-4">
-                        <input type="file" class="form-control form-control-lg border-dark hidden"  name="image1" id="img"
-                            accept="image/*">
-                     <label for="img">{{product.img1}}</label>
+                        <input type="text" id="bgColor" name="bgcolor" class="form-control form-control-lg"
+                            style="border: solid 3px {{product.bgColor}}" placeholder="background color"
+                            value="{{product.bgColor}}" />
+                    </div>
+
+                    <div class="form-outline mb-4">
+                        <input type="number" id="offer" name="offer" pattern="\d*" maxlength="2"
+                            class="form-control form-control-lg border-dark" placeholder="Offer Percentage(in %)"
+                            value="{{product.offer}}" required />
+
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <h5><label for="checkbox">trending:</label>
+                            <input type="checkbox" id="checkbox" value="true" name="trending">-{{product.trending}}
+                        </h5>
+                        <span>
+                            <h5><label for="checkbox">new:</label>
+                                <input type="checkbox" id="checkbox" value="true" name="new">
+                            </h5>
+                        </span>
+
+                    </div>
+                    <div class="form-outline mb-4">
+                        <input type="file" class="form-control form-control-lg border-dark hidden" name="image1"
+                            id="img" accept="image/*">
+                        <label for="img">{{product.img1}}</label>
 
                     </div>
 
 
                     <div class="form-outline mb-4">
                         <input type="file" class="form-control form-control-lg border-dark" name="image2" id="img"
-                            accept="image/*" >
-                             <label for="img">{{product.img2}}</label>
+                            accept="image/*">
+                        <label for="img">{{product.img2}}</label>
                     </div>
 
                     <div class="d-flex justify-content-around align-items-center mb-3">

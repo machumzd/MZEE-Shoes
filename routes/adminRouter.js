@@ -4,26 +4,21 @@ const controlls=require("../controllers/control")
 const store = require('../helpers/multer')
 const auth=require('../middleware/auth')
 
-
 router.get('/admin',controlls.getAdminLogin)
 router.post('/admin',controlls.adminLogin)
-
 
 router.get('/admin/users',auth.adminLoggedIn,controlls.userManagement)
 router.post('/admin/users/search',controlls.userSearch)
 router.get('/admin/users/edit',controlls.userEdit)
 router.post('/admin/users/edit',controlls.userUpdate)
-// router.post('/admin/users/delete',controlls.userDelete)
 router.post('/admin/users/block',controlls.userBlock)
 router.post('/admin/users/unblock',controlls.userUnBlock)
-
 
 router.get('/admin/category',auth.adminLoggedIn,controlls.adminCategory)
 router.post('/admin/category',controlls.adminCategoryLoad)
 router.get('/admin/category/delete',controlls.categoryDelete)
 router.get('/admin/category/edit',controlls.categoryEdit)
 router.post('/admin/category/update',controlls.categoryUpdate)
-
 
 router.get('/admin/products',auth.adminLoggedIn,controlls.productLoad)
 router.get('/admin/products/add',controlls.productAdd)
@@ -54,8 +49,6 @@ router.post("/admin/banner/update",store.any(),controlls.bannerUpdate)
 
 router.post("/admin/banner/disable",controlls.bannerDisable)
 router.post("/admin/banner/enable",controlls.bannerEnable)
-
 router.get("/admin-logout",auth.adminLogout)
-
 
 module.exports=router;
