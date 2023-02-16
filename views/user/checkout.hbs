@@ -40,7 +40,7 @@
                                     </div>
                                     {{/each}}
 
-                                    <a href="/profile?&add=true&checkout=true" style="text-decoration: none; color: green;">
+                                    <a href="/profile?add=true&checkout=true" style="text-decoration: none; color: green;">
                                         <p>Add a new address</p>
                                     </a>
                             </div>
@@ -132,11 +132,20 @@
 </div>
 {{>foot}}
 <script>
-    const inputElems = document.getElementsByClassName("js-radioInput");
-    for (const i = inputElems.length - 1; i >= 0; --i) {
-        const elem = inputElems[i];
-        elem.onchange = function () {
-            document.getElementById("my_button").removeAttribute("disabled");
-        };
-    }
+  const inputElems = document.getElementsByClassName("js-radioInput");
+  const myButton = document.getElementById("my_button");
+
+  for (let i = 0; i < inputElems.length; i++) {
+    const elem = inputElems[i];
+    elem.addEventListener("change", function() {
+      let isDisabled = true;
+      for (let j = 0; j < inputElems.length; j++) {
+        if (inputElems[j].checked) {
+          isDisabled = false;
+          break;
+        }
+      }
+      myButton.disabled = isDisabled;
+    });
+  }
 </script>

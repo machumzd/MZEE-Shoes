@@ -46,11 +46,11 @@ router.post("/verifyPassword", controlls.verifyPassword);
 router.get("/profile",auth.userLoggedIn, controlls.userProfile);
 router.post("/profile/addAddress", controlls.userAddress);
 router.post("/profile/uploadAddress", controlls.uploadAddress);
-router.get("/profile/deleteAddress",controlls.deleteAddress)
+router.get("/profile/deleteAddress",auth.userLoggedIn,controlls.deleteAddress)
 router.post("/profile/changePassword", controlls.changePassword);
 router.post("/profile/userEdit", controlls.uploadUser);
 router.post("/addToCart/operation", controlls.cartOperation);
-router.get("/razorpay",controlls.razorpayRedirect)
+router.get("/razorpay",auth.userLoggedIn,controlls.razorpayRedirect)
 
 router.post("/cancelOrder",controlls.cancelOrder)
 router.post("/returnOrder",controlls.returnOrder)

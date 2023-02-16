@@ -312,19 +312,28 @@ exports.mobileOtp = (req, res) => {
 exports.sendOtp = (req, res) => {
   mobile = req.body.mobile;
   if (mobile.length == 10 && mobile != "") {
-    const OTP = generateOTP();
-    sendOTP(mobile, OTP);
-    User.updateOne({ mobile: mobile }, { $set: { token: OTP } })
-
-      .then(() => {
-        req.session.verifypage = true;
-        res.render("user/otpVerify");
-      })
-      .catch((error) => console.log(error));
-  } else {
-    const message = "fields cannot empty";
-    res.render("user/mobileOtp", { message: message });
-  }
+User.findOne({mobile:mobile})
+.then((user)=>{
+      if(user){
+      
+          const OTP = generateOTP();
+          sendOTP(mobile, OTP);
+          User.updateOne({ mobile: mobile }, { $set: { token: OTP } })
+      
+            .then(() => {
+              req.session.verifypage = true;
+              res.render("user/otpVerify");
+            })
+            .catch((error) => console.log(error));
+          }else{
+            const message = "invalid credintials";
+            res.render("user/mobileOtp", { message: message });
+          }
+    })
+    } else {
+      const message = "fields cannot empty";
+      res.render("user/mobileOtp", { message: message });
+    }
 };
 
 exports.verifyOtp = (req, res) => {
@@ -383,7 +392,6 @@ exports.verifyOtp = (req, res) => {
               res.render("user/otpVerify", {
                 message: "the Otp is Incorrrect",
               });
-              reject(new Error("Incorrect OTP"));
             }
           })
           .catch((err) => {
@@ -512,21 +520,23 @@ exports.userProfile = (req, res) => {
       getWishlists(userData._id).then((wishlists) => {
         if (req.query.add) {
           if (req.query.checkout) {
-            const addAddress = "for edit address panel";
-            const toCheckout = "to go checkout";
+            const addAddress = "for add address panel";
+            const toCheckout2= "to go checkout";
             res.render("user/userProfile", {
               addAddress,
-              toCheckout,
+              toCheckout2,
               userData,
               cart: carts,
               wishlist: wishlists,
               categories,
             });
           } else {
-            const addAddress = "for et edit address panel";
+            const addAddress = "for add address panel";
             res.render("user/userProfile", {
               addAddress,
               userData,
+              cart:carts,
+              wishlist:wishlists,
               categories,
             });
           }
@@ -543,7 +553,6 @@ exports.userProfile = (req, res) => {
                 toCheckout,
                 wishlist: wishlists,
                 cart: carts,
-
                 userData,
                 categories,
               });
@@ -620,11 +629,17 @@ exports.userAddress = (req, res) => {
     .save()
     .then((address) => {
       req.session.address = address;
+  
       const message = "Address Added Successfully";
       req.session.successMessage = message;
       req.session.errorMessage = "";
-      req.query.add = false;
-      res.redirect("/profile");
+      if (req.query.checkout) {
+        req.query.checkout = false;
+        res.redirect("/cart/checkout");
+
+      } else {
+        res.redirect("/profile");
+      }
     })
     .catch((err) => {
       console.log(" new address error" + err);
@@ -840,7 +855,7 @@ exports.addToCart = (req, res) => {
     Product.findOne({
       _id: id,
     }).then((result) => {
-      Cart.findOne({ productId: result._id }).then((cart) => {
+      Cart.findOne({ owner:userData._id,productId: result._id }).then((cart) => {
         if (!cart) {
           const cartAdd = new Cart({
             owner: userData._id,

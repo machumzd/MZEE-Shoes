@@ -124,8 +124,12 @@
                     <p class="card-text text-muted mt-4 mb-0  space">ADD DELIVERY ADDRESS</p>
                   </div>
                   <div>
+                     
+                      {{#if toCheckout2}}
+                     <form class="row g-3 mt-0" action="/profile/addAddress?id={{_id}}&checkout=true" method="post">
 
-                    <form class="row g-3 mt-0" action="/profile/addAddress?id={{_id}}" method="post">
+                        {{else}}
+                       <form class="row g-3 mt-0" action="/profile/addAddress?id={{_id}}" method="post">{{/if}}
 
                       <div class="col-md-6">
                         <label for="" class="form-label">Name</label>
