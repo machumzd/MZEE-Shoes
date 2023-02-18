@@ -60,7 +60,7 @@ const sendOTP = (mobile, OTP) => {
     client.messages
       .create({
         body: `DO NOT SHARE: Your Mzee OTP is ${OTP}.`,
-        to: "+917994299413",
+        to: "+91"+mobile,
         from: "+13854817890",
       })
       .then((send) => {
@@ -89,9 +89,10 @@ const getCategory = function () {
 const getTotalSum = function (id) {
   return new Promise((res, rej) => {
     Cart.find({ owner: id }).then((result) => {
-      if (result == null) {
+
+      if (result.length == 0) {
         constsum = 0;
-        res(sum);
+        res(constsum);
       } else {
         Cart.aggregate([
           {
@@ -281,6 +282,10 @@ exports.userHome = (req, res) => {
       getProducts().then((products) => {
         if (req.session.user) {
           userData = req.session.userData;
+          User.findOne({_id:userData._id}).then((user)=>{
+            if(user.blockStatus==true){
+              req.session.user=false
+            }
           getCarts(userData._id).then((carts) => {
             getWishlists(userData._id).then((wishlists) => {
               res.render("user/index", {
@@ -293,6 +298,7 @@ exports.userHome = (req, res) => {
               });
             });
           });
+        })
         } else {
           res.render("user/index", {
             categories: categories,
@@ -918,7 +924,7 @@ exports.cartOperation = (req, res) => {
   const userData = req.session.userData;
   req.session.cartMessage = "";
 
-  Cart.findOne({ owner: userData._id })
+  Cart.find({ owner: userData._id })
     .then((cart) => {
       if (!cart) {
         return res.redirect(`/cart?id=${userData._id}`);
@@ -947,6 +953,8 @@ exports.cartOperation = (req, res) => {
         if (req.body.sub) {
           const id = req.body.id;
           const price = req.body.price;
+          const quant=req.body.quantity;
+          if(quant!=0){
           Cart.findOneAndUpdate(
             { _id: id },
             {
@@ -957,6 +965,15 @@ exports.cartOperation = (req, res) => {
               res.json(totalsum);
             });
           });
+        }else{
+          Cart.findOneAndDelete({_id:id})
+          .then(()=>{
+            if(cart.length!=0)
+            getTotalSum(userData._id).then((totalsum) => {
+              res.json(totalsum);
+            });
+          })
+        }
         }
       }
     })

@@ -17,13 +17,14 @@
                 <div class="p-5">
                   <div class="d-flex justify-content-between align-items-center mb-5">
                     <h1 class="fw-bold mb-0 text-black">Shopping Cart</h1>
-                    <h6 class="mb-0 text-muted">{{cart.length}} items</h6>
+                    <h6 class="mb-0 text-muted" id="itemsLength2">{{cart.length}} items</h6>
                   </div>
                   <hr class="my-4">
                   {{#if cart}}
                   {{#each cart}}
-
-                  <div class="row mb-4 d-flex justify-content-between align-items-center">
+                  <p id="noItems"></p>
+                  
+                  <div class="row mb-4 d-flex justify-content-between align-items-center" id="cartItem{{_id}}">
                     <div class="col-md-2 col-lg-2 col-xl-2">
                       <img src="/images/{{img1}}" class="img-fluid rounded-3" alt="Cotton T-shirt">
                     </div>
@@ -60,8 +61,9 @@
                       </form>
                     </div>
                     <h8 id="limitMessage{{_id}}" class="ps-5 text-center text-danger"></h8>
+                    <hr class="my-4">
                   </div>
-                  <hr class="my-4">
+                  
 
                   {{/each}}
                   {{else}}
@@ -81,7 +83,7 @@
                   <h3 class="fw-bold mb-5 mt-2 pt-1">Summary</h3>
                   <hr class="my-4">
                   <div class="d-flex justify-content-between mb-4">
-                    <h5 class="text-uppercase">items {{cart.length}}</h5>
+                    <h5 class="text-uppercase" id="itemsLength" value="{{cart.length}}">items {{cart.length}}</h5>
                     <h5 id="totalBill" value="">₹ {{cartBill}}</h5>
                   </div>
                   <h5 class="text-uppercase mb-3">Shipping</h5>
@@ -128,7 +130,6 @@
       element.previousElementSibling.value = parseInt(x) + 1;
       const bill = document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) + 1) * price);
 
-
       const id = data;
       console.log("im in steponup")
       fetch("/addToCart/operation", {
@@ -161,12 +162,11 @@
   function stepondown(element, data, price, cartBill) {
     document.getElementById("limitMessage" + data).innerHTML = ""
     const x = element.nextElementSibling.value;
-    if (x > 0) {
+    
       element.nextElementSibling.value = parseInt(x) - 1;
       const bill = document.getElementById("bill" + data).innerHTML = "₹ " + ((parseInt(x) - 1) * price);
       //document.getElementById("4minus"+data).value=bill
-
-
+  
       const id = data;
       fetch("/addToCart/operation", {
         method: "POST",
@@ -176,6 +176,7 @@
         body: JSON.stringify({
           sub: "sub",
           price: price,
+          quantity:element.nextElementSibling.value,
           id: id
         })
       })
@@ -183,15 +184,23 @@
           return response.json();
         })
         .then(data => {
+          console.log(data)
+         if(element.nextElementSibling.value==0){
+            document.getElementById("cartItem"+id).outerHTML=""
+            const length=document.getElementById("itemsLength").innerHTML.slice(6)
+            console.log("length=="+length)
+            document.getElementById("itemsLength").innerHTML="items "+ (parseInt(length)-1)
+            document.getElementById("itemsLength2").innerHTML=(parseInt(length)-1) +" items"
+            document.getElementById("noItems").innerHTML="No items found"
+          }else if(data==0){
+          document.getElementById()
+          }
           document.getElementById("totalBill").innerHTML = "₹ " + data
           document.getElementById("totalBills").innerHTML = "₹ " + data
         })
         .catch(error => {
           console.log(error);
         });
-    } else {
-      document.getElementById("limitMessage" + data).innerHTML = "You can't add less than 0 items"
-    }
   }
 </script>
 <script>
