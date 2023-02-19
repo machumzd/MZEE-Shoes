@@ -16,7 +16,6 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="images">
-   <form action="/user/addtoCart?id={{product._id}}" method="post">
                             <div class="text-center col-12 zoom-image" data-image="./image/{{product.img1}}">
                                 <img class="col-12" id="main-image" src="/images/{{product.img1}} " width="520"
                                     style="background-color:{{product.bgColor}};border-radius:30px;" />
@@ -48,25 +47,34 @@
                                 <div class="price d-flex flex-row align-items-center"> <span
                                         class="text-danger act-price" style="margin-right: 10px">
                                         ₹{{product.price}}/- per pair
-                                    </span>
-                                    40% off
-                                    <span class="p-1">
-              <a> <button onclick="wishlistClick('{{product._id}}')" class="btn border-0" style="color:red">
-                  <h3><i class="fa-solid fa-heart p-1" area-hidden="true"></i></h3></button>
-              </a>
 
-            </span>
+                                    </span>
+                                    {{#ifnoteq product.offer 0}}
+                                    {{product.offer}}% off
+                                    {{/ifnoteq}}
+                                    <span class="p-1">
+                                        <a> <button onclick="wishlistClick('{{product._id}}')" class="btn border-0"
+                                                style="color:red">
+                                                <h3><i class="fa-solid fa-heart p-1" area-hidden="true"></i></h3>
+                                            </button>
+                                        </a>
+
+                                    </span>
                                 </div>
                             </div>
                             <p class="about">
                                 {{product.description}}
                             </p>
-                         <label>Enter the <span class="text-danger">Size</span></label>
-                         <input type="number" name="size" min="1" max="10" id="size" placeholder="Enter size" style="max-width:10em;" class="form-control mb-3 border-dark" required>
-                                <button type="submit" class="btn btn-outline-dark bg-dark text-light mb-5 p-3"
-                                    style="width: 100%; margin-top: 3vw; border-radius:50px;max-width:20em;">Add to cart</button>
+                            <label id="size{{product._id}}"> <span class="text-danger">Size</span></label>
+                            <input type="number" name="size" min="1" max="10" id="size" placeholder="Enter size"
+                                style="max-width:10em;" class="form-control mb-3 border-dark">
+                            <p class="text-danger" id="alertmsg{{product._id}}"></p>
 
-                            </form>
+                            <a><button onclick="addToCart('{{product._id}}','{{product.stock}}')"
+                                    class="btn btn-outline-dark bg-dark text-light mb-5 p-3"
+                                    style="width: 100%; margin-top: 3vw; border-radius:50px;max-width:20em;">Add to
+                                    cart</button></a>
+
 
 
                         </div>
@@ -145,32 +153,115 @@
 </script>
 
 <script>
-  function wishlistClick(data) {
-    const id = data;
-    fetch("/wishlist/add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: id
-      })
-    })
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        if (data == "not logged in") {
-          window.location.href = "/login";
-        } else {
-          location.reload();
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }
+    function wishlistClick(data) {
+        const id = data;
+        fetch("/wishlist/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: id
+            })
+        })
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                if (data == "not logged in") {
+                    window.location.href = "/login";
+                } else {
+                    const wishl=document.getElementById("wishlistLength").innerHTML
+          document.getElementById("wishlistLength").innerHTML=(parseInt(wishl)+1);
+                    Swal.fire({
+                        title: 'Added to wishlist',
+                        icon: 'success',
+                        timer: 1300,
+                        showConfirmButton: false,
+                    }
+                    )
+
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
 
 </script>
+
+<script>
+
+    function addToCart(data, stock) {
+        const size = document.getElementById("size").value;
+
+        if (size == "") {
+            document.getElementById("alertmsg" + data).innerHTML = "size is required"
+        }
+        else if (size > 10 || size < 1) {
+            document.getElementById("alertmsg" + data).innerHTML = "size is not valid (1-10)"
+        } else {
+            const id = data;
+            fetch("/user/addtoCart", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: id,
+                    size: size
+                })
+            })
+                .then(response => {
+                    return response.json();
+                })
+                .then(data2 => {
+                    console.log(data2)
+                    if (data2 == "login") {
+                        window.location.href = "/login";
+                    }
+                    else if (data2 == "added") {
+
+                       Swal.fire({
+                         title: 'Product added to cart!',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: 'red',
+                            confirmButtonText: '<a style="text-decoration:none !important; color:inherit !important;" href="/cart?id={{userData._id}}">Go to Cart?</a>',
+                            confirmButtonTextColor: 'white',
+                            showCancelButton: true,
+                              reverseButtons: true,
+                            customClass: {
+                            confirmButton: 'my-confirm-button-class'
+                        }
+                        })
+                        const cartl = document.getElementById("cartLength").innerHTML;
+                        document.getElementById("cartLength").innerHTML = parseInt(cartl) + 1;
+                    } else {
+                        Swal.fire({
+                         title: 'Cart updated successfully!',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: 'red',
+                            confirmButtonText: '<a style="text-decoration:none !important; color:inherit !important;" href="/cart?id={{userData._id}}">Go to Cart?</a>',
+                            confirmButtonTextColor: 'white',
+                            showCancelButton: true,
+                              reverseButtons: true,
+                            customClass: {
+                            confirmButton: 'my-confirm-button-class'
+                        }
+                        }
+                        )
+    
+                    }
+
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        }
+    }
+</script>
+
 
 {{>foot}}

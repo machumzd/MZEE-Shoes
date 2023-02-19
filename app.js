@@ -12,7 +12,7 @@ const hbs=require("hbs")
 const userRouter=require("./routes/userRouter")
 const adminRouter=require("./routes/adminRouter")
 
-// logger(app);
+logger(app);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

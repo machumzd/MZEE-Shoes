@@ -29,7 +29,7 @@
     "path": "^0.12.7",
     "razorpay": "^2.8.4",
     "smtp-client": "^0.4.0",
-    "sweetalert2": "^11.7.1",
+    "sweetalert2": "^11.4.8",
     "twilio": "^2.5.2"
   }
 }

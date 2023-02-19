@@ -184,14 +184,14 @@
           return response.json();
         })
         .then(data => {
-          console.log(data)
          if(element.nextElementSibling.value==0){
             document.getElementById("cartItem"+id).outerHTML=""
             const length=document.getElementById("itemsLength").innerHTML.slice(6)
             console.log("length=="+length)
             document.getElementById("itemsLength").innerHTML="items "+ (parseInt(length)-1)
             document.getElementById("itemsLength2").innerHTML=(parseInt(length)-1) +" items"
-            document.getElementById("noItems").innerHTML="No items found"
+
+            
           }else if(data==0){
           document.getElementById()
           }

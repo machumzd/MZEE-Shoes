@@ -855,7 +855,7 @@ exports.cart = (req, res) => {
 };
 
 exports.addToCart = (req, res) => {
-  const id = req.query.id;
+  const id = req.body.id;
   const userData = req.session.userData;
   if (userData) {
     Product.findOne({
@@ -879,7 +879,7 @@ exports.addToCart = (req, res) => {
           cartAdd
             .save()
             .then((cartData) => {
-              res.redirect(`/productView?id=${result._id}`);
+              res.json("added")
             })
             .catch((err) => {
               console.log("cannot get cart" + err);
@@ -893,16 +893,16 @@ exports.addToCart = (req, res) => {
                 $set: { size: req.body.size },
               }
             ).then((updatedCart) => {
-              res.redirect(`/productView?id=${result._id}`);
+               res.json("updated")
             });
           } else {
-            res.redirect(`/productView?id=${result._id}`);
+             res.json("done")
           }
         }
       });
     });
   } else {
-    res.redirect("/login");
+    res.json("login")
   }
 };
 
@@ -1031,14 +1031,13 @@ exports.addToWishlist = (req, res) => {
 };
 
 exports.deleteWishlist = (req, res) => {
-  const id = req.query.id;
-
+  const id = req.body.id;
   const userData = req.session.userData;
   Wishlist.findOneAndUpdate(
     { owner: userData._id },
     { $pull: { items: { _id: id } } }
   ).then(() => {
-    res.redirect(`/wishlist?id=${userData._id}`);
+    res.json("done")
   });
 };
 exports.emailOtp = (req, res) => {

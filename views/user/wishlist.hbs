@@ -7,9 +7,20 @@
 {{/if}}
 
 <!-- end hero area -->
+<style>
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+</style>
 <!-- shop section -->
-
 <section class="shop_section layout_padding">
   <div class="container">
     <div class="heading_container heading_center">
@@ -18,15 +29,20 @@
       </h2>
     </div>
     <div class="row">
-
-{{#if wishlist}}
+{{#ifeq wishlist.items.length 0}}
+  <h4 class="text-center text-danger">No Products Found</h4>
+{{/ifeq}}
 
 {{#each wishlist}}
       {{#each items}}
       <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="box shadow-lg" style="background-color:{{bgColor}}">
+            <a> <button onclick="wishlistDelete('{{_id}}')" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow" style="color:red">
+               <i class="fa-solid fa-heart-crack" area-hidden="true"></i>
+                 </button>
+              </a>
 
-        <div class="box" style="background-color:{{bgColor}}">
-          <a href="">
+          <a href="/productView?id={{_id}}">
             <div class="img-box">
               <img src="/images/{{img1}}" alt="">
             </div>
@@ -49,29 +65,154 @@
             </span>
           </h6>
           <div class="btn-box">
-            <a href="/productView?id={{_id}}" class="btn">
+            <a href="/productView?id={{_id}}" class="btn shadow-sm">
               Explore
               </a>
-              <span class="p-1">
-                  <form action="/wishlist/delete?id={{_id}}" method="post">
-            <a> <button type="submit" class="btn border-0 text-danger ">
-<i class="fa-solid fa-heart-crack p-1" area-hidden="true"></i></button>
-</a>
-</form>
-              </span>
-            
+              {{#ifeq stock 0}}
+                  <p class="text-danger m-2 fw-bold">out of stock</p>
+                  {{/ifeq}}
+                  {{#ifnoteq stock 0}}
+               <span class="mt-1 ms-1" style="max-width:8em; ">
+                <a> <button class="btn border-0 ps-1" style="color:midnightblue"> <span>
+                    <input type="number" class="border-0 ms-1 me-1" min="1" max="10" maxlength="2" style="max-width:2.2em;background-color:#d9d9d900;  border-radius:8px; box-shadow: none !important;" placeholder="size" name="size" id="size{{_id}}" required></span>
+                  <i onclick="addToCart('{{_id}}','{{stock}}')"  class="fa fa-shopping-bag" aria-hidden="true"></i>
+                  </button>
+              </a>
+            </span>
+                {{/ifnoteq}}
           </div>
+          <p class="text-danger mx-auto" id="alertmsg{{_id}}"></p>
         </div>
+
       </div>
 {{/each}}
       {{/each}}
- {{else}}
-  <h4 class="text-center text-danger">No Products Found</h4>
-{{/if}}
+
+
     </div>
    
   </div>
 </section>
+
+<script>
+  function wishlistDelete(data) {
+    const id = data;
+Swal.fire({
+  title: 'Are you sure?',
+  text: "You want to delete this product from wishlist",
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#3085d6',
+  cancelButtonColor: '#d33',
+  confirmButtonText: 'Yes, delete it!'
+}).then((result) => {
+  if (result.isConfirmed) {
+    fetch("/wishlist/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id
+      })
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+            Swal.fire(
+      'Deleted!',
+      'Your file has been deleted.',
+      'success'
+    )
+      })
+      .catch(error => {
+        console.log(error);
+      });
+location.reload();
+  }
+  
+})
+
+  }
+
+
+</script>
+<script>
+  
+  function addToCart(data,stock) {
+    const size=document.getElementById("size"+data).value;
+    if(size==""){
+      document.getElementById("alertmsg"+data).innerHTML="size is required"
+    }
+   else if(size>10 || size<1){
+     document.getElementById("alertmsg"+data).innerHTML="size is not valid (1-10)"
+    }else{
+    const id = data;
+    fetch("/user/addtoCart", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id,
+        size:size
+      })
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(data2 => {
+        console.log(data2)
+        if(data2=="added"){
+     document.getElementById("alertmsg"+data).innerHTML=""
+
+          const cartl=document.getElementById("cartLength").innerHTML;
+          if(cartl==""){
+            console.log("empty")
+            document.getElementById("cartLength").innerHTML=1;
+          }else{
+                 document.getElementById("alertmsg"+data).innerHTML=""
+          document.getElementById("cartLength").innerHTML=parseInt(cartl)+1;
+          Swal.fire({
+                         title: 'Product added to cart!',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: 'red',
+                            confirmButtonText: '<a style="text-decoration:none !important; color:inherit !important;" href="/cart?id={{userData._id}}">Go to Cart?</a>',
+                            confirmButtonTextColor: 'white',
+                            showCancelButton: true,
+                              reverseButtons: true,
+                            customClass: {
+                            confirmButton: 'my-confirm-button-class'
+                        }
+                        })
+          }
+        }else{
+           Swal.fire({
+                         title: 'Cart updated successfully!',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: 'red',
+                            confirmButtonText: '<a style="text-decoration:none !important; color:inherit !important;" href="/cart?id={{userData._id}}">Go to Cart?</a>',
+                            confirmButtonTextColor: 'white',
+                            showCancelButton: true,
+                              reverseButtons: true,
+                            customClass: {
+                            confirmButton: 'my-confirm-button-class'
+                        }
+                        }
+                        )
+        }
+
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
+  }
+</script>
+
 
 <!-- end shop section -->
 {{>footer}}

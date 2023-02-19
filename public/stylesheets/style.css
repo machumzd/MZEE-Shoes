@@ -6,6 +6,11 @@ body {
   color: #101010;
   background-color: #ffffff;
 }
+.my-confirm-button-class {
+  background-color: rgb(30, 193, 30) !important;
+  color: white !important;
+
+}
 
 .layout_padding {
   padding-top: 90px;

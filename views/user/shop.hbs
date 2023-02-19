@@ -25,10 +25,15 @@
       {{#each products}}
       <div class="col-sm-6 col-md-4 col-lg-3">
 
-        <div class="box" style="background-color:{{bgColor}}">
-          <a href="">
+        <div class="box shadow-lg" style="background-color:{{bgColor}}">
+           <a> <button onclick="wishlistClick('{{_id}}')" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow" style="color:brown">
+                 <i class="fa-solid fa-heart" area-hidden="true"></i>
+                 </button>
+              </a>
+          <a href="/productView?id={{_id}}">
             <div class="img-box">
               <img src="/images/{{img1}}" alt="">
+              
             </div>
               {{#ifnoteq __v 0}}
             <div class="new">
@@ -50,14 +55,9 @@
             </span>
           </h6>
           <div class="btn-box">
-            <a href="/productView?id={{_id}}" class="btn">
+            <a href="/productView?id={{_id}}" class="btn shadow-sm">
               Explore
-            </a>
-            <span class="p-1">
-              <a> <button onclick="wishlistClick('{{_id}}')" class="btn border-0" style="color:brown">
-                  <i class="fa-solid fa-heart p-1" area-hidden="true"></i></button>
-              </a>
-            </span>
+            </a> 
           </div>
         </div>
       </div>

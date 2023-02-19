@@ -42,13 +42,13 @@
             <a class="nav-icon-link my-auto position-relative" href="/cart?id={{userData._id}}"> <i
                 class="fa fa-shopping-bag" aria-hidden="true"></i><span
                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                id="cartLength">{{cart.length}}
+                id="cartLength" value="{{cart.length}}">{{cart.length}}
               </span></a>
             </a>
             {{else}}
 
             <a href="/cart?id={{userData._id}}">
-              <i class="fa fa-shopping-bag" aria-hidden="true"></i>
+              <i class="fa fa-shopping-bag" aria-hidden="true" id="cartLength" value="0"></i>
             </a>
             {{/if}}
 
@@ -61,7 +61,7 @@
               </span></a>
             {{else}}
             <a href="/wishlist?id={{userData._id}}">
-              <i class="fa-solid fa-heart" area-hidden="true"></i>
+              <i class="fa-solid fa-heart" area-hidden="true" id="wishlistLength" value="0"></i>
             </a>
             {{/if}}
           </div>

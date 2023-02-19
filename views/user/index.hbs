@@ -115,7 +115,11 @@
     
       <div class="col-sm-6 col-md-4 col-lg-3">
 
-        <div class="box" style="background-color:{{bgColor}}!important">
+        <div class="box shadow-lg" style="background-color:{{bgColor}}!important">
+       <a> <button onclick="wishlistClick('{{_id}}')" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow" style="color:brown">
+                 <i class="fa-solid fa-heart" area-hidden="true"></i>
+                 </button>
+              </a>         
           <a href="/productView?id={{_id}}">
             <div class="img-box">
               <img src="/images/{{img1}}" alt="">
@@ -147,17 +151,9 @@
             </span>
           </h6>
           <div class="btn-box d-flex flex-row">
-            <a href="/productView?id={{_id}}" class="btn">
+            <a href="/productView?id={{_id}}" class="btn shadow-sm">
               Explore
             </a>
-
-            <span class="p-1">
-              <a> <button onclick="wishlistClick('{{_id}}')" class="btn border-0" style="color:brown">
-                  <i class="fa-solid fa-heart p-1" area-hidden="true"></i></button>
-              </a>
-
-            </span>
-
 
           </div>
         </div>
@@ -173,9 +169,9 @@
   <!-- end shop section -->
   <!-- saving section -->
   <section class="saving_section">
-
-    <div class="row">
-      <div class="col-sm-6  col-md-12 col-lg-12 box1 p-5 saving_section_col mt-2 ">
+ <div class="container">
+    <div class="row ">
+      <div class="col-sm-12  col-md-12 col-lg-12 box1 p-5 saving_section_col mt-3 ">
 
 
 
@@ -186,7 +182,7 @@
             </h3>
           </div>
           <div class="btn-box">
-            <a href="/displayCategory?id=CASUAL" class="btn1">
+            <a href="/displayCategory?id=CASUAL" class="btn1 shadow">
               Explore
             </a>
           </div>
@@ -198,7 +194,8 @@
 
 
       </div>
-      <div class="col-sm-6  col-md-12 col-lg-12 bg-$pink-400 box2 p-5 saving_section_col mt-2">
+     
+      <div class="col-sm-12  col-md-12 col-lg-12 bg-$pink-400 box2 p-5 saving_section_col mt-3">
 
 
 
@@ -209,7 +206,7 @@
             </h3>
           </div>
           <div class="btn-box">
-            <a href="/displayCategory?id=FORMAL" class="btn1">
+            <a href="/displayCategory?id=FORMAL" class="btn1 shadow">
               Explore
             </a>
           </div>
@@ -222,7 +219,7 @@
 
       </div>
     </div>
-
+</div>
   </section>
 
 
@@ -245,7 +242,11 @@
       {{#if trending}}
       <div class="col-sm-6 col-md-4 col-lg-3">
 
-        <div class="box" style="background-color:{{bgColor}}">
+        <div class="box shadow-lg" style="background-color:{{bgColor}}">
+             <a> <button onclick="wishlistClick('{{_id}}')" class="btn position-absolute start-75 end-0 bg-light rounded-circle mt-1 me-1 shadow" style="color:brown">
+                 <i class="fa-solid fa-heart" area-hidden="true"></i>
+                 </button>
+              </a>        
           <a href="/productView?id={{_id}}">
             <div class="img-box">
               <img src="/images/{{img1}}" alt="">
@@ -277,16 +278,9 @@
             </span>
           </h6>
           <div class="btn-box">
-            <a href="/productView?id={{_id}}" class="btn">
+            <a href="/productView?id={{_id}}" class="btn shadow-sm">
               Explore
             </a>
-
-            <span class="p-1">
-              <a> <button onclick="wishlistClick('{{_id}}')" class="btn border-0" style="color:brown">
-                  <i class="fa-solid fa-heart p-1" area-hidden="true"></i></button>
-              </a>
-
-            </span>
           </div>
         </div>
       </div>
@@ -581,7 +575,22 @@
         if (data == "not logged in") {
           window.location.href = "/login";
         } else {
-          location.reload();
+          const wishl=document.getElementById("wishlistLength").innerHTML
+          document.getElementById("wishlistLength").innerHTML=(parseInt(wishl)+1);
+          console.log(wishl)
+           Swal.fire({
+                         title: 'Product added to Wishlist!',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: 'red',
+                            confirmButtonText: '<a style="text-decoration:none !important; color:inherit !important;" href="/wishlist?id={{userData._id}}">Go to Wishlist?</a>',
+                            confirmButtonTextColor: 'white',
+                            showCancelButton: true,
+                              reverseButtons: true,
+                            customClass: {
+                            confirmButton: 'my-confirm-button-class'
+                        }
+                        })
         }
       })
       .catch(error => {
