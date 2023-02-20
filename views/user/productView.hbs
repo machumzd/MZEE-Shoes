@@ -65,6 +65,11 @@
                             <p class="about">
                                 {{product.description}}
                             </p>
+                            {{#ifeq product.stock 0}}
+                            <h5 class="text-danger  mt-5 fw-bold">out of stock</h5>
+                            {{/ifeq}}
+
+                            {{#ifnoteq product.stock 0}}
                             <label id="size{{product._id}}"> <span class="text-danger">Size</span></label>
                             <input type="number" name="size" min="1" max="10" id="size" placeholder="Enter size"
                                 style="max-width:10em;" class="form-control mb-3 border-dark">
@@ -74,9 +79,9 @@
                                     class="btn btn-outline-dark bg-dark text-light mb-5 p-3"
                                     style="width: 100%; margin-top: 3vw; border-radius:50px;max-width:20em;">Add to
                                     cart</button></a>
+                            {{/ifnoteq}}
 
-
-
+                            <input type="hidden" id="cartLength2" value="{{cart.length}}">
                         </div>
                     </div>
                 </div>
@@ -171,8 +176,8 @@
                 if (data == "not logged in") {
                     window.location.href = "/login";
                 } else {
-                    const wishl=document.getElementById("wishlistLength").innerHTML
-          document.getElementById("wishlistLength").innerHTML=(parseInt(wishl)+1);
+                    const wishl = document.getElementById("wishlistLength").innerHTML
+                    document.getElementById("wishlistLength").innerHTML = (parseInt(wishl) + 1);
                     Swal.fire({
                         title: 'Added to wishlist',
                         icon: 'success',
@@ -222,37 +227,37 @@
                     }
                     else if (data2 == "added") {
 
-                       Swal.fire({
-                         title: 'Product added to cart!',
+                        Swal.fire({
+                            title: 'Product added to cart!',
                             icon: 'success',
                             confirmButtonColor: '#3085d6',
                             cancelButtonColor: 'red',
                             confirmButtonText: '<a style="text-decoration:none !important; color:inherit !important;" href="/cart?id={{userData._id}}">Go to Cart?</a>',
                             confirmButtonTextColor: 'white',
                             showCancelButton: true,
-                              reverseButtons: true,
+                            reverseButtons: true,
                             customClass: {
-                            confirmButton: 'my-confirm-button-class'
-                        }
+                                confirmButton: 'my-confirm-button-class'
+                            }
                         })
-                        const cartl = document.getElementById("cartLength").innerHTML;
+                        const cartl = document.getElementById("cartLength2").value;
                         document.getElementById("cartLength").innerHTML = parseInt(cartl) + 1;
                     } else {
                         Swal.fire({
-                         title: 'Cart updated successfully!',
+                            title: 'Cart updated successfully!',
                             icon: 'success',
                             confirmButtonColor: '#3085d6',
                             cancelButtonColor: 'red',
                             confirmButtonText: '<a style="text-decoration:none !important; color:inherit !important;" href="/cart?id={{userData._id}}">Go to Cart?</a>',
                             confirmButtonTextColor: 'white',
                             showCancelButton: true,
-                              reverseButtons: true,
+                            reverseButtons: true,
                             customClass: {
-                            confirmButton: 'my-confirm-button-class'
-                        }
+                                confirmButton: 'my-confirm-button-class'
+                            }
                         }
                         )
-    
+
                     }
 
                 })

@@ -15,7 +15,8 @@ const wishlistSchema = new Schema({
     category:{type:String},
     Trending:{type:Boolean},
     offer:{type:String},
-    bgColor:{type:String}
+    bgColor:{type:String},
+    __v:{type:Number},
   }]
 });
 const Wishlist=mongoose.model("Wishlist",wishlistSchema)

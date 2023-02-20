@@ -38,19 +38,12 @@
               </span>
             </a>
 
-            {{#if cart}}
+            
             <a class="nav-icon-link my-auto position-relative" href="/cart?id={{userData._id}}"> <i
                 class="fa fa-shopping-bag" aria-hidden="true"></i><span
-                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                id="cartLength" value="{{cart.length}}">{{cart.length}}
-              </span></a>
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartLength" >{{cart.length}} </span></a>
             </a>
-            {{else}}
-
-            <a href="/cart?id={{userData._id}}">
-              <i class="fa fa-shopping-bag" aria-hidden="true" id="cartLength" value="0"></i>
-            </a>
-            {{/if}}
+          
 
             {{#if wishlist}}
 

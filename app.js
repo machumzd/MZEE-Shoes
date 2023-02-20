@@ -38,6 +38,15 @@ hbs.registerHelper('formatDate', function(date) {
   return `${day}-${month}-${year}`;
 });
 
+hbs.registerHelper('times', function(n, block) {
+  var accum = '';
+  for(var i = 1; i <= n; ++i) {
+      block.data.index = i;
+      accum += block.fn(this);
+  }
+  return accum;
+});
+
 hbs.registerHelper('ifeq', function (a, b, options) {
     if (a == b) { return options.fn(this); }
     return options.inverse(this);

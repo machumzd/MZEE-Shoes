@@ -23,6 +23,7 @@ input[type=number] {
 <!-- shop section -->
 <section class="shop_section layout_padding">
   <div class="container">
+            <h6 class="mb-0 d-flex justify-content-end text-muted" id="itemsLength2"> {{wishlist.items.length}} items</h6>
     <div class="heading_container heading_center">
       <h2>
         Wishlist
@@ -46,12 +47,20 @@ input[type=number] {
             <div class="img-box">
               <img src="/images/{{img1}}" alt="">
             </div>
-
-            <div class="new">
+           {{#ifnoteq __v 0}}
+              <div class="new">
+                <span>
+                  new
+                </span>
+              </div>
+              {{/ifnoteq}}
+               {{#ifnoteq offer 0}}
+             <div class="new2">
               <span>
-                new
+                {{offer}}%
               </span>
             </div>
+            {{/ifnoteq}}
           </a>
         </div>
         <div class="mt-2 detail-box">

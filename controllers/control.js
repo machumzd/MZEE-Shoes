@@ -411,9 +411,21 @@ exports.verifyOtp = (req, res) => {
 
 exports.displayCategory = (req, res) => {
   const category = req.query.id;
-  Product.find({ $and: [{ category: category }, { isDeleted: false }] })
 
+
+  let page=1
+  if(req.query.page){
+    page=req.query.page
+  }
+  const limit=2
+
+  Product.find({ $and: [{ category: category }, { isDeleted: false }] }).count()
+  .then((count)=>{
+
+  Product.find({ $and: [{ category: category }, { isDeleted: false }] }).limit(limit*1).skip((page-1)*limit)
     .then((products) => {
+console.log(count)
+
       getCategory()
         .then((categories) => {
           const userData = req.session.userData;
@@ -422,10 +434,13 @@ exports.displayCategory = (req, res) => {
               getWishlists(userData._id).then((wishlists) => {
                 res.render("user/shop", {
                   products,
+                  count:count/2,
                   cart: carts,
+                  cLength:count,
                   wishlist: wishlists,
                   categoryName: category,
                   userData: userData,
+                  page:page,
                   categories: categories,
                 });
               });
@@ -433,6 +448,9 @@ exports.displayCategory = (req, res) => {
           } else {
             res.render("user/shop", {
               products,
+              page:page,
+              cLength:count,
+              count:count/2,
               categoryName: category,
               categories: categories,
             });
@@ -443,6 +461,7 @@ exports.displayCategory = (req, res) => {
           console.log("error from products" + err);
         });
     })
+  })
     .catch((err) => {
       console.log("error from categories" + err);
     });
@@ -1537,13 +1556,22 @@ exports.userDashboard = (req, res) => {
        res.render("admin/adminDashboard", {
             months: months,data:JSON.stringify(result),totalBill:orderSum[0].totalBill,orderCount:orderCount,userCount:userCount,totalQuantity:quantitySum[0].totalProducts
           });
-        });
+        }).catch((err)=>{
+          console.log(err.message)
         })
+        }).catch((err)=>{
+          console.log(err.message)
+        })
+      }).catch((err)=>{
+        console.log(err.message)
       })
-      
+    }).catch((err)=>{
+      console.log(err.message)
     })
   
- })
+ }).catch((err)=>{
+    console.log(err.message)
+  })
 }) 
 };
 
@@ -1590,6 +1618,8 @@ exports.adminCategory = (req, res) => {
         message: req.session.categoryMessage,
       });
     }
+  }).catch((err)=>{
+    console.log(err.message)
   });
 };
 
@@ -1614,6 +1644,8 @@ exports.adminCategoryLoad = (req, res) => {
         req.session.categoryMessage = message;
         res.redirect("/admin/category");
       }
+    }).catch((err)=>{
+      console.log(err.message)
     });
   } else {
     const message = "The Category field don't be null";
@@ -1638,6 +1670,8 @@ exports.categoryEdit = (req, res) => {
   Category.findOne({ _id: id }).then((result) => {
     req.session.editCategory = result.category;
     res.redirect("/admin/category");
+  }).catch((err)=>{
+    console.log(err.message)
   });
 };
 
@@ -1664,7 +1698,7 @@ exports.productLoad = (req, res) => {
       res.render("admin/adminProducts", {
         products,
         adminMessage: req.session.productMessage,
-      });
+      })
     })
     .catch((err) => {
       console.log(err.message);
@@ -1732,7 +1766,9 @@ exports.productEdit = (req, res) => {
           product: result,
           categories: categories,
         });
-      });
+      }).catch((err)=>{
+        console.log(err.message)
+      })
     })
     .catch((err) => {
       console.log(err.message);
@@ -1924,7 +1960,9 @@ exports.couponLoad = (req, res) => {
       } else {
         res.render("admin/coupons");
       }
-    });
+    }).catch((err) => {
+      console.log(err);
+    })
 };
 
 exports.couponAdd = (req, res) => {
@@ -1961,7 +1999,9 @@ exports.couponAdd = (req, res) => {
           res.redirect("/admin/coupons");
         }
       }
-    });
+    }).catch((err) => {
+      console.log(err);
+    })
   } else {
     req.session.couponMessage = "";
     req.session.couponErrMessage = "fields dont be null";
@@ -1976,7 +2016,9 @@ exports.couponDelete = (req, res) => {
     const message = "coupon Deleted Successfully";
     req.session.couponMessage = message;
     res.redirect("/admin/coupons");
-  });
+  }).catch((err) => {
+    console.log(err);
+  })
 };
 
 exports.couponEdit = (req, res) => {
@@ -2017,7 +2059,9 @@ exports.couponUpdate = (req, res) => {
 exports.orderReport = (req, res) => {
   Order.find({ "items.orderStatus": "Delivered" }).then((orders) => {
     res.render("admin/reports", { orders });
-  });
+  }).catch((err) => {
+    console.log(err);
+  })
 };
 
 exports.orderSearch = (req, res) => {
@@ -2028,7 +2072,9 @@ exports.orderSearch = (req, res) => {
     orderDate: { $gte: from, $lt: to },
   }).then((orders) => {
     res.render("admin/reports", { orders });
-  });
+  }).catch((err) => {
+    console.log(err);
+  })
 };
 
 exports.orderExcel = (req, res) => {

@@ -102,12 +102,10 @@
                   {{#if cart}}
                   <a href="/cart/checkout"><button type="button" class="btn btn-dark btn-block btn-lg"
                       style="border-radius: 20px;" data-mdb-ripple-color="dark">Proceed to Checkout</button></a>
-
                   {{else}}
                   <button type="button" disabled class="btn btn-secondary btn-block btn-lg"
                     data-mdb-ripple-color="dark">Proceed to Checkout</button>
                   {{/if}}
-
                 </div>
               </div>
             </div>
@@ -190,8 +188,7 @@
             console.log("length=="+length)
             document.getElementById("itemsLength").innerHTML="items "+ (parseInt(length)-1)
             document.getElementById("itemsLength2").innerHTML=(parseInt(length)-1) +" items"
-
-            
+            location.reload();
           }else if(data==0){
           document.getElementById()
           }

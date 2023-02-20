@@ -219,8 +219,6 @@
             method: 'post',
             data: $('#checkout-form').serialize(),
             success: (response) => {
-                console.log("The response")
-
                 if (response.codSuccess) {
                     console.log("COD working")
                     location.replace('/orderRedirect')
@@ -237,7 +235,6 @@
 <script>
     
     function razorpay(order,bill) {
-        console.log(bill)
         let options = {
             "key": "rzp_test_8bFkeBhywF7wRI", // Enter the Key ID generated from the Dashboard
             "amount": bill*100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
