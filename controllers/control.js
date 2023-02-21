@@ -60,7 +60,7 @@ const sendOTP = (mobile, OTP) => {
     client.messages
       .create({
         body: `DO NOT SHARE: Your Mzee OTP is ${OTP}.`,
-        to: "+91"+mobile,
+        to: "+91" + mobile,
         from: "+13854817890",
       })
       .then((send) => {
@@ -89,7 +89,6 @@ const getCategory = function () {
 const getTotalSum = function (id) {
   return new Promise((res, rej) => {
     Cart.find({ owner: id }).then((result) => {
-
       if (result.length == 0) {
         constsum = 0;
         res(constsum);
@@ -282,23 +281,23 @@ exports.userHome = (req, res) => {
       getProducts().then((products) => {
         if (req.session.user) {
           userData = req.session.userData;
-          User.findOne({_id:userData._id}).then((user)=>{
-            if(user.blockStatus==true){
-              req.session.user=false
+          User.findOne({ _id: userData._id }).then((user) => {
+            if (user.blockStatus == true) {
+              req.session.user = false;
             }
-          getCarts(userData._id).then((carts) => {
-            getWishlists(userData._id).then((wishlists) => {
-              res.render("user/index", {
-                userData: userData,
-                cart: carts,
-                banners: banners,
-                wishlist: wishlists,
-                categories: categories,
-                products: products,
+            getCarts(userData._id).then((carts) => {
+              getWishlists(userData._id).then((wishlists) => {
+                res.render("user/index", {
+                  userData: userData,
+                  cart: carts,
+                  banners: banners,
+                  wishlist: wishlists,
+                  categories: categories,
+                  products: products,
+                });
               });
             });
           });
-        })
         } else {
           res.render("user/index", {
             categories: categories,
@@ -318,28 +317,26 @@ exports.mobileOtp = (req, res) => {
 exports.sendOtp = (req, res) => {
   mobile = req.body.mobile;
   if (mobile.length == 10 && mobile != "") {
-User.findOne({mobile:mobile})
-.then((user)=>{
-      if(user){
-      
-          const OTP = generateOTP();
-          sendOTP(mobile, OTP);
-          User.updateOne({ mobile: mobile }, { $set: { token: OTP } })
-      
-            .then(() => {
-              req.session.verifypage = true;
-              res.render("user/otpVerify");
-            })
-            .catch((error) => console.log(error));
-          }else{
-            const message = "invalid credintials";
-            res.render("user/mobileOtp", { message: message });
-          }
-    })
-    } else {
-      const message = "fields cannot empty";
-      res.render("user/mobileOtp", { message: message });
-    }
+    User.findOne({ mobile: mobile }).then((user) => {
+      if (user) {
+        const OTP = generateOTP();
+        sendOTP(mobile, OTP);
+        User.updateOne({ mobile: mobile }, { $set: { token: OTP } })
+
+          .then(() => {
+            req.session.verifypage = true;
+            res.render("user/otpVerify");
+          })
+          .catch((error) => console.log(error));
+      } else {
+        const message = "invalid credintials";
+        res.render("user/mobileOtp", { message: message });
+      }
+    });
+  } else {
+    const message = "fields cannot empty";
+    res.render("user/mobileOtp", { message: message });
+  }
 };
 
 exports.verifyOtp = (req, res) => {
@@ -408,64 +405,80 @@ exports.verifyOtp = (req, res) => {
     }
   });
 };
-
 exports.displayCategory = (req, res) => {
   const category = req.query.id;
+  console.log("sort shop" + req.query.sortShop);
 
-
-  let page=1
-  if(req.query.page){
-    page=req.query.page
+  let page = 1;
+  if (req.query.page) {
+    page = req.query.page;
   }
-  const limit=2
+  const limit = 4;
 
-  Product.find({ $and: [{ category: category }, { isDeleted: false }] }).count()
-  .then((count)=>{
-
-  Product.find({ $and: [{ category: category }, { isDeleted: false }] }).limit(limit*1).skip((page-1)*limit)
-    .then((products) => {
-console.log(count)
-
-      getCategory()
-        .then((categories) => {
-          const userData = req.session.userData;
-          if (userData) {
-            getCarts(userData._id).then((carts) => {
-              getWishlists(userData._id).then((wishlists) => {
-                res.render("user/shop", {
-                  products,
-                  count:count/2,
-                  cart: carts,
-                  cLength:count,
-                  wishlist: wishlists,
-                  categoryName: category,
-                  userData: userData,
-                  page:page,
-                  categories: categories,
-                });
-              });
-            });
-          } else {
+  const countPromise = Product.count({ $and: [{ category: category }, { isDeleted: false }] });
+  const productsPromise = Product.find({ $and: [{ category: category }, { isDeleted: false }] })
+    .sort(getSortQuery(req.query.sort))
+    .limit(limit * 1)
+    .skip((page - 1) * limit);
+  const categoriesPromise = getCategory();
+  
+  Promise.all([countPromise, productsPromise, categoriesPromise])
+    .then(([count, products, categories]) => {
+      console.log(count);
+      const userData = req.session.userData;
+      if (userData) {
+        Promise.all([getCarts(userData._id), getWishlists(userData._id)])
+          .then(([carts, wishlists]) => {
             res.render("user/shop", {
               products,
-              page:page,
-              cLength:count,
-              count:count/2,
+              count: ((count / limit)+1),
+              cart: carts,
+              cLength: count,
+              wishlist: wishlists,
               categoryName: category,
+              userData: userData,
+              page: page,
               categories: categories,
             });
-          }
-        })
-
-        .catch((err) => {
-          console.log("error from products" + err);
+          })
+          .catch((err) => {
+            console.log("error from getCarts and getWishlists" + err);
+          });
+      } else {
+        res.render("user/shop", {
+          products,
+          page: page,
+          cLength: count,
+          count: ((count / limit)+1),
+          categoryName: category,
+          categories: categories,
         });
+      }
     })
-  })
     .catch((err) => {
-      console.log("error from categories" + err);
+      console.log("error from count, products, and categories" + err);
     });
 };
+
+function getSortQuery(sortType) {
+  let sortQuery = { createdAt: -1 };
+  switch (sortType) {
+    case "1":
+      sortQuery = { price: 1 };
+      break;
+    case "2":
+      sortQuery = { price: -1 };
+      break;
+    case "3":
+      sortQuery = { createdAt: -1 };
+      break;
+    case "4":
+      sortQuery = { createdAt: 1 };
+      break;
+  }
+  return sortQuery;
+}
+
 
 exports.proSearch = (req, res) => {
   const search = req.query.search;
@@ -546,7 +559,7 @@ exports.userProfile = (req, res) => {
         if (req.query.add) {
           if (req.query.checkout) {
             const addAddress = "for add address panel";
-            const toCheckout2= "to go checkout";
+            const toCheckout2 = "to go checkout";
             res.render("user/userProfile", {
               addAddress,
               toCheckout2,
@@ -560,8 +573,8 @@ exports.userProfile = (req, res) => {
             res.render("user/userProfile", {
               addAddress,
               userData,
-              cart:carts,
-              wishlist:wishlists,
+              cart: carts,
+              wishlist: wishlists,
               categories,
             });
           }
@@ -654,14 +667,13 @@ exports.userAddress = (req, res) => {
     .save()
     .then((address) => {
       req.session.address = address;
-  
+
       const message = "Address Added Successfully";
       req.session.successMessage = message;
       req.session.errorMessage = "";
       if (req.query.checkout) {
         req.query.checkout = false;
         res.redirect("/cart/checkout");
-
       } else {
         res.redirect("/profile");
       }
@@ -880,48 +892,50 @@ exports.addToCart = (req, res) => {
     Product.findOne({
       _id: id,
     }).then((result) => {
-      Cart.findOne({ owner:userData._id,productId: result._id }).then((cart) => {
-        if (!cart) {
-          const cartAdd = new Cart({
-            owner: userData._id,
-            productId: result._id,
-            productName: result.productName,
-            price: result.price,
-            category: result.category,
-            quantity: 1,
-            stock: result.stock,
-            size: req.body.size,
-            bill: result.price,
-            img1: result.img1,
-            orderStatus: "pending",
-          });
-          cartAdd
-            .save()
-            .then((cartData) => {
-              res.json("added")
-            })
-            .catch((err) => {
-              console.log("cannot get cart" + err);
+      Cart.findOne({ owner: userData._id, productId: result._id }).then(
+        (cart) => {
+          if (!cart) {
+            const cartAdd = new Cart({
+              owner: userData._id,
+              productId: result._id,
+              productName: result.productName,
+              price: result.price,
+              category: result.category,
+              quantity: 1,
+              stock: result.stock,
+              size: req.body.size,
+              bill: result.price,
+              img1: result.img1,
+              orderStatus: "pending",
             });
-        } else {
-          if (cart.quantity < cart.stock) {
-            Cart.updateOne(
-              { _id: cart._id },
-              {
-                $inc: { quantity: 1, bill: result.price },
-                $set: { size: req.body.size },
-              }
-            ).then((updatedCart) => {
-               res.json("updated")
-            });
+            cartAdd
+              .save()
+              .then((cartData) => {
+                res.json("added");
+              })
+              .catch((err) => {
+                console.log("cannot get cart" + err);
+              });
           } else {
-             res.json("done")
+            if (cart.quantity < cart.stock) {
+              Cart.updateOne(
+                { _id: cart._id },
+                {
+                  $inc: { quantity: 1, bill: result.price },
+                  $set: { size: req.body.size },
+                }
+              ).then((updatedCart) => {
+                res.json("updated");
+              });
+            } else {
+              res.json("done");
+            }
           }
         }
-      });
+      );
     });
   } else {
-    res.json("login")
+    res.json("login");
   }
 };
 
@@ -972,27 +986,26 @@ exports.cartOperation = (req, res) => {
         if (req.body.sub) {
           const id = req.body.id;
           const price = req.body.price;
-          const quant=req.body.quantity;
-          if(quant!=0){
-          Cart.findOneAndUpdate(
-            { _id: id },
-            {
-              $inc: { quantity: -1, bill: -price },
-            }
-          ).then((response) => {
-            getTotalSum(userData._id).then((totalsum) => {
-              res.json(totalsum);
+          const quant = req.body.quantity;
+          if (quant != 0) {
+            Cart.findOneAndUpdate(
+              { _id: id },
+              {
+                $inc: { quantity: -1, bill: -price },
+              }
+            ).then((response) => {
+              getTotalSum(userData._id).then((totalsum) => {
+                res.json(totalsum);
+              });
             });
-          });
-        }else{
-          Cart.findOneAndDelete({_id:id})
-          .then(()=>{
-            if(cart.length!=0)
-            getTotalSum(userData._id).then((totalsum) => {
-              res.json(totalsum);
+          } else {
+            Cart.findOneAndDelete({ _id: id }).then(() => {
+              if (cart.length != 0)
+                getTotalSum(userData._id).then((totalsum) => {
+                  res.json(totalsum);
+                });
             });
-          })
-        }
+          }
         }
       }
     })
@@ -1056,7 +1069,7 @@ exports.deleteWishlist = (req, res) => {
     { owner: userData._id },
     { $pull: { items: { _id: id } } }
   ).then(() => {
-    res.json("done")
+    res.json("done");
   });
 };
 exports.emailOtp = (req, res) => {
@@ -1360,31 +1373,31 @@ exports.applyCoupon = (req, res) => {
 
   Coupon.findOne({ code: code }).then((coupon1) => {
     if (coupon1) {
-      if(coupon1.status!="Applied"){
-      const coupDate = new Date(coupon1.expiryDate);
-      const currDate = new Date();
-      const status =
-        currDate.getTime() > coupDate.getTime() ? "Expired" : "Active";
-      Coupon.findOneAndUpdate(
-        { code: code },
-        { $set: { status: status } }
-      ).then((coupon3) => {
-        Coupon.findOne({ code: code }) //extra validation
-          .then((Vcoupon) => {
-            console.log(Vcoupon.minBill);
+      if (coupon1.status != "Applied") {
+        const coupDate = new Date(coupon1.expiryDate);
+        const currDate = new Date();
+        const status =
+          currDate.getTime() > coupDate.getTime() ? "Expired" : "Active";
+        Coupon.findOneAndUpdate(
+          { code: code },
+          { $set: { status: status } }
+        ).then((coupon3) => {
+          Coupon.findOne({ code: code }) //extra validation
+            .then((Vcoupon) => {
+              console.log(Vcoupon.minBill);
 
-            if (Vcoupon.minBill < bill) {
-              req.session.applyedCoupon = Vcoupon;
-              const final = bill - (bill * Vcoupon.value) / 100;
+              if (Vcoupon.minBill < bill) {
+                req.session.applyedCoupon = Vcoupon;
+                const final = bill - (bill * Vcoupon.value) / 100;
 
-              req.session.orderBill = final;
-            }
-            res.json(coupon1);
-          });
-      });
-    }else{
-      res.json(coupon1);
-    }
+                req.session.orderBill = final;
+              }
+              res.json(coupon1);
+            });
+        });
+      } else {
+        res.json(coupon1);
+      }
     } else {
       res.json(307);
     }
@@ -1512,67 +1525,95 @@ exports.userUpdate = (req, res) => {
 };
 
 exports.userDashboard = (req, res) => {
-  const months={}
-  const monthNames=["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const months = {};
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   Order.find({})
-  .then((orders)=>{
-    orders.map(function(order) {
-      var month = monthNames[order.orderDate.getMonth()];
-      if (!months[month]) {
-        months[month] = 0;
-      }
-      months[month]++;
-    });
-  })
- .then(()=>{
-  Order.aggregate([
-    {
-      $group: {
-        _id: "$paymentMode",
-        count: { $sum: 1 }
-      }
-    }
-  ])
-  .then((result)=>{
-
-    Order.find({__v:0}).count()
-    .then((orderCount)=>{
-      User.find({__v:0}).count()
-      .then((userCount)=>{
-        Order.aggregate([
-          { $unwind: '$items' },
-          { $match: { 'items.orderStatus': 'Delivered' } },
-          { $group: { _id: null, totalBill: { $sum: '$items.bill' } } }
-        ])
-        .then((orderSum) => {
-          
-          Order.aggregate([
-            { $unwind: '$items' },
-            { $match: { 'items.orderStatus': 'Delivered' } },
-            { $group: { _id: null, totalProducts: { $sum: '$items.quantity' } } }
-          ])
-          .then((quantitySum) => {
-       res.render("admin/adminDashboard", {
-            months: months,data:JSON.stringify(result),totalBill:orderSum[0].totalBill,orderCount:orderCount,userCount:userCount,totalQuantity:quantitySum[0].totalProducts
-          });
-        }).catch((err)=>{
-          console.log(err.message)
-        })
-        }).catch((err)=>{
-          console.log(err.message)
-        })
-      }).catch((err)=>{
-        console.log(err.message)
-      })
-    }).catch((err)=>{
-      console.log(err.message)
+    .then((orders) => {
+      orders.map(function (order) {
+        var month = monthNames[order.orderDate.getMonth()];
+        if (!months[month]) {
+          months[month] = 0;
+        }
+        months[month]++;
+      });
     })
-  
- }).catch((err)=>{
-    console.log(err.message)
-  })
-}) 
+    .then(() => {
+      Order.aggregate([
+        {
+          $group: {
+            _id: "$paymentMode",
+            count: { $sum: 1 },
+          },
+        },
+      ])
+        .then((result) => {
+          Order.find({ __v: 0 })
+            .count()
+            .then((orderCount) => {
+              User.find({ __v: 0 })
+                .count()
+                .then((userCount) => {
+                  Order.aggregate([
+                    { $unwind: "$items" },
+                    { $match: { "items.orderStatus": "Delivered" } },
+                    {
+                      $group: { _id: null, totalBill: { $sum: "$items.bill" } },
+                    },
+                  ])
+                    .then((orderSum) => {
+                      Order.aggregate([
+                        { $unwind: "$items" },
+                        { $match: { "items.orderStatus": "Delivered" } },
+                        {
+                          $group: {
+                            _id: null,
+                            totalProducts: { $sum: "$items.quantity" },
+                          },
+                        },
+                      ])
+                        .then((quantitySum) => {
+                          res.render("admin/adminDashboard", {
+                            months: months,
+                            data: JSON.stringify(result),
+                            totalBill: orderSum[0].totalBill,
+                            orderCount: orderCount,
+                            userCount: userCount,
+                            totalQuantity: quantitySum[0].totalProducts,
+                          });
+                        })
+                        .catch((err) => {
+                          console.log(err.message);
+                        });
+                    })
+                    .catch((err) => {
+                      console.log(err.message);
+                    });
+                })
+                .catch((err) => {
+                  console.log(err.message);
+                });
+            })
+            .catch((err) => {
+              console.log(err.message);
+            });
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    });
 };
 
 exports.userBlock = (req, res) => {
@@ -1606,47 +1647,51 @@ exports.userUnBlock = (req, res) => {
 };
 
 exports.adminCategory = (req, res) => {
-  Category.find().then((result) => {
-    if (req.session.editCategory) {
-      res.render("admin/category", {
-        categories: result,
-        editCategory: req.session.editCategory,
-      });
-    } else {
-      res.render("admin/category", {
-        categories: result,
-        message: req.session.categoryMessage,
-      });
-    }
-  }).catch((err)=>{
-    console.log(err.message)
-  });
+  Category.find()
+    .then((result) => {
+      if (req.session.editCategory) {
+        res.render("admin/category", {
+          categories: result,
+          editCategory: req.session.editCategory,
+        });
+      } else {
+        res.render("admin/category", {
+          categories: result,
+          message: req.session.categoryMessage,
+        });
+      }
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 };
 
 exports.adminCategoryLoad = (req, res) => {
   if (req.body.category != "") {
     Category.find({
       category: req.body.category,
-    }).then((result) => {
-      if (result.length === 0) {
-        req.session.categoryMessage = "";
-        const categoryData = new Category(req.body);
-        categoryData
-          .save()
-          .then(() => {
-            res.redirect("/admin/category");
-          })
-          .catch((err) => {
-            console.log(err.message);
-          });
-      } else {
-        const message = "The Category aldready exists.";
-        req.session.categoryMessage = message;
-        res.redirect("/admin/category");
-      }
-    }).catch((err)=>{
-      console.log(err.message)
-    });
+    })
+      .then((result) => {
+        if (result.length === 0) {
+          req.session.categoryMessage = "";
+          const categoryData = new Category(req.body);
+          categoryData
+            .save()
+            .then(() => {
+              res.redirect("/admin/category");
+            })
+            .catch((err) => {
+              console.log(err.message);
+            });
+        } else {
+          const message = "The Category aldready exists.";
+          req.session.categoryMessage = message;
+          res.redirect("/admin/category");
+        }
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
   } else {
     const message = "The Category field don't be null";
     req.session.categoryMessage = message;
@@ -1667,12 +1712,14 @@ exports.categoryDelete = (req, res) => {
 
 exports.categoryEdit = (req, res) => {
   const id = req.query.id;
-  Category.findOne({ _id: id }).then((result) => {
-    req.session.editCategory = result.category;
-    res.redirect("/admin/category");
-  }).catch((err)=>{
-    console.log(err.message)
-  });
+  Category.findOne({ _id: id })
+    .then((result) => {
+      req.session.editCategory = result.category;
+      res.redirect("/admin/category");
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 };
 
 exports.categoryUpdate = (req, res) => {
@@ -1698,7 +1745,7 @@ exports.productLoad = (req, res) => {
       res.render("admin/adminProducts", {
         products,
         adminMessage: req.session.productMessage,
-      })
+      });
     })
     .catch((err) => {
       console.log(err.message);
@@ -1708,8 +1755,8 @@ exports.productLoad = (req, res) => {
 exports.productAdd = (req, res) => {
   getCategory()
     .then((categories) => {
-      const message=req.query.message
-      res.render("admin/addProduct", { categories ,message:message});
+      const message = req.query.message;
+      res.render("admin/addProduct", { categories, message: message });
     })
     .catch(() => {
       console.log(err.message);
@@ -1735,7 +1782,7 @@ exports.productUpload = (req, res) => {
       offer: req.body.offer,
       category: req.body.category,
       bgColor: req.body.bgcolor,
-      __v:1,
+      __v: 1,
       img1: req.files[0] && req.files[0].filename ? req.files[0].filename : "",
       img2: req.files[1] && req.files[1].filename ? req.files[1].filename : "",
       isDeleted: false,
@@ -1750,9 +1797,9 @@ exports.productUpload = (req, res) => {
       .catch((err) => {
         console.log(err.message);
       });
-  }else{
-    const message="fields don't be blank"
-    res.redirect(`admin/addProduct?message=${message}`)
+  } else {
+    const message = "fields don't be blank";
+    res.redirect(`admin/addProduct?message=${message}`);
   }
 };
 
@@ -1761,14 +1808,16 @@ exports.productEdit = (req, res) => {
   req.session.productQuery = id;
   Product.findOne({ _id: id })
     .then((result) => {
-      getCategory().then((categories) => {
-        res.render("admin/editProduct", {
-          product: result,
-          categories: categories,
+      getCategory()
+        .then((categories) => {
+          res.render("admin/editProduct", {
+            product: result,
+            categories: categories,
+          });
+        })
+        .catch((err) => {
+          console.log(err.message);
         });
-      }).catch((err)=>{
-        console.log(err.message)
-      })
     })
     .catch((err) => {
       console.log(err.message);
@@ -1777,7 +1826,7 @@ exports.productEdit = (req, res) => {
 
 exports.productUpdate = (req, res) => {
   const trendingStatus = req.body.trending == undefined ? false : true;
-  const newStatus=req.body.new== undefined ? 0 : 1;
+  const newStatus = req.body.new == undefined ? 0 : 1;
   const id = req.session.productQuery;
   const updateObj = {
     $set: {
@@ -1787,7 +1836,7 @@ exports.productUpdate = (req, res) => {
       stock: req.body.stock,
       trending: trendingStatus,
       offer: req.body.offer,
-      __v:newStatus,
+      __v: newStatus,
       category: req.body.category,
       bgColor: req.body.bgcolor,
       isDeleted: false,
@@ -1960,9 +2009,10 @@ exports.couponLoad = (req, res) => {
       } else {
         res.render("admin/coupons");
       }
-    }).catch((err) => {
-      console.log(err);
     })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 exports.couponAdd = (req, res) => {
@@ -1972,36 +2022,38 @@ exports.couponAdd = (req, res) => {
   const expiry = req.body.couponExpiry;
   const bill = req.body.minBill;
   if (code != "" && value != "" && expiry != "" && bill != "") {
-    Coupon.findOne({ code: code }).then((find) => {
-      if (find) {
-        req.session.couponMessage = "";
-        req.session.couponErrMessage = "Coupon Aldready Exists";
-        res.redirect("/admin/coupons");
-      } else {
-        if (value > 0 && value <= 100) {
-          const couponData = new Coupon({
-            code: code,
-            value: value,
-            minBill: bill,
-            expiryDate: Date(),
-            status: "Active",
-          });
-
-          couponData.save().then((coupon) => {
-            req.session.couponErrMessage = "";
-            const message = "new Coupon Added Successfully";
-            req.session.couponMessage = message;
-            res.redirect("/admin/coupons");
-          });
-        } else {
+    Coupon.findOne({ code: code })
+      .then((find) => {
+        if (find) {
           req.session.couponMessage = "";
-          req.session.couponErrMessage = "coupon Value(0-100 only)";
+          req.session.couponErrMessage = "Coupon Aldready Exists";
           res.redirect("/admin/coupons");
+        } else {
+          if (value > 0 && value <= 100) {
+            const couponData = new Coupon({
+              code: code,
+              value: value,
+              minBill: bill,
+              expiryDate: Date(),
+              status: "Active",
+            });
+
+            couponData.save().then((coupon) => {
+              req.session.couponErrMessage = "";
+              const message = "new Coupon Added Successfully";
+              req.session.couponMessage = message;
+              res.redirect("/admin/coupons");
+            });
+          } else {
+            req.session.couponMessage = "";
+            req.session.couponErrMessage = "coupon Value(0-100 only)";
+            res.redirect("/admin/coupons");
+          }
         }
-      }
-    }).catch((err) => {
-      console.log(err);
-    })
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   } else {
     req.session.couponMessage = "";
     req.session.couponErrMessage = "fields dont be null";
@@ -2011,14 +2063,16 @@ exports.couponAdd = (req, res) => {
 
 exports.couponDelete = (req, res) => {
   const id = req.query.id;
-  Coupon.deleteOne({ _id: id }).then(() => {
-    req.session.couponErrMessage = "";
-    const message = "coupon Deleted Successfully";
-    req.session.couponMessage = message;
-    res.redirect("/admin/coupons");
-  }).catch((err) => {
-    console.log(err);
-  })
+  Coupon.deleteOne({ _id: id })
+    .then(() => {
+      req.session.couponErrMessage = "";
+      const message = "coupon Deleted Successfully";
+      req.session.couponMessage = message;
+      res.redirect("/admin/coupons");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 exports.couponEdit = (req, res) => {
@@ -2057,11 +2111,13 @@ exports.couponUpdate = (req, res) => {
 };
 
 exports.orderReport = (req, res) => {
-  Order.find({ "items.orderStatus": "Delivered" }).then((orders) => {
-    res.render("admin/reports", { orders });
-  }).catch((err) => {
-    console.log(err);
-  })
+  Order.find({ "items.orderStatus": "Delivered" })
+    .then((orders) => {
+      res.render("admin/reports", { orders });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 exports.orderSearch = (req, res) => {
@@ -2070,11 +2126,13 @@ exports.orderSearch = (req, res) => {
   Order.find({
     "items.orderStatus": "Delivered",
     orderDate: { $gte: from, $lt: to },
-  }).then((orders) => {
-    res.render("admin/reports", { orders });
-  }).catch((err) => {
-    console.log(err);
   })
+    .then((orders) => {
+      res.render("admin/reports", { orders });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 exports.orderExcel = (req, res) => {

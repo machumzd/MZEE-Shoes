@@ -19,11 +19,21 @@
           <i class="fa fa-long-arrow-left"></i> <span class="ml-1">{{category}}</a>
       </h5>
       {{/each}}
+     <div class="form-outline mt-4" style="max-width:10em;">
+      <h3 class="fw-bold mt-4">Sort</h3>
+                        <select name="sortShop" class="form-control form-control-lg border-dark" id="sortshop" onchange="sort()">
+                            <option>Sort Orders</option>
+                             <option value="3">newly listed</option>
+                              <option  value="4">early listed</option>
+                            <option  value="1">price low to high</option>
+                            <option value="2">price high to low</option>
+                        </select>
+                    </div>
   </div>
+
   <section class="shop_section layout_padding col-sm-12 col-md-12 col-lg-9 col-xl-9">
     <div class="container">
-            <h6 class="mb-0 d-flex justify-content-end text-muted" id="itemsLength2">{{cLength}} items</h6>
-
+            <h6 class="p-2 d-flex justify-content-end text-muted" id="itemsLength2">{{cLength}} items</h6>
       <div class="heading_container heading_center">
         <h2>
           Latest {{categoryName}} Products
@@ -92,50 +102,58 @@
  {{#ifnoteq count 0}}
 <div class="container">
 <nav aria-label="Page navigation example">
-  <ul class="pagination d-flex  justify-content-center">
-    <li class="page-item">
-      <a class="page-link" onclick="disCategory1('{{count}}')" id="down" aria-label="Previous">
-        <span aria-hidden="true">&laquo;</span>
-      </a>
-    </li>
-    {{#times count}}
-    <li class="page-item"><a class="page-link" href="/displayCategory?id={{categoryName}}&page={{@index}}">{{@index}}</a></li>
-    {{/times}}
-    <li class="page-item">
-      <a class="page-link" onclick="disCategory('{{count}}')" id="up" aria-label="Next">
-        <span aria-hidden="true">&raquo;</span>
-      </a>
-    </li>
+ <ul class="pagination d-flex justify-content-center">
+  <li class="page-item">
+    <a class="page-link" onclick="disCategory1('{{count}}')" id="down" aria-label="Previous">
+      <span aria-hidden="true">&laquo;</span>
+    </a>
+  </li>
+  {{#times count}}
+  <li class="page-item">
+    <a class="page-link" href="/displayCategory?id={{categoryName}}&page={{@index}}">{{@index}}</a>
+  </li>
+  {{/times}}
+  <li class="page-item">
+    <a class="page-link" onclick="disCategory('{{count}}')" id="up" aria-label="Next">
+      <span aria-hidden="true">&raquo;</span>
+    </a>
+  </li>
+</ul>
 
-  </ul>
 </nav>
 </div>
 {{/ifnoteq}}
     <script>
-  function disCategory(count){
-     document.getElementById("page").value;
-   let page = document.getElementById("page").value;
-      if(page==count){
-        document.getElementById("up").style.display="disabled";
-      }else{
-       page++;
-      }
-      window.location.href = "/displayCategory?id={{categoryName}}&page="+page;
+ function disCategory(count) {
+  let page = parseInt(document.getElementById("page").value);
+  console.log("page: " + page);
+  console.log("count: " + count);
+  if (page >= count-1) {
+    console.log("Cannot go to next page!");
+    document.getElementById("up").setAttribute("disabled", true);
+  } else {
+    console.log("Going to next page...");
+    page++;
+    window.location.href = "/displayCategory?id={{categoryName}}&page=" + page;
   }
+}
+
   function disCategory1(count){
-     document.getElementById("page").value;
      let page = document.getElementById("page").value;
       if(page==count-1){
         document.getElementById("down").style.display="disabled";
       }else{
       page--;
-      }
       window.location.href = "/displayCategory?id={{categoryName}}&page="+page;
+      }
   }
 
-
-</script>
-
+  function sort(){
+    console.log("hello")
+    let sort = document.getElementById("sortshop").value;
+    window.location.href = "/displayCategory?id={{categoryName}}&sort="+sort;
+  }
+  </script>
 
 
 <script>
