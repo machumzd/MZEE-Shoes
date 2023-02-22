@@ -404,61 +404,102 @@ exports.verifyOtp = (req, res) => {
       }
     }
   });
-};
-exports.displayCategory = (req, res) => {
-  const category = req.query.id;
-  console.log("sort shop" + req.query.sortShop);
+  };
+  exports.displayCategory = (req, res) => {
+    const category = req.query.id;
 
-  let page = 1;
-  if (req.query.page) {
-    page = req.query.page;
-  }
-  const limit = 4;
-
-  const countPromise = Product.count({ $and: [{ category: category }, { isDeleted: false }] });
-  const productsPromise = Product.find({ $and: [{ category: category }, { isDeleted: false }] })
-    .sort(getSortQuery(req.query.sort))
-    .limit(limit * 1)
-    .skip((page - 1) * limit);
-  const categoriesPromise = getCategory();
-  
-  Promise.all([countPromise, productsPromise, categoriesPromise])
-    .then(([count, products, categories]) => {
-      console.log(count);
-      const userData = req.session.userData;
-      if (userData) {
-        Promise.all([getCarts(userData._id), getWishlists(userData._id)])
-          .then(([carts, wishlists]) => {
-            res.render("user/shop", {
-              products,
-              count: ((count / limit)+1),
-              cart: carts,
-              cLength: count,
-              wishlist: wishlists,
-              categoryName: category,
-              userData: userData,
-              page: page,
-              categories: categories,
+    let page = 1;
+    if (req.query.page) {
+      page = req.query.page;
+    }
+    const limit = 4;
+    if(req.query.id=="All"){
+      const categoriesPromise = getCategory();
+      const countPromise = Product.count({isDeleted: false });
+      const productsPromise = Product.find({ isDeleted: false })
+      .sort(getSortQuery(req.query.sort))
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+      Promise.all([countPromise, productsPromise, categoriesPromise])
+      .then(([count, products, categories]) => {
+        const userData = req.session.userData;
+        if (userData) {
+          Promise.all([getCarts(userData._id), getWishlists(userData._id)])
+            .then(([carts, wishlists]) => {
+              res.render("user/shop", {
+                products,
+                count: ((count / limit)+1),
+                cart: carts,
+                cLength: count,
+                wishlist: wishlists,
+                categoryName: "All",
+                userData: userData,
+                page: page,
+                categories: categories,
+              });
+            })
+            .catch((err) => {
+              console.log("error from getCarts and getWishlists" + err);
             });
-          })
-          .catch((err) => {
-            console.log("error from getCarts and getWishlists" + err);
+        } else {
+          res.render("user/shop", {
+            products,
+            page: page,
+            cLength: count,
+            count: ((count / limit)+1),
+            categoryName: "All",
+            categories: categories,
           });
-      } else {
-        res.render("user/shop", {
-          products,
-          page: page,
-          cLength: count,
-          count: ((count / limit)+1),
-          categoryName: category,
-          categories: categories,
-        });
-      }
-    })
-    .catch((err) => {
-      console.log("error from count, products, and categories" + err);
-    });
-};
+        }
+      })
+      .catch((err) => {
+        console.log("error from count, products, and categories" + err);
+      });
+    }else{
+  const categoriesPromise = getCategory();
+    const countPromise = Product.count({ $and: [{ category: category }, { isDeleted: false }] });
+    const productsPromise = Product.find({ $and: [{ category: category }, { isDeleted: false }] })
+      .sort(getSortQuery(req.query.sort))
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+       Promise.all([countPromise, productsPromise, categoriesPromise])
+       .then(([count, products, categories]) => {
+        const userData = req.session.userData;
+        if (userData) {
+          Promise.all([getCarts(userData._id), getWishlists(userData._id)])
+            .then(([carts, wishlists]) => {
+              res.render("user/shop", {
+                products,
+                count: ((count / limit)+1),
+                cart: carts,
+                cLength: count,
+                wishlist: wishlists,
+                categoryName: category,
+                userData: userData,
+                page: page,
+                categories: categories,
+              });
+            })
+            .catch((err) => {
+              console.log("error from getCarts and getWishlists" + err);
+            });
+        } else {
+          res.render("user/shop", {
+            products,
+            page: page,
+            cLength: count,
+            count: ((count / limit)+1),
+            categoryName: category,
+            categories: categories,
+          });
+        }
+      })
+      .catch((err) => {
+        console.log("error from count, products, and categories" + err);
+      });
+    }
+     
+  };
 
 function getSortQuery(sortType) {
   let sortQuery = { createdAt: -1 };

@@ -18,6 +18,7 @@
                   <div class="d-flex justify-content-between align-items-center mb-5">
                     <h1 class="fw-bold mb-0 text-black">Shopping Cart</h1>
                     <h6 class="mb-0 text-muted" id="itemsLength2">{{cart.length}} items</h6>
+                    <input type="hidden" id="cartLength2" value="{{cart.length}}">
                   </div>
                   <hr class="my-4">
                   {{#if cart}}
@@ -188,7 +189,8 @@
             console.log("length=="+length)
             document.getElementById("itemsLength").innerHTML="items "+ (parseInt(length)-1)
             document.getElementById("itemsLength2").innerHTML=(parseInt(length)-1) +" items"
-            location.reload();
+            const cartl = document.getElementById("cartLength2").value;
+            document.getElementById("cartLength").innerHTML = parseInt(cartl) - 1;
           }else if(data==0){
           document.getElementById()
           }

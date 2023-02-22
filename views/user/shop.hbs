@@ -13,9 +13,13 @@
 <div class="row">
     <div class="h-100 col-sm-12 col-lg-2 col-md-12 col-xl-2 d-flex flex-column sticky align-content-evenly p-5 mt-5">
       <h3 class="mb-5 fw-bold mt-2">Categories</h3>
+       <h5>
+        <a href="/displayCategory?id=All" style="text-decoration: none; color: #6a6c6d;;">
+          <i class="fa fa-long-arrow-left"></i> <span class="ml-1">All Products</a>
+      </h5>
       {{#each categories}}
       <h5>
-        <a href="/displayCategory?id={{category}}" style="text-decoration: none; color: #6a6c6d;">
+        <a href="/displayCategory?id={{category}}" style="text-decoration: none; color:#6a6c6d;">
           <i class="fa fa-long-arrow-left"></i> <span class="ml-1">{{category}}</a>
       </h5>
       {{/each}}
@@ -35,9 +39,16 @@
     <div class="container">
             <h6 class="p-2 d-flex justify-content-end text-muted" id="itemsLength2">{{cLength}} items</h6>
       <div class="heading_container heading_center">
+        {{#ifnoteq categoryName "All"}}
         <h2>
           Latest {{categoryName}} Products
         </h2>
+        {{/ifnoteq}}
+        {{#ifeq categoryName "All"}}
+        <h2>
+          All Products
+        </h2>
+        {{/ifeq}}
       </div>
       <div class="row">
         {{#if products}}
@@ -98,6 +109,7 @@
   </section>
   </div>
 </div>
+<input type="hidden" id="sortHidden" value="0"></input>
  <input type="hidden" id="page" value="{{page}}">
  {{#ifnoteq count 0}}
 <div class="container">
@@ -126,15 +138,13 @@
     <script>
  function disCategory(count) {
   let page = parseInt(document.getElementById("page").value);
-  console.log("page: " + page);
-  console.log("count: " + count);
   if (page >= count-1) {
     console.log("Cannot go to next page!");
     document.getElementById("up").setAttribute("disabled", true);
   } else {
     console.log("Going to next page...");
     page++;
-    window.location.href = "/displayCategory?id={{categoryName}}&page=" + page;
+   window.location.href = "/displayCategory?id={{categoryName}}&page="+page;
   }
 }
 
@@ -144,14 +154,14 @@
         document.getElementById("down").style.display="disabled";
       }else{
       page--;
-      window.location.href = "/displayCategory?id={{categoryName}}&page="+page;
+         window.location.href = "/displayCategory?id={{categoryName}}&page="+page;
       }
   }
 
   function sort(){
-    console.log("hello")
+  let page = parseInt(document.getElementById("page").value);
     let sort = document.getElementById("sortshop").value;
-    window.location.href = "/displayCategory?id={{categoryName}}&sort="+sort;
+    window.location.href = "/displayCategory?id={{categoryName}}"+"&page="+page+"&sort="+sort;
   }
   </script>
 
