@@ -33,6 +33,7 @@ router.post("/applyCoupon",controlls.applyCoupon)
 router.get("/orderRedirect",auth.userLoggedIn,controlls.orderSuccessRedirect);
 router.get("/orders",auth.userLoggedIn,controlls.orders);//dont forget to add auth.userLoggedIn
 router.get("/orderSuccess",auth.userLoggedIn,controlls.orderSuccess)
+router.get("/orderFailed",auth.userLoggedIn,controlls.orderFailed)
 router.post("/orderSearch",controlls.orderSearch)
 router.get("/wishlist",auth.userLoggedIn,controlls.wishlist)
 
@@ -58,5 +59,20 @@ router.post("/returnOrder",controlls.returnOrder)
 router.post("/signup", controlls.signUpCheck);
 router.post("/login", controlls.signIn);
 router.post("/otp", controlls.sendOtp);
+
+router.get("/error", function (req, res,next) {
+  if(req.session.user)
+  {
+    res.redirect("/user");
+    next();
+  }
+  else if(req.session.admin)
+  {
+   res.redirect("/admin");
+    next();
+  }else{
+    res.redirect("/user");
+  }
+});
 
 module.exports = router;

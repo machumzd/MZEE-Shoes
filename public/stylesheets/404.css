@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Fira+Mono:wght@500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 body{
     height: 95vh;
     background: #000000;
@@ -8,7 +8,7 @@ body{
 }
 h1{
     font-size: 2.5rem;
-    font-family: 'Permanent Marker', cursive;
+    font-family: 'Righteous', cursive;
 }
 div{
     transform-style: preserve-3d;

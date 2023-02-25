@@ -80,19 +80,19 @@
                 </div>
               </div>
               <div class="col-lg-4 bg-grey">
-                <div class="p-5">
+                <div class="p-5" style="background-color:#f9ece6;border-radius:18px;">
                   <h3 class="fw-bold mb-5 mt-2 pt-1">Summary</h3>
                   <hr class="my-4">
                   <div class="d-flex justify-content-between mb-4">
-                    <h5 class="text-uppercase" id="itemsLength" value="{{cart.length}}">items {{cart.length}}</h5>
+                    <h5 class="text-uppercase" id="itemsLength" value="{{cart.length}}">items-{{cart.length}}</h5>
                     <h5 id="totalBill" value="">₹ {{cartBill}}</h5>
                   </div>
-                  <h5 class="text-uppercase mb-3">Shipping</h5>
-                  <div class="mb-4 pb-2">
-                    <select class="select">
-                      <option value="1">Delivery- Free</option>
-                    </select>
+
+                   <div class="d-flex justify-content-between mb-4">
+                    <h5 class="text-uppercase" id="itemsLength" value="{{cart.length}}">Shipping</h5>
+                    <h5 id="shipping" class="text-success" value="free">Free</h5>
                   </div>
+                 
                   <hr class="my-4">
                   <div class="d-flex justify-content-between mb-5">
                     <h5 class="text-uppercase">Total price</h5>

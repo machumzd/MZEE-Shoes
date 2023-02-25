@@ -1,10 +1,6 @@
 {{>head}}
 
-{{#if userData}}
 {{>userNavLogged}}
-{{else}}
-{{>userNav}}
-{{/if}}
 
 
 <section class="h-100 h-custom" style="background-color: #fff;">
@@ -65,7 +61,7 @@
                       {{#ifnoteq orderStatus "Delivered"}}
                       {{#ifnoteq orderStatus "Cancelled"}}
                       {{#ifnoteq orderStatus "Return initiated"}}
-                      <a><button onclick="Cancel('{{_id}}')" data-bs-toggle="modal" data-bs-target="#cancelBut"
+                      <a><button onclick="Cancel('{{_id}}')" type="button"
                           class="btn btn-danger border-dark">Cancel</button></a>
                       {{/ifnoteq}}
                       {{/ifnoteq}}
@@ -80,11 +76,6 @@
                       <h6><button type="submit" disabled class="btn btn-secondary border-dark">Returned</button>
                       </h6>
                       {{/ifeq}}
-
-
-
-
-
                     </div>
                   </div>
 
@@ -111,45 +102,21 @@
   </div>
 </section>
 
-
-{{>footer}}
-{{>foot}}
-
-
-
-<div class="modal fade" id="cancelBut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-  aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel">Cancel</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        Are you sure you want to Cancel this order?
-        <input type="hidden" id="cancelID">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-
-        <button class="btn btn-danger mt-1 mb-1" onclick='return confirmCancel()' id="cancel-Button">Cancel</button>
-
-
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
 <script>
-  function Cancel(data) {
-    document.getElementById('cancelID').value = data
-  }
-  function confirmCancel() {
-    const id = document.getElementById("cancelID").value
-    console.log(id)
-    fetch("/cancelOrder", {
+  function  Cancel(data) {
+    const id = data;
+Swal.fire({
+  title: 'Are you sure?',
+  text: "You want to cancel this product from Orders!",
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#d33',
+  cancelButtonText: 'No, keep it',
+  cancelButtonColor: '#3085d6',
+  confirmButtonText: 'Yes, cancel it!'
+}).then((result) => {
+  if (result.isConfirmed) {
+   fetch("/cancelOrder", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -159,15 +126,28 @@
       })
     })
       .then(response => {
-        $('#cancelBut').modal('hide')
-        console.log(response)
+        return response.json();
       })
-
       .then(data => {
-        location.reload()
+            Swal.fire(
+      'Cancelled!',
+      'Your Order has been cancelled.',
+      'success'
+    )
       })
       .catch(error => {
         console.log(error);
       });
-  };
+location.reload();
+  }
+  
+})
+
+  }
+
+
 </script>
+
+
+
+{{>foot}}

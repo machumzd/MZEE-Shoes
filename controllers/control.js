@@ -46,31 +46,38 @@ exports.why = (req, res) => {
             wishlist: wishlists,
             cart: carts,
           });
-        });
-      });
+        }).catch((err) => {
+          console.log(err);
+        })
+      })
+      .catch((err) => {
+        console.log(err);
+      })
     } else {
       res.render("user/why", { categories, userData });
     }
-  });
+  }).catch((err) => {
+    console.log(err);
+  })
 };
 
-//for signup extra otp
 const sendOTP = (mobile, OTP) => {
   return new Promise((resolve, reject) => {
     client.messages
       .create({
         body: `DO NOT SHARE: Your Mzee OTP is ${OTP}.`,
-        to: "+91" + mobile,
+        to: "+91"+mobile,
         from: "+13854817890",
       })
       .then((send) => {
         resolve(send);
       })
       .catch((error) => {
-        reject(new Error("Error sending OTP: " + error.message));
+        reject("Error sending OTP: " + error.message);
       });
   });
 };
+
 
 //category get cheyyan
 const getCategory = function () {
@@ -80,7 +87,7 @@ const getCategory = function () {
         res(categories);
       })
       .catch(() => {
-        const error = new Error("could not find categories");
+        const error ="could not find categories";
         rej(error);
       });
   });
@@ -113,7 +120,9 @@ const getTotalSum = function (id) {
             res(sum[0].total);
           });
       }
-    });
+    }).catch((err) => {
+      console.log(err);
+    })
   });
 };
 
@@ -124,7 +133,7 @@ const getProducts = function () {
         res(products);
       })
       .catch(() => {
-        const error = new Error("could not find products");
+        const error ="could not find products";
         rej(error);
       });
   });
@@ -137,7 +146,7 @@ const getWishlists = function (id) {
         res(wishlists);
       })
       .catch(() => {
-        const error = new Error("could not find wishlists");
+        const error ="could not find wishlists";
         rej(error);
       });
   });
@@ -150,23 +159,12 @@ const getBanners = function () {
         res(banners);
       })
       .catch(() => {
-        const error = new Error("could not find Banners");
+        const error = "could not find Banners";
         rej(error);
       });
   });
 };
-const getCoupons = function () {
-  return new Promise((res, rej) => {
-    Coupon.find({})
-      .then((coupons) => {
-        res(coupons);
-      })
-      .catch(() => {
-        const error = new Error("could not find coupons");
-        rej(error);
-      });
-  });
-};
+
 const getCarts = function (id) {
   return new Promise((res, rej) => {
     Cart.find({ owner: id })
@@ -174,7 +172,7 @@ const getCarts = function (id) {
         res(carts);
       })
       .catch(() => {
-        const error = new Error("could not find Cart");
+        const error = "could not find Cart";
         rej(error);
       });
   });
@@ -187,7 +185,7 @@ const getAddress = function (id) {
         res(address);
       })
       .catch((err) => {
-        const error = new Error("could not get Address");
+        const error ="could not get Address";
         rej(error);
       });
   });
@@ -295,9 +293,15 @@ exports.userHome = (req, res) => {
                   categories: categories,
                   products: products,
                 });
-              });
-            });
-          });
+              }).catch((err) => {
+                console.log(err);
+              })
+            }).catch((err) => {
+              console.log(err);
+            })
+          }).catch((err) => {
+            console.log(err);
+          })
         } else {
           res.render("user/index", {
             categories: categories,
@@ -305,9 +309,15 @@ exports.userHome = (req, res) => {
             banners: banners,
           });
         }
-      });
-    });
-  });
+      }).catch((err) => {
+        console.log(err);
+      })
+    }).catch((err) => {
+      console.log(err);
+    })
+  }).catch((err) => {
+    console.log(err);
+  })
 };
 
 exports.mobileOtp = (req, res) => {
@@ -332,7 +342,9 @@ exports.sendOtp = (req, res) => {
         const message = "invalid credintials";
         res.render("user/mobileOtp", { message: message });
       }
-    });
+    }).catch((err) => {
+      console.log(err);
+    })
   } else {
     const message = "fields cannot empty";
     res.render("user/mobileOtp", { message: message });
@@ -344,7 +356,7 @@ exports.verifyOtp = (req, res) => {
     if (req.session.otpmobile) {
       const otpdata = req.session.otpmobile;
       const OTP = req.session.OTPofuser;
-      if (req.query.otp == OTP) {
+      if (req.query.otp == OTP && req.query.otp != "") {
         // Hash the provided password
         securePassword(otpdata.password)
           .then((passwordHash) => {
@@ -376,6 +388,10 @@ exports.verifyOtp = (req, res) => {
             console.log(err.message);
             reject(err);
           });
+      }else{
+        res.render("user/otpVerify", {
+          message: "the Otp is Incorrrect",
+        });
       }
     } else {
       if (req.session.verifypage) {
@@ -528,7 +544,6 @@ exports.proSearch = (req, res) => {
       {
         $or: [
           { productName: { $regex: search, $options: "i" } },
-          { price: { $regex: search, $options: "i" } },
           { category: { $regex: search, $options: "i" } },
         ],
       },
@@ -1111,7 +1126,9 @@ exports.deleteWishlist = (req, res) => {
     { $pull: { items: { _id: id } } }
   ).then(() => {
     res.json("done");
-  });
+  }).catch((err) => {
+    console.log(err);
+  })
 };
 exports.emailOtp = (req, res) => {
   const enteredEmail = req.body.email;
@@ -1245,10 +1262,11 @@ exports.payment = (req, res) => {
           res.redirect("/cart");
         } else {
           getTotalSum(userData._id).then((totalBill) => {
+            const keyId=config.keyID;
             req.session.orderBill = totalBill;
             res.render("user/payment", {
               categories,
-              wishlist: wishlists,
+              keyId:keyId,              wishlist: wishlists,
               coupon: req.session.couponCode,
               selectedAddress,
               cart,
@@ -1341,6 +1359,11 @@ exports.orderSuccessRedirect = (req, res) => {
 exports.orderSuccess = (req, res) => {
   res.render("user/orderSuccess");
 };
+
+exports.orderFailed = (req, res) => {
+  res.render("error/paymentFailed");
+};
+
 exports.orders = (req, res) => {
   const userData = req.session.userData;
 
@@ -1921,7 +1944,6 @@ exports.productSearch = (req, res) => {
       {
         $or: [
           { productName: { $regex: search, $options: "i" } },
-          { price: { $regex: search, $options: "i" } },
           { category: { $regex: search, $options: "i" } },
         ],
       },

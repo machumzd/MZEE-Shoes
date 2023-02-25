@@ -9,6 +9,7 @@ module.exports={
     ServiceID : process.env.TWILIO_SERVICE_SID,
     accountSID : process.env.TWILIO_ACCOUNT_SID,
     authTocken : process.env.TWILIO_AUTH_TOCKEN,
+    keyID:process.env.KEY_ID,
     email:process.env.EMAIL,
     pass:process.env.PASSWORD,
     secretKey:process.env.RP_SECRET_KEY,
