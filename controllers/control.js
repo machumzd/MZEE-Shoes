@@ -47,17 +47,17 @@ exports.why = (req, res) => {
             cart: carts,
           });
         }).catch((err) => {
-          console.log(err);
+          
         })
       })
       .catch((err) => {
-        console.log(err);
+        
       })
     } else {
       res.render("user/why", { categories, userData });
     }
   }).catch((err) => {
-    console.log(err);
+    
   })
 };
 
@@ -121,7 +121,7 @@ const getTotalSum = function (id) {
           });
       }
     }).catch((err) => {
-      console.log(err);
+      
     })
   });
 };
@@ -294,13 +294,13 @@ exports.userHome = (req, res) => {
                   products: products,
                 });
               }).catch((err) => {
-                console.log(err);
+                
               })
             }).catch((err) => {
-              console.log(err);
+              
             })
           }).catch((err) => {
-            console.log(err);
+            
           })
         } else {
           res.render("user/index", {
@@ -310,13 +310,13 @@ exports.userHome = (req, res) => {
           });
         }
       }).catch((err) => {
-        console.log(err);
+        
       })
     }).catch((err) => {
-      console.log(err);
+      
     })
   }).catch((err) => {
-    console.log(err);
+    
   })
 };
 
@@ -337,13 +337,13 @@ exports.sendOtp = (req, res) => {
             req.session.verifypage = true;
             res.render("user/otpVerify");
           })
-          .catch((error) => console.log(error));
+          .catch((error) => {});
       } else {
         const message = "invalid credintials";
         res.render("user/mobileOtp", { message: message });
       }
     }).catch((err) => {
-      console.log(err);
+      
     })
   } else {
     const message = "fields cannot empty";
@@ -385,7 +385,7 @@ exports.verifyOtp = (req, res) => {
             }
           })
           .catch((err) => {
-            console.log(err.message);
+            
             reject(err);
           });
       }else{
@@ -414,7 +414,7 @@ exports.verifyOtp = (req, res) => {
             }
           })
           .catch((err) => {
-            console.log(err.message);
+            
             reject(err);
           });
       }
@@ -455,7 +455,7 @@ exports.verifyOtp = (req, res) => {
               });
             })
             .catch((err) => {
-              console.log("error from getCarts and getWishlists" + err);
+              
             });
         } else {
           res.render("user/shop", {
@@ -469,7 +469,7 @@ exports.verifyOtp = (req, res) => {
         }
       })
       .catch((err) => {
-        console.log("error from count, products, and categories" + err);
+        
       });
     }else{
   const categoriesPromise = getCategory();
@@ -497,7 +497,7 @@ exports.verifyOtp = (req, res) => {
               });
             })
             .catch((err) => {
-              console.log("error from getCarts and getWishlists" + err);
+              
             });
         } else {
           res.render("user/shop", {
@@ -511,7 +511,7 @@ exports.verifyOtp = (req, res) => {
         }
       })
       .catch((err) => {
-        console.log("error from count, products, and categories" + err);
+        
       });
     }
      
@@ -567,11 +567,11 @@ exports.proSearch = (req, res) => {
           }
         })
         .catch((err) => {
-          console.log("categories not found" + err);
+          
         });
     })
     .catch((err) => {
-      console.log("product not found" + err);
+      
     });
 };
 
@@ -735,7 +735,7 @@ exports.userAddress = (req, res) => {
       }
     })
     .catch((err) => {
-      console.log(" new address error" + err);
+      
     });
 };
 
@@ -767,7 +767,7 @@ exports.uploadAddress = (req, res) => {
       }
     })
     .catch((err) => {
-      console.log("error in address updation section" + err);
+      
     });
 };
 
@@ -823,20 +823,20 @@ exports.changePassword = (req, res) => {
                         res.redirect("/profile");
                       })
                       .catch((err) => {
-                        console.log("user couldn't update" + err);
+                        
                       });
                   })
                   .catch((err) => {
-                    console.log("cant get password" + err);
+                    
                   });
               }
             })
             .catch((err) => {
-              console.log("password not match" + user);
+              
             });
         })
         .catch((err) => {
-          console.log("cannot get user" + err);
+          
         });
     } else {
       const message = "Passwords are not match";
@@ -891,7 +891,7 @@ exports.uploadUser = (req, res) => {
               res.redirect("/profile");
             })
             .catch((err) => {
-              console.log("profile can't updated" + err);
+              
             });
         } else {
           const message = "Credintial's will be aldready Taken";
@@ -901,7 +901,7 @@ exports.uploadUser = (req, res) => {
         }
       })
       .catch((err) => {
-        console.log("user result not found" + err);
+        
       });
   }
 };
@@ -970,7 +970,7 @@ exports.addToCart = (req, res) => {
                 res.json("added");
               })
               .catch((err) => {
-                console.log("cannot get cart" + err);
+                
               });
           } else {
             if (cart.quantity < cart.stock) {
@@ -1005,7 +1005,7 @@ exports.deleteCart = (req, res) => {
       res.redirect(`cart?id=${userData._id}`);
     })
     .catch((err) => {
-      console.log("cant delete" + err);
+      
     });
 };
 
@@ -1127,7 +1127,7 @@ exports.deleteWishlist = (req, res) => {
   ).then(() => {
     res.json("done");
   }).catch((err) => {
-    console.log(err);
+    
   })
 };
 exports.emailOtp = (req, res) => {
@@ -1160,14 +1160,14 @@ exports.emailOtp = (req, res) => {
               res.render("user/otpVerify");
             })
             .catch((err) => {
-              console.log("couldnt send response" + err);
+              
             });
         } else if (enteredEmail != "") {
           res.render("user/emailOtp", { message: "incorrect credintials" });
         }
       })
       .catch((err) => {
-        console.log("user not found" + err);
+        
       });
   } else if (enteredEmail == "") {
     res.render("user/emailOtp", { message: "fields are not be null" });
@@ -1201,11 +1201,11 @@ exports.verifyPassword = (req, res) => {
               res.redirect("/login");
             })
             .catch((err) => {
-              console.log("coudnt update the user" + err);
+              
             });
         })
         .catch((err) => {
-          console.log("password Hash not working" + err);
+          
         });
     } else {
       req.session.changePassword = true;
@@ -1352,7 +1352,7 @@ exports.orderSuccessRedirect = (req, res) => {
       });
     })
     .catch((err) => {
-      console.log("cant render order success" + err);
+      
     });
 };
 
@@ -1448,7 +1448,7 @@ exports.applyCoupon = (req, res) => {
         ).then((coupon3) => {
           Coupon.findOne({ code: code }) //extra validation
             .then((Vcoupon) => {
-              console.log(Vcoupon.minBill);
+              
 
               if (Vcoupon.minBill < bill) {
                 req.session.applyedCoupon = Vcoupon;
@@ -1513,7 +1513,7 @@ exports.adminLogin = (req, res) => {
       }
     })
     .catch((err) => {
-      console.log(err);
+      
     });
 };
 
@@ -1526,7 +1526,7 @@ exports.userManagement = (req, res) => {
         adminMessage: req.session.adminMessage,
       });
     } else {
-      console.log(err.message);
+      
     }
   });
 };
@@ -1549,7 +1549,7 @@ exports.userSearch = (req, res) => {
       }
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1562,7 +1562,7 @@ exports.userEdit = (req, res) => {
       res.render("admin/adminEditUsers", { user: result });
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1584,7 +1584,7 @@ exports.userUpdate = (req, res) => {
       res.redirect("/admin/users");
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1659,23 +1659,23 @@ exports.userDashboard = (req, res) => {
                           });
                         })
                         .catch((err) => {
-                          console.log(err.message);
+                          
                         });
                     })
                     .catch((err) => {
-                      console.log(err.message);
+                      
                     });
                 })
                 .catch((err) => {
-                  console.log(err.message);
+                  
                 });
             })
             .catch((err) => {
-              console.log(err.message);
+              
             });
         })
         .catch((err) => {
-          console.log(err.message);
+          
         });
     });
 };
@@ -1691,7 +1691,7 @@ exports.userBlock = (req, res) => {
       res.redirect("/admin/users");
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1706,7 +1706,7 @@ exports.userUnBlock = (req, res) => {
       res.redirect("/admin/users");
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1726,7 +1726,7 @@ exports.adminCategory = (req, res) => {
       }
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1745,7 +1745,7 @@ exports.adminCategoryLoad = (req, res) => {
               res.redirect("/admin/category");
             })
             .catch((err) => {
-              console.log(err.message);
+              
             });
         } else {
           const message = "The Category aldready exists.";
@@ -1754,7 +1754,7 @@ exports.adminCategoryLoad = (req, res) => {
         }
       })
       .catch((err) => {
-        console.log(err.message);
+        
       });
   } else {
     const message = "The Category field don't be null";
@@ -1770,7 +1770,7 @@ exports.categoryDelete = (req, res) => {
       res.redirect("/admin/category");
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1782,7 +1782,7 @@ exports.categoryEdit = (req, res) => {
       res.redirect("/admin/category");
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1797,7 +1797,7 @@ exports.categoryUpdate = (req, res) => {
       res.redirect("/admin/category");
     })
     .catch((err) => {
-      console.log(err);
+      
     });
 };
 
@@ -1812,7 +1812,7 @@ exports.productLoad = (req, res) => {
       });
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1823,7 +1823,7 @@ exports.productAdd = (req, res) => {
       res.render("admin/addProduct", { categories, message: message });
     })
     .catch(() => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1859,7 +1859,7 @@ exports.productUpload = (req, res) => {
         res.redirect("/admin/products");
       })
       .catch((err) => {
-        console.log(err.message);
+        
       });
   } else {
     const message = "fields don't be blank";
@@ -1880,11 +1880,11 @@ exports.productEdit = (req, res) => {
           });
         })
         .catch((err) => {
-          console.log(err.message);
+          
         });
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1919,7 +1919,7 @@ exports.productUpdate = (req, res) => {
       res.redirect("/admin/products");
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1932,7 +1932,7 @@ exports.productDelete = (req, res) => {
       res.json(response);
     })
     .catch((error) => {
-      console.log(error.message);
+      
     });
 };
 
@@ -1959,7 +1959,7 @@ exports.productSearch = (req, res) => {
       }
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -1994,7 +1994,7 @@ exports.editStatus = (req, res) => {
         res.redirect(`/admin/orders/status?id=${order2Id}`);
       })
       .catch((err) => {
-        console.log(err);
+        
       });
   } else if (req.query.deny) {
     const id = req.query.deny;
@@ -2009,7 +2009,7 @@ exports.editStatus = (req, res) => {
         res.redirect(`/admin/orders/status?id=${order2Id}`);
       })
       .catch((err) => {
-        console.log(err);
+        
       });
   } else if (req.query.shipped) {
     const id = req.query.orderId;
@@ -2024,7 +2024,7 @@ exports.editStatus = (req, res) => {
         res.redirect(`/admin/orders/status?id=${order2Id}`);
       })
       .catch((err) => {
-        console.log(err);
+        
       });
   } else if (req.query.delivered) {
     const id = req.query.orderId;
@@ -2047,7 +2047,7 @@ exports.editStatus = (req, res) => {
         });
       })
       .catch((err) => {
-        console.log(err);
+        
       });
   } else {
     res.redirect(`/admin/orders/status?id=${order2Id}`);
@@ -2074,7 +2074,7 @@ exports.couponLoad = (req, res) => {
       }
     })
     .catch((err) => {
-      console.log(err);
+      
     });
 };
 
@@ -2115,7 +2115,7 @@ exports.couponAdd = (req, res) => {
         }
       })
       .catch((err) => {
-        console.log(err);
+        
       });
   } else {
     req.session.couponMessage = "";
@@ -2134,7 +2134,7 @@ exports.couponDelete = (req, res) => {
       res.redirect("/admin/coupons");
     })
     .catch((err) => {
-      console.log(err);
+      
     });
 };
 
@@ -2179,7 +2179,7 @@ exports.orderReport = (req, res) => {
       res.render("admin/reports", { orders });
     })
     .catch((err) => {
-      console.log(err);
+      
     });
 };
 
@@ -2194,7 +2194,7 @@ exports.orderSearch = (req, res) => {
       res.render("admin/reports", { orders });
     })
     .catch((err) => {
-      console.log(err);
+      
     });
 };
 
@@ -2237,7 +2237,7 @@ exports.orderExcel = (req, res) => {
       }
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -2317,7 +2317,7 @@ exports.bannerUpdate = (req, res) => {
       res.redirect("/admin/banner");
     })
     .catch((err) => {
-      console.log(err.message);
+      
     });
 };
 
@@ -2337,7 +2337,7 @@ exports.bannerDisable = (req, res) => {
       res.redirect("/admin/banner");
     })
     .catch((err) => {
-      console.log("disable  button error" + err);
+      
     });
 };
 
@@ -2357,6 +2357,6 @@ exports.bannerEnable = (req, res) => {
       res.redirect("/admin/banner");
     })
     .catch((err) => {
-      console.log("enable  button error" + err);
+      
     });
 };

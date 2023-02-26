@@ -77,7 +77,7 @@ const PORT=process.env.PORT||3002;
 db.connectToDb((err)=>{
     if(!err){
         app.listen(PORT,()=>{
-        console.log(`listening in the port ${PORT}`)
+        
         })
     }
 });

@@ -17,11 +17,11 @@ module.exports={
      connectToDb: (cb) => {
         mongoose.connect(process.env.dataBase,{ useNewUrlParser: true })
             .then(() => {
-                console.log("connected to DB")
+                
                 return cb();
             })
             .catch((err) => {
-                console.log(err);
+                
                 return cb(err)
             })
     }
